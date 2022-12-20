@@ -1,0 +1,97 @@
+* org-mode structure
+Test in org is structured by headings, denoted by lines starting with
+one or more * so we are curently in a section!
+
+** A subheading
+Starts with an extra * and so on
+
+** navigation
+Headings can be expanded or collapsed by moving to the (sub) heading
+and pressing TAB. S-TAB cycles all headings. You can jump to the next
+and previous headings by C-c C-n and C-c C-p respectively.
+
+Move headings up and down to reorder them with M-up and M-down. You
+can change the level of headings with M-left and M-right. (M-S-left
+and M-S-right also change the levels of any subheadings.)
+
+** lists
+
+*** bullet lists
+ - bullet lists start a line with one or more spaces and a -
+ - pressing M-RET gives a you a new bullet
+ - we might also like nested bullets (with M-RET TAB to ident it)
+   - like this one. M-RET now gives another one on the same level
+   - like this one
+ - the nice thing is that for long lines of text, emacs wraps them so that you can use them with the bullet (doesn't seem to happen)
+ - you can also re-order list items and change identation with M-up and M-down and M-left and M-right
+ - you can change bullet style with S-left and S-right
+
+*** numbered lists
+1) numbered lists are also possible. M-RET gives the next number
+2) Like that
+
+*** checklists [3/5]
+- [X] we can have check lists. M-S-RET gives a new item with a check box
+- [X] Like that
+- [X] C-c C-c checks/unchecks a checkbox
+- [-] You can have sub items (M-S-RET TAB)
+  - [ ] like this
+  - [X] and this
+- [ ] and you can track no. of items by adding [0/0] to the end of a
+  line above a checklist
+
+*** definition lists
+ - definition lists :: these are useful sometimes
+ - item 2 :: M-RET again gives another item
+
+** tables                                                            :tables:
+Org creates tables by using | to separate columns and a line of ---
+(inserted with C-c -) to add horizontal lines
+
+TAB goes to the next column and to the next row of the table from the
+end of the previous one
+| ID | x | y | z | comments                                       |
+|----+---+---+---+------------------------------------------------|
+| A  | 1 | 2 | 4 | This is some comment on A                      |
+| B  | 3 | 9 | 7 | Some other very very very.. .long comment on B |
+
+We can now move rows and columns around with M-arrow, and insert or
+delete columns with M-S-arrow
+
+We can create a table using C-c |, which will prompt for dimensions
+if no region is selected (e.g. 5x3 below)
+
+|   |   |   |   |   |
+|---+---+---+---+---|
+|   |   |   |   |   |
+|   |   |   |   |   |
+
+
+The same command can create a table from existing text. For example,
+creating one for the following text by highlighting it
+
+ID X Y
+1  2 45
+3  -1 9
+
+| ID |  X |  Y |
+|  1 |  2 | 45 |
+|  3 | -1 |  9 |
+
+You can also save tables to their own files by putting the cursor in
+the and using M-x org-table-export. You'll be asked for a file name
+and format. For the format, type orgtbl-to and press TAB to see the
+list of options.
+
+** tags                                                          :tags:intro:
+Implicit tags can be set for all items in file using a like
+that starts with a hash like this
+
+#+FILETAGS: :orgmode:tutorial:
+
+These are inherited by all headers in the file
+
+C-c C-q can be used to enter tags for the current headline. If the
+cursor is on the headline itself, C-c C-c does the same thing
+
+To search by tags, use C-c / m or C-c \
