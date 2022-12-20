@@ -1,7 +1,7 @@
 #+FILETAGS: :ethereum:
 
 * hardhat                                                           :hardhat:
-** npm install --save-dev hardhart@versionX
+** npm install --save-dev hardhart@versionX            :npm_install:save_dev:
 Installs hardhat in the local node_modules directory. Updates
 package.json to include hardhat as a dev dependency (not included in
 the production environment)
@@ -9,11 +9,13 @@ the production environment)
 Hardhat is an SDK that makes it easy to develop and deploy ethereum
 Dapps.
 
-** npx hardhat
+** npx hardhat                                                          :npx:
 Executes the hardhat command in the local node_modules/.bin directory
 or in $PATH.
 
-** hardhat tasks
+If no project exists, a prompt is provided to create a project/config
+
+** hardhat task
 
 An async js function that can be used to automate things for you.  A
 list of tasks can be seen by `npx hardhat`
@@ -30,4 +32,7 @@ Contains the hardhat configuration
 ** npx hardhat compile
 
 Compiles all artifacts in the projects. The solidity compiler version
-to be used is specified as configuration in hardhat.config.js
+to be used is specified as configuration in hardhat.config.
+
+** npx hardhat test
+Run tests using the mocha framework, compiling the project if necessary.
