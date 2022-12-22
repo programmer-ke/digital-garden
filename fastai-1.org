@@ -1,6 +1,6 @@
 #+FILETAGS: :fastai:
 
-* Areas where deep learning is now the best in the world
+* Areas where deep learning is now the best in the world :deep_learning:chatgpt:
  - Computer Vision :: self-driving cars, face recognition
  - NLP :: surmarizing documents, chatbots e.g. openGPT
  - Medicine :: finding anomalies in radiology images
@@ -10,18 +10,22 @@
  - Recommendation systems :: movies, shopping, search
 
 * Artificial Neural Networks         :ann:artificial_neural_networks:history:
-The first device based on the principle of the artifician neuron was
+The first device based on the principle of the artificial neuron was
 the Mark 1 Perceptron. It was designed for image recognition, with
 20 * 20 photocells connected to weights.
 
-* Parallel Distributed Processing requirements
-Based on the 1986 book MIT press
+https://en.wikipedia.org/wiki/Perceptron
+
+* Parallel Distributed Processing requirements                          :pdp:
+Based on the 1986 book MIT press, requirements for a parallel
+distributed system were:
 
  - A set of processing units
  - Interconnection between the processing units
  - A state of activation
  - An output function for each unit
- - A propagation rule for propagating patterns of activities through the network
+ - A propagation rule for propagating patterns of activities through
+   the network
  - An activation rule combining inputs to a unit with the current
    state of the unit to give an output from the unit
  - A learning rule where patterns of connectivity are modified by
@@ -29,22 +33,23 @@ Based on the 1986 book MIT press
  - An environment within which the system must operate
 
 * Misunderstandings that held back the field of neural networks
- - That they were incapable of learning some simple mathematical functions like XOR
+ - That they were incapable of learning some simple mathematical
+   functions like XOR
 
-* GPU
+* GPU                                                                   :gpu:
 A graphics processing unit is a specialized computer processor that executes
 a computer instruction in parallel on many data points.
 
-* Image recognition using traditional computer programs
+* Image recognition using traditional computer programs   :image_recognition:
 
 It is hard to recognize images using traditional computer programs
 because traditional programming works by specifying a step by step
-procedure expressed in detail.
+procedure to achieve an outcome in detail.
 
 It is extremely hard to write a step by step procedure to instruct a
-computer to recognize an image, let along generalize it.
+computer to recognize a single image, let along generalize it.
 
-Machine learning by Arthur Samuel (1949)
+* Machine learning description by Arthur Samuel (1949) :machine_learning:arthur_samuel:ml:
 
 By weight assignment, Samuel meant values assigned to variables which
 affected how his program made decisions.
@@ -62,30 +67,92 @@ weights. A weight is a specific type of parameter in deep learning.
 | Results     | evaluated into | Performance        |
 | Performance | updates        | Weights            |
 
+Input ------> Model --------> Results ----> Performance 
+               ^                               |
+               |                               |
+Weights -------                                |
+   ^                                           |
+   |                                           v
+    <-------------------------------------------
+
 In his view the process of updating weights to optimize performance
 could be made automatic.
 
-Why is it hard to understand why a deep learning model makes a particular prediction?
+* Deep learning explainability
 
-What is the name of the theorem that shows that a neural network can solve any mathematical problem to any level of accuracy?
+It is hard to understand why a deep learning model makes a particular
+prediction because prediction is emergent behaviour from many discrete
+units interconnected across many layers.
 
-What do you need in order to train a model?
+It is less deterministic than traditional programming.
 
-How could a feedback loop impact the rollout of a predictive policing model?
+* The Universal Approximation Theorem :theorem:proof:universal_approximation_theorem:neural_network:
 
-Do we always have to use 224×224-pixel images with the cat recognition model?
+This is a proof that shows that a mathematical function modeling a
+neural network can solve any problem to any level of accuracy
 
-What is the difference between classification and regression?
+* Requirements needed to train a model
 
-What is a validation set? What is a test set? Why do we need them?
+ - Labelled datasets
 
-What will fastai do if you don't provide a validation set?
+* Feedback loops when making prediction                      :feedback_loops:
 
-Can we always use a random sample for a validation set? Why or why not?
+A positive feedback loop can develop where a model's predictions
+enhance bias in the data used to train it e.g. a predictive policing
+model trained on datasets of areas where arrests have been made in the
+past will lead to the police make more arrests in those areas when
+deployed to predict crimes, which further produces data supporting its
+bias.
 
-What is overfitting? Provide an example.
+* Image size for image recognition                    :image_recognition:224:
 
-What is a metric? How does it differ from "loss"?
+Historically 224*224 was used to train image models, so pre-trained
+models would require this size. However, higher-resolution images can
+be used which will lead to improved accuracy at the expense of higher
+computational costs.
+
+* Classification vs Regression                    :classification:regression:
+
+ - Classification :: Assigning a class to the input
+ - Regression :: predict a numerical value
+
+* Types of datasets                            :datasets:train:test:validate:
+
+ - Training set :: Used to update model parameters
+ - Validation set :: Used to evaluate the generality of the model
+   weights by testing against data not seen by model
+ - Test set :: Used to evaluate the generality of the model's
+   hyperparameters not seen by model developers, since they have
+   already seen the validation set
+
+* Sampling for validation sets                 :validate:validation:datasets:
+
+Many times a random sample of the provided sample will be used as a
+validation set, but not always. With timeseries data, the approach
+used is to train on a continuous batch of earlier data and validate
+using a continuous batch of later data.
+
+This more closely matches what the model should do in production
+i.e. make future predictions based on past data.
+
+* overfitting                                          :overfitting:training:
+
+This is a situation where a model learns specific characteristings of 
+the training dataset rather than patterns that can be generalized for
+data not yet seen.
+
+This is noticeable when a model's accuracy is increasing on the
+training data, but decreasing on the validation data.
+
+This happens when you train to long on insufficient data.
+
+
+* metric vs loss                                            :metric:loss:sgd:
+
+ - metric :: Tells the model developer how well the model
+   performs. Optimized for developer
+ - loss :: Informs the SGD algorithm how well the model performs and
+   is used primarily for updating the model weights. Optimized for SGD
 
 How can pretrained models help?
 
