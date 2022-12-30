@@ -32,9 +32,16 @@ distributed system were:
    experience
  - An environment within which the system must operate
 
-* Misunderstandings that held back the field of neural networks
+* Misunderstandings that held back the field of neural networks :neural_networks:minsky:
  - That they were incapable of learning some simple mathematical
-   functions like XOR
+   functions like XOR. This was true with a single layer, but could be
+   solved with multiple layers. The multi-layer approach wasn't
+   explored. Led to first AI winter (1969)
+ - In the 80s, it was known that it was theoretically possible to
+   approximate any mathematical function with two layers. However,
+   these networks were too big and too slow. It was known that
+   additional layers improved performance, but this wasn't explored
+   until the past decade. It led to the second AI winter
 
 * GPU                                                                   :gpu:
 A graphics processing unit is a specialized computer processor that executes
@@ -144,7 +151,7 @@ data not yet seen.
 This is noticeable when a model's accuracy is increasing on the
 training data, but decreasing on the validation data.
 
-This happens when you train to long on insufficient data.
+This happens when you train too long on insufficient data.
 
 * metric vs loss                                            :metric:loss:sgd:
 
