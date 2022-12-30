@@ -146,7 +146,6 @@ training data, but decreasing on the validation data.
 
 This happens when you train to long on insufficient data.
 
-
 * metric vs loss                                            :metric:loss:sgd:
 
  - metric :: Tells the model developer how well the model
@@ -154,20 +153,58 @@ This happens when you train to long on insufficient data.
  - loss :: Informs the SGD algorithm how well the model performs and
    is used primarily for updating the model weights. Optimized for SGD
 
-How can pretrained models help?
+* pretrained models                                       :transfer_learning:
 
-What is the "head" of a model?
+Pretrained models help in minimizing training time and data
+needed. They are already trained by experts on big data and so already
+contain generalized layers that are useful to the task at hand.
 
-What kinds of features do the early layers of a CNN find? How about the later layers?
+** Head of a model                                                     :head:
 
-Are image models only useful for photos?
+The head of a model is the last layer. It is usually the most specific
+to the training data used.
 
-What is an "architecture"?
+When fine tuning with the fast ai library, the head is typically the
+layer that is customized for the dataset provided.
 
-What is segmentation?
+The earlier layers contain more generalized and primitive features
+e.g. edges or color for vision models.
 
-What is y_range used for? When do we need it?
+The later layers contain higher level features that are usually more
+specialized to the training dataset e.g. car wheels in a dataset of
+cars.
 
-What are "hyperparameters"?
+* image recognizers on non-image tasks
 
-What's the best way to avoid failures when using AI in an organization?
+Image recognition models can be used to learn non-image tasks by
+having them converted to an image representation e.g. having the
+binary-encoding of malware being represented as an image.
+
+* model architecture                                           :architecture:
+
+A model architecture is the arrangment of layers and their
+interconnections.  It is a template for the mathematical function provided
+by parameters.
+
+* segmentation           :segmentation:self_driving_cars:autonomous_vehicles:
+
+Segmentation is the process of using a model to recognize the content
+of each pixel in an image.
+
+* fastai y_range                                                    :y_range:
+
+y_range is useful when we're predicting a continuous value rather
+than producing a classification e.g. predicting movie rating based on review
+
+* hyperparameters                                           :hyperparameters:
+
+Hyperparameters are model parameters that configure how it trains, and
+are typically set by the model developer rather than by the training
+data like model weights.
+
+* validation                   :validation:failures:datasets:hyperparameters:
+
+The best way to avoid failures when using AI in an organization is to
+have a reserved test set representative of actual expected data that
+is not made available during the model training phase. This can detect
+cases where we overfit the hyperparameters to the validation set.
