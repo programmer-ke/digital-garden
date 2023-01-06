@@ -1,4 +1,4 @@
-#+FILETAGS: :ethereum:
+#+FILETAGS: :ethereum:solidity
 
 * hardhat                                                           :hardhat:
 ** npm install --save-dev hardhart@versionX            :npm_install:save_dev:
@@ -12,6 +12,8 @@ Dapps.
 ** npx hardhat                                                          :npx:
 Executes the hardhat command in the local node_modules/.bin directory
 or in $PATH.
+
+npx is short for npm exec.
 
 If no project exists, a prompt is provided to create a project/config
 
@@ -32,7 +34,50 @@ Contains the hardhat configuration
 ** npx hardhat compile
 
 Compiles all artifacts in the projects. The solidity compiler version
-to be used is specified as configuration in hardhat.config.
+to be used is specified as configuration in hardhat.config.js
 
 ** npx hardhat test
 Run tests using the mocha framework, compiling the project if necessary.
+
+** npx hardhat run <script_path>
+
+Executes a script within the hardhat context (with the runtime
+environment 'hre' injected). Can be used to compile, deploy and run
+contract in an ephemeral local network that is recreated with every
+run.
+
+** npx hardhat node                                               :localhost:
+
+Starts an empty network running in localhost, which is useful for
+local dev.
+
+** npx hardhat run <script_path> --network localhost
+
+A deployment can be made via a custom script to localhost, by
+specifying it as the network option.
+
+** npx hardhat run <script_path> --network <testnet_or_mainnet_name>
+
+Runs a script against an actual network; testnet or mainnet. This is a
+live ethereum network with real nodes and miners/validators.
+
+<testnet_or_mainnet_name> has to be configured in hardhat.config.js
+
+Each network is configured by:
+ - url :: The URL from the service provider through which the network
+   is accessed e.g. alchemy, quicknode
+
+   One needs to sign up to the service provider to access the url.
+   
+ - accounts :: The private key retrieved from the wallet
+   e.g. metamask. This should not be made public as it is the actual
+   private key that gives full access to your account.
+
+   Best to use
+   the `dotenv` package so as not to accidentally commit the private
+   key into the repo. dotenv can be added to hardhat.config.js to access
+   the private key securely.
+
+
+
+

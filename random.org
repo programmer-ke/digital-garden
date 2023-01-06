@@ -6,3 +6,12 @@ as fully quantifiable process. You can improve almost everything by
 allowing non-quantifiables to factor in.
 
 https://twitter.com/tobi/status/1607829493250658304
+
+* Find nth fibonacci number                                       :fibonacci:
+
+https://github.com/programmer-ke/codings/blob/master/py/nth_fibonacci.py
+
+* Build small skills in right order :learning:public_speaking:toastmasters:scientology:
+
+https://www.lesswrong.com/posts/qwdupkFd6kmeZHYXy/build-small-skills-in-the-right-order
+

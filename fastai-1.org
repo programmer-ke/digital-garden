@@ -215,3 +215,6 @@ The best way to avoid failures when using AI in an organization is to
 have a reserved test set representative of actual expected data that
 is not made available during the model training phase. This can detect
 cases where we overfit the hyperparameters to the validation set.
+
+Additionally, a simple baseline should be established which all new
+models should beat.

@@ -1,0 +1,6 @@
+* Evaluating limits                  :math:limits:evaluating_limits:calculus:
+
+ - simple substitution
+ - factoring polynomials
+ - multiply both top and bottom in fractions by conjugate
+   (take advantage of difference of squares to simplify)
