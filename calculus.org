@@ -1,0 +1,12 @@
+#+FILETAGS: :math:calculus:
+
+* L'Hopital's rule                                                :l_hopitals_rule:
+
+The limit after we divide one function by another is the same as the
+limit after we divide their derivatives.
+
+** conditions
+ - For a limit approaching c, the original functions must be differentiable either side of c
+ - The differential of the dividing functions should not be zero
+
+https://www.mathsisfun.com/calculus/l-hopitals-rule.html

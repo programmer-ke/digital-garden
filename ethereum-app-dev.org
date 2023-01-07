@@ -78,6 +78,27 @@ Each network is configured by:
    key into the repo. dotenv can be added to hardhat.config.js to access
    the private key securely.
 
+* javascript                                                     :javascript:
 
+** window.ethereum                                        :ethereum:MetaMask:
 
+Provided by a browser extension such as metamask and allows web pages to
+communicate with the ethereum network
 
+*** window.ethereum.request({ method: "eth_accounts" });       :eth_accounts:
+
+Request access to the user's account via the wallet
+
+*** provider = new ethers.providers.Web3Provider(ethereum) :ethers:provider:Web3Provider:
+
+Web3Provider from the ethers 3rd party library wraps the ethereum
+object to provide convenient methods of communicating with the
+network.
+
+Access to the network is via the user's wallet.
+
+** contract = new ethers.Contract(contractAddress, contractABI, signer);
+Access a contract using it's contract address, ABI and signer object
+
+The signer object represents the account associated with connected
+wallet and used to sign transactions sent to the network.

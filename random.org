@@ -15,3 +15,6 @@ https://github.com/programmer-ke/codings/blob/master/py/nth_fibonacci.py
 
 https://www.lesswrong.com/posts/qwdupkFd6kmeZHYXy/build-small-skills-in-the-right-order
 
+* swaks                                           :email:email_testing:swaks:
+
+Email testing tool: http://www.jetmore.org/john/code/swaks/

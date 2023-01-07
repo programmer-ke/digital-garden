@@ -84,7 +84,7 @@ and format. For the format, type orgtbl-to and press TAB to see the
 list of options.
 
 ** tags                                                          :tags:intro:
-Implicit tags can be set for all items in file using a like
+Implicit tags can be set for all items in file using a line
 that starts with a hash like this
 
 #+FILETAGS: :orgmode:tutorial:
