@@ -29,6 +29,7 @@ and M-S-right also change the levels of any subheadings.)
 *** numbered lists
 1) numbered lists are also possible. M-RET gives the next number
 2) Like that
+3) and this
 
 *** checklists [3/5]
 - [X] we can have check lists. M-S-RET gives a new item with a check box
@@ -43,10 +44,11 @@ and M-S-right also change the levels of any subheadings.)
 *** definition lists
  - definition lists :: these are useful sometimes
  - item 2 :: M-RET again gives another item
+ - term :: definition
 
 ** tables                                                            :tables:
 Org creates tables by using | to separate columns and a line of ---
-(inserted with C-c -) to add horizontal lines
+(inserted with C-c - while at the end of the previous row) to add horizontal lines
 
 TAB goes to the next column and to the next row of the table from the
 end of the previous one
@@ -66,7 +68,6 @@ if no region is selected (e.g. 5x3 below)
 |   |   |   |   |   |
 |   |   |   |   |   |
 
-
 The same command can create a table from existing text. For example,
 creating one for the following text by highlighting it
 
@@ -79,7 +80,7 @@ ID X Y
 |  3 | -1 |  9 |
 
 You can also save tables to their own files by putting the cursor in
-the and using M-x org-table-export. You'll be asked for a file name
+the table and using M-x org-table-export. You'll be asked for a file name
 and format. For the format, type orgtbl-to and press TAB to see the
 list of options.
 
@@ -95,3 +96,180 @@ C-c C-q can be used to enter tags for the current headline. If the
 cursor is on the headline itself, C-c C-c does the same thing
 
 To search by tags, use C-c / m or C-c \
+
+* Links and images                                             :links:images:
+
+Lets download an image to the current directory with:
+
+curl http://www.star.bris.ac.uk/bjm/superman_cluster.gif -o superman_cluster.gif
+
+We link to a file using C-u C-c C-l and type it's name. Use tab
+completion to select the image we downloaded an optionally enter a
+description.
+
+[[file:superman_cluster.gif][superman gif]]
+
+We can follow the link with C-c C-o
+
+The structure of a link looks like the following (wrapped in an example
+block to prevent org mode from interpreting it).
+
+#+BEGIN_EXAMPLE
+[[link address][description]]
+#+END_EXAMPLE
+
+
+To link specifically to an image, we omit the description part
+
+#+BEGIN_EXAMPLE
+[[./img/wenger.jpg]]
+#+END_EXAMPLE
+
+[[./img/wenger.jpg]]
+
+To toggle the image inline, we use C-c C-x C-v (M-x org-toggle-inline-images)
+
+Links to webpages are added by using the hyperlink as the address
+component. A quick way is C-c C-l. For example, linking to brave search:
+
+#+BEGIN_EXAMPLE
+[[https://search.brave.com/][brave search]]
+#+END_EXAMPLE
+
+[[https://search.brave.com/][brave search]]
+
+We can link to the tables section in this document like so
+
+#+BEGIN_EXAMPLE
+[[tables][link to tables above]]
+#+END_EXAMPLE
+
+[[tables][link to tables above]]
+
+We can add name and captions to our image as follows
+
+#+begin_example
+#+CAPTION: Arsenal loss
+#+NAME: wenger.img
+[[./img/wenger.jpg]]
+#+end_example
+
+#+CAPTION: Arsenal loss
+#+NAME: wenger.img
+[[./img/wenger.jpg]]
+
+This means we can refer to our image in a link using its name [[wenger.img]]
+
+* Formatting text and code                             :formatting:code:text:
+
+** Simple formatting
+
+We apply simple formatting by enclosing text in special characters e.g.
+ - /italicised text/
+ - *bold text*
+ - _underlines_
+ - =literal text=
+ - ~code~ (generally appears same as literal text)
+
+** Formatting blocks of text
+
+Enclose them in blocks marking them as specific types e.g.
+
+#+BEGIN_EXAMPLE
+One can type code that org should not mess with e.g. [[link]]. Rendered
+as monospace font when exported
+#+END_EXAMPLE
+
+
+#+BEGIN_QUOTE
+Encloses text that should appear as a quotation
+#+END_QUOTE
+
+#+BEGIN_CENTER
+This text will be centered when exported
+#+END_CENTER
+
+We can save time typing a block wrapper by using the C-c C-,
+(org-insert-structure-template).
+
+e.g. C-c C-, then s gives
+
+#+begin_src
+  
+#+end_src
+
+** LaTeX
+
+Org mode can understand and correctly exports simple LaTeX like
+
+\begin{eqnarray}
+x^2 + \left(\frac{y}{z}\right)^4 = 0
+\end{eqnarray}
+
+
+For more complex LaTeX, enclose in a block
+
+#+begin_export latex
+\begin{eqnarray}
+x^2 + \left(\frac{y}{z}\right)^4 = 0
+\end{eqnarray}
+#+end_export
+
+
+** Source code blocks
+
+To enclose souce code, we use a source block. We can tell org-mode what
+kind of source code it is e.g. sh for shell.
+
+#+begin_src shell
+  echo "hello $USER! Today is `date`"
+  exit
+#+end_src
+
+We can get org to syntax highlight by addint the following in the
+emacs config file
+
+#+begin_src elisp
+  ;; synax hightlight code blocks
+  ;; set this in .emacs or emacs.d/init.el
+  (setq org-src-fontify-natively t)
+#+end_src
+
+When inside the source block, C-c ' will open a buffer in the major
+mode of the programming language specified. C-c ' again will return
+to the org document and show the additional edits.
+
+C-c C-c inside a code block will execute it.
+
+Some further examples on babel (code execution) [[https://orgmode.org/worg/org-contrib/babel/intro.html][here]].
+
+We can tell org-mode which languages to support by adding something
+like the following in the emacs config file
+
+#+BEGIN_SRC elisp
+;; Some initial languages we want org-babel to support
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '(
+   (sh . t)
+   (python . t)
+   (R . t)
+   (ditaa . t)
+   (perl . t)
+   (gnuplot t)
+   ))
+#+END_SRC
+
+
+#+begin_src python
+  import time
+  print("todays date is %s" % time.ctime())
+  print("2 + 2")
+  return 2 + 2
+#+end_src
+
+
+
+
+
+

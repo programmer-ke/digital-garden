@@ -18,3 +18,17 @@ https://www.lesswrong.com/posts/qwdupkFd6kmeZHYXy/build-small-skills-in-the-righ
 * swaks                                           :email:email_testing:swaks:
 
 Email testing tool: http://www.jetmore.org/john/code/swaks/
+
+* dpkg download and extract deb file                           :dpkg:apt:deb:
+
+apt-get download <package_name> - downloads it
+
+dpkg-deb -c package.deb - list contents
+
+dpkg-deb -x package.deb destination_dir - extract contents to destination_dir
+
+* ClamAV daemon using too much memory            :clamav:clamd:oom:antivirus:
+
+Could be due to concurrent DB reload
+
+https://betatim.github.io/posts/clamav-memory-usage/

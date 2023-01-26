@@ -102,3 +102,5 @@ Access a contract using it's contract address, ABI and signer object
 
 The signer object represents the account associated with connected
 wallet and used to sign transactions sent to the network.
+
+The signer object is accessed via the `provider.getSigner` method.
