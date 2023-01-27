@@ -1,12 +1,57 @@
-#+FILETAGS: :fastai:
+#+FILETAGS: :fastai:machine_learning:deep_learning
+
+* Text models deficiencies                                          :llm:nlp:
+
+Models can generate text that is very compelling yet incorrect. This
+is a risk where correctness is very important e.g. precedents in
+judgement used in court of law.
+
+A layman may be deceived by very compelling generated information that
+only an expert would identify as incorrect.
+
+This has implications on spreading disinformation at a large scale
+online, for instance.
+
+* ML Automation                                                  :automation:
+
+In situations where a model might make mistakes, a good alternative to
+automating a process is to insert a human into the loop to verify the
+model predictions.
+
+Automated alerts from predictions can help timely intervention in
+time-sensitive situations, but channelling the alerts through a human
+ensures reduces the error rate.
+
+* Tabular Data and Deep learning                       :tabular_data:xgboost:
+
+Generally, tabular data work well with model ensembles like
+Xgboost. However, deep learning is suited in cases where certain
+columns have a high cardinality (large number of options), or include
+info amenable to deep learning such as natural language or images.
+
+The downside is that deep learning models typically take longer to
+train than the other methods used for tabular data.
+
+* Deep learning in recommendation systems            :recommendation_systems:
+
+While deep learning may be useful in recommendation systems where
+information is represented as a sparse matrix (users as rows, products
+as columns), and make recommendations by attempting the fill up the matrix,
+they are only good at predicting what a user might like, but not what may
+be useful to them.
+
+For example, they may recommend variations of a product already
+consoomed, but not an entirely new one that may be useful.
 
 
-    Provide an example of where the bear classification model might work poorly in production, due to structural or style differences in the training data.
     Where do text models currently have a major deficiency?
     What are possible negative societal implications of text generation models?
     In situations where a model might make mistakes, and those mistakes could be harmful, what is a good alternative to automating a process?
     What kind of tabular data is deep learning particularly good at?
     What's a key downside of directly using a deep learning model for recommendation systems?
+    
+
+    Provide an example of where the bear classification model might work poorly in production, due to structural or style differences in the training data.
     What are the steps of the Drivetrain Approach?
     How do the steps of the Drivetrain Approach map to a recommendation system?
     Create an image recognition model using data you curate, and deploy it on the web.
