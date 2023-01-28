@@ -43,7 +43,7 @@ be useful to them.
 For example, they may recommend variations of a product already
 consoomed, but not an entirely new one that may be useful.
 
-* Steps of the Drivetrain approach
+* Steps of the Drivetrain approach       :drivetrain:self_driving:end_to_end:
 
  1) Identify the objective
  2) Identify levers (controllable actions) that can be used to achieve the objective
@@ -65,6 +65,7 @@ In self driving:
     hand-engineered features in deep learning (information is lost) if
     data is plentiful. Possible approach in here is a single deep
     learning model that is trained straight from all inputs.
+    https://stats.stackexchange.com/q/218961
  
 
 
