@@ -223,6 +223,8 @@ kind of source code it is e.g. sh for shell.
 
 #+begin_src shell
   echo "hello $USER! Today is `date`"
+  sleep 2
+  echo "Goodbye!!"
   exit
 #+end_src
 
@@ -267,9 +269,3 @@ like the following in the emacs config file
   print("2 + 2")
   return 2 + 2
 #+end_src
-
-
-
-
-
-
