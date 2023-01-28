@@ -43,17 +43,41 @@ be useful to them.
 For example, they may recommend variations of a product already
 consoomed, but not an entirely new one that may be useful.
 
+* Steps of the Drivetrain approach
+
+ 1) Identify the objective
+ 2) Identify levers (controllable actions) that can be used to achieve the objective
+ 3) Collect data needed (existing or new)
+ 4) Construct the models that can make predictions that lead to the appropriate action
+
+In self driving:
+
+ 1) Get from A to B without engaging the car
+ 2) Intercepting the car controls - steering, braking, acceleration...
+ 3) Collect driving footage, record front-view, rear view, proximity
+    sensors etc..
+ 4) A single model, or model assembly with a simulator (search space
+    of possible outcomes) and optimizer (selects best possible
+    outcome)
+
+    Question: How does end-to-end learning come into the picture here?
+    Possible Answer: End to end learning is an attempt at avoiding
+    hand-engineered features in deep learning (information is lost) if
+    data is plentiful. Possible approach in here is a single deep
+    learning model that is trained straight from all inputs.
+ 
+
 
     Where do text models currently have a major deficiency?
     What are possible negative societal implications of text generation models?
     In situations where a model might make mistakes, and those mistakes could be harmful, what is a good alternative to automating a process?
     What kind of tabular data is deep learning particularly good at?
     What's a key downside of directly using a deep learning model for recommendation systems?
+    What are the steps of the Drivetrain Approach?
+    How do the steps of the Drivetrain Approach map to a recommendation system?
     
 
     Provide an example of where the bear classification model might work poorly in production, due to structural or style differences in the training data.
-    What are the steps of the Drivetrain Approach?
-    How do the steps of the Drivetrain Approach map to a recommendation system?
     Create an image recognition model using data you curate, and deploy it on the web.
     What is DataLoaders?
     What four things do we need to tell fastai to create DataLoaders?

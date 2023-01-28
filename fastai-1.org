@@ -9,7 +9,7 @@
  - Biology :: Protein folding
  - Recommendation systems :: movies, shopping, search
 
-* Artificial Neural Networks         :ann:artificial_neural_networks:history:
+* Artificial Neural Networks history :ann:artificial_neural_networks:history:
 The first device based on the principle of the artificial neuron was
 the Mark 1 Perceptron. It was designed for image recognition, with
 20 * 20 photocells connected to weights.
@@ -185,7 +185,8 @@ cars.
 
 Image recognition models can be used to learn non-image tasks by
 having them converted to an image representation e.g. having the
-binary-encoding of malware being represented as an image.
+binary-encoding of malware being represented as an image, or audio
+converted to waveforms and fed to a model.
 
 * model architecture                                           :architecture:
 
