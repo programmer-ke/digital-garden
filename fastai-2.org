@@ -66,7 +66,106 @@ In self driving:
     data is plentiful. Possible approach in here is a single deep
     learning model that is trained straight from all inputs.
     https://stats.stackexchange.com/q/218961
- 
+
+* DataLoaders                       :fastai:dataloader:dataloaders:datablock:
+
+DataLoaders in the fast ai library describe how the data will structured
+for use by the model.
+
+They define:
+ - What kind of data (inputs and outputs) we're dealing with
+ - The path the the dataset
+ - How to split the dataset into training and validation sets
+ - How to identify the labels for the data
+ - Any transformations being performed on the data
+
+The splitter parameter to a DataBlock specifies how the  data will be
+divided into training and validation sets.
+
+To ensure a random split always gives the same validation set, we use
+a seed which will always generate the same sequence.
+
+* Data augmentation                                       :data_augmentation:
+
+Data augmentation is the process of creating random variations of the
+training dataset during the training process to help the model learn
+on variations of a specific training input.
+
+For images, this could include rotating, warping, flipping, brightness
+and contrast changes.
+
+`item_tfms` in dataloaders specify a transformation applied to a single
+item in the training/validation sets.
+
+`batch_tfms` specify transformations applied to an entire batch of the
+training data e.g. augmentation.
+
+* Confusion matrix                                         :confusion_matrix:
+
+The confusion matrix analyses the performance of a model and displays
+the number of correct/incorrect predictions with labels for each
+dimension.
+
+The correct predictions are found along its diagonal.
+
+* learner.export                                       :fastai:export:pickle:
+
+The `export` method on a model saves the model's architecture and
+trained parameters in a pickled python file. This will include a
+reference to the model's DataLoaders.
+
+* Image Transformations                              :fastai:crop:pad:squish:
+
+When training an image recognition model, the images have to all be
+of the same size. This can be done in 3 ways using the fastai library
+so that the images can fit the specified dimensions
+
+ - crop :: Cut out parts of the image
+ - pad :: Add extra pixels to the image
+ - squish :: Re-shape the image
+
+** Risks
+ - Cropping may leave out important segments of the image
+ - Padding adds unneeded data onto the images. Also, the images may
+   now be lower resolution affects learnability
+ - Squishing my reshape the objects in a way that doesn't occur in
+   real world.
+
+* Inference                                 :inference:production:deployment:
+
+Inference is using a model to getting predictions.
+
+
+** GPUs vs CPUs in production                                       :cpu:gpu:
+
+A CPU is used while doing inference in production because it is much
+less compute intensive than training and CPUs typically have a lower
+price than GPUs. 
+
+GPUs can be used in cases where many concurrent inferences are
+happening that can justify the addition cost of parallelizing the
+inferences. The model may have to be recompiled to support GPU
+inferencing, and additional software/hardware infrastructure may be
+required to coordinate the batching process.
+
+** Server side vs edge deployment
+
+The models may be deployed either server side or closer to the
+customer (edge or mobile device).
+
+The model lifecycle is typically easier to manage if deployed
+server side, as well as making it easy to provide the appropriate
+resources needed by the model e.g. more expensive hardware for faster
+inference.
+
+However some downsides of deploying server side as compared to
+client-side (edge or mobile) are:
+ - Privacy implications when sending a users' private data to the
+   server for inference
+ - More difficult horizontal scalability (users use their own hardware
+   so it is easier on the service provider.
+ - A network connection is required to use the service, and the
+   additional roundtrip adds latency to inferencing.
 
 
     Where do text models currently have a major deficiency?
@@ -76,10 +175,6 @@ In self driving:
     What's a key downside of directly using a deep learning model for recommendation systems?
     What are the steps of the Drivetrain Approach?
     How do the steps of the Drivetrain Approach map to a recommendation system?
-    
-
-    Provide an example of where the bear classification model might work poorly in production, due to structural or style differences in the training data.
-    Create an image recognition model using data you curate, and deploy it on the web.
     What is DataLoaders?
     What four things do we need to tell fastai to create DataLoaders?
     What does the splitter parameter to DataBlock do?
@@ -91,11 +186,15 @@ In self driving:
     What is a confusion matrix?
     What does export save?
     What is it called when we use a model for getting predictions, instead of training?
-    What are IPython widgets?
     When might you want to use CPU for deployment? When might GPU be better?
     What are the downsides of deploying your app to a server, instead of to a client (or edge) device such as a phone or PC?
+    What are IPython widgets?
+
+
     What are three examples of problems that could occur when rolling out a bear warning system in practice?
     What is "out-of-domain data"?
     What is "domain shift"?
     What are the three steps in the deployment process?
+    Provide an example of where the bear classification model might work poorly in production, due to structural or style differences in the training data.     
+    Create an image recognition model using data you curate, and deploy it on the web.
 

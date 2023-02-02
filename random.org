@@ -1,4 +1,4 @@
-* On experience vs competence in organizations :corporations:competence:experience:
+* On experience vs competence in organizations :corporations:competence:experience:institutions:
 
 Corporations hate non quantifiable because you cannot create process
 with it and most companies cannot execute things that cannot be stated
@@ -32,3 +32,19 @@ dpkg-deb -x package.deb destination_dir - extract contents to destination_dir
 Could be due to concurrent DB reload
 
 https://betatim.github.io/posts/clamav-memory-usage/
+
+* Elon Musk's 5 step process              :management:elon_musk:corporations:
+
+ 1) Work hard to make requirements less wrong
+ 2) Simplify - remove unnecessary parts
+ 3) Optimize
+ 4) Automate
+
+https://www.linkedin.com/pulse/5-step-process-elon-musk-used-grow-tesla-spacex-paul-knight/
+
+* New theory of management :management:elon_musk:corporations:institutions:geohot:
+
+By continually creating chaos, process is incapable of forming, and
+everyone is forced to work only toward goal.
+
+https://geohot.github.io/blog/jekyll/update/2022/12/31/eacc.html
