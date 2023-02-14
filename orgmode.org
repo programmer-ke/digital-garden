@@ -99,9 +99,9 @@ To search by tags, use C-c / m or C-c \
 
 * Links and images                                             :links:images:
 
-Lets download an image to the current directory with:
+Let's download an image to the current directory with:
 
-curl http://www.star.bris.ac.uk/bjm/superman_cluster.gif -o superman_cluster.gif
+~curl http://www.star.bris.ac.uk/bjm/superman_cluster.gif -o superman_cluster.gif~
 
 We link to a file using C-u C-c C-l and type it's name. Use tab
 completion to select the image we downloaded an optionally enter a
@@ -245,6 +245,8 @@ C-c C-c inside a code block will execute it.
 
 Some further examples on babel (code execution) [[https://orgmode.org/worg/org-contrib/babel/intro.html][here]].
 
+See [[https://orgmode.org/worg/org-contrib/babel/languages/index.html][this]] for language specific documentation
+
 We can tell org-mode which languages to support by adding something
 like the following in the emacs config file
 
@@ -263,9 +265,18 @@ like the following in the emacs config file
 #+END_SRC
 
 
-#+begin_src python
+#+begin_src python :results output
   import time
   print("todays date is %s" % time.ctime())
   print("2 + 2")
-  return 2 + 2
+  print(2 + 2)
+  import sys
+  print(sys.version)
 #+end_src
+
+#+RESULTS:
+: todays date is Tue Feb 14 15:00:39 2023
+: 2 + 2
+: 4
+: 2.7.17 (default, Nov 28 2022, 18:51:39) 
+: [GCC 7.5.0]

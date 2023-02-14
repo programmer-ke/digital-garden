@@ -48,3 +48,7 @@ By continually creating chaos, process is incapable of forming, and
 everyone is forced to work only toward goal.
 
 https://geohot.github.io/blog/jekyll/update/2022/12/31/eacc.html
+
+* npm install ERR! ENOTEMPTY                              :npm:err:enotempty:
+
+https://github.com/npm/cli/issues/4096

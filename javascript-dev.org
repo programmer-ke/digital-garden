@@ -1,0 +1,5 @@
+#+FILE_TAGS: :javascript:nodejs:
+ 
+* npm run <command> or npm <command>
+
+Executes the value with property ~command~ in package.json ~scripts~ section
