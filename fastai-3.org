@@ -1,15 +1,84 @@
-* Survery questions
+#+FILETAGS: :fastai:machine_learning:deep_learning
 
-How is a grayscale image represented on a computer? How about a color image?
+* MNIST_SAMPLE file structure                                         :mnist:
+
+There are 2 directories, =train= and =valid=. Once can train using images in the
+former directory and validate using the latter.
+
+Inside each of =train= and =valid=, we have directories that serve
+as labels for the data e.g. images of number 7 will be under the 
+directory =7=.
+
+*  Pixel similarity approach to image classification :pixel_similarity:mae:mad:rmse:l1_norm:l2_norm:
+
+Take all the images of a particular object e.g. number 7 and find the
+average of each pixel position. This will give an /ideal/ image of that
+object that is an average of all samples.
+
+To classify a new image, calculate the distance between the pixels of
+that image and the ideal image to find out how far apart they are.
+
+Two ways of doing that are:
+ - Mean Absolute Difference (MAD)/ L1 Norm :: get the absolute difference for each
+   pixel position then calculate the mean
+ - Root Mean Squared Error (RMSE) / L2 Norm :: get the square of the differences
+   for each pixel position, the the mean of the square values then
+   finally get the square root.
+
+* Tensor rank vs shape                                    :rank:shape:tensor:
+
+- rank :: The number of axes/dimensions of the tensor.
+- shape :: A list showing the length of each axis/dimension.
+
+A rank-3 tensor is a tensor with 3 axis i.e. a cube.
+
+* Parallel computation of thousands of numbers with python :numpy:pytorch:tensor:array:gpu:cuda:
+
+Rather than use python itself, we can use a lower language for better
+performance. Two common ways are using =numpy=, which will implement
+the operations in optimized C, and =pytorch=, which will implement
+the operations parallelized on a GPU via CUDA if available.
+
+=numpy= provides the ~array~ data structure for this, while =pytorch=
+provides the ~tensor~ data structure.
+
+On a GPU, the operation will be many thousands of times faster than
+pure python.
+
+* Broadcasting                                  :tensor:pytorch:broadcasting:
+
+When conducting an operation between two pytorch tensors, if one of
+the tensors is of a lower rank, it will be broadcast onto the one with
+the larger rank.
+
+e.g. on adding a tensor of shape (3, 3, 3) with another of shape (3, 3),
+the latter will be broadcast across on axis of the former one 3 times.
+
+* Image Representation in computers    :image_representation:grayscale:color:
+
+An image is typically represented using numbers in a computer.
+
+For example, a gray scale image of 28 * 28 pixels will be represented
+as a matrix of shape (28, 28) with each cell having a number between
+0 and 255 representing the shade of grey.
+
+A colour image will have red, green and blue values for each
+pixel. Therefore, a 28 * 28 colour image will be represented by a
+cube of shape (28, 28, 3), with each cell having a number between 0
+and 255 representing the shade of the colour red, green or blue.
+
+
 How are the files and folders in the MNIST_SAMPLE dataset structured? Why?
 Explain how the "pixel similarity" approach to classifying digits works.
 What is a list comprehension? Create one now that selects odd numbers from a list and doubles them.
+What are RMSE and L1 norm?
 What is a "rank-3 tensor"?
 What is the difference between tensor rank and shape? How do you get the rank from the shape?
-What are RMSE and L1 norm?
 How can you apply a calculation on thousands of numbers at once, many thousands of times faster than a Python loop?
 Create a 3×3 tensor or array containing the numbers from 1 to 9. Double it. Select the bottom-right four numbers.
 What is broadcasting?
+How is a grayscale image represented on a computer? How about a color image?
+
 Are metrics generally calculated using the training set, or the validation set? Why?
 What is SGD?
 Why does SGD use mini-batches?
