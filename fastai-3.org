@@ -52,7 +52,7 @@ the tensors is of a lower rank, it will be broadcast onto the one with
 the larger rank.
 
 e.g. on adding a tensor of shape (3, 3, 3) with another of shape (3, 3),
-the latter will be broadcast across on axis of the former one 3 times.
+the latter will be broadcast across one axis of the former one 3 times.
 
 * Image Representation in computers    :image_representation:grayscale:color:
 
@@ -67,6 +67,58 @@ pixel. Therefore, a 28 * 28 colour image will be represented by a
 cube of shape (28, 28, 3), with each cell having a number between 0
 and 255 representing the shade of the colour red, green or blue.
 
+* Metrics                                            :metrics:validation_set:
+
+Metrics are generally calculated by the validation set. This is because
+we want to know how the model is performing on data it hasn't yet seen.
+
+* Stochastic Gradient Descent                                 :SGD:gradients:
+
+SGD is an iterative method of updating the weights of a neural network
+to improve their predictions. This is done by defining function that
+calculates the loss, i.e. how far off the predictions are from the
+actual outcome, and updating the weights of the network to minimize
+this loss.
+
+The process of updating the weights is called backward propagation.
+For each weight, calculus is used to calculate the value of the
+derivative of the loss function with respect to it. The collection
+of these values for each of the weights (parameters) are called the
+gradients and represent the slope of the function for each parameter.
+
+The goal is for these gradients to be as close to zero as possible,
+so we update the weights in the direction that makes this true.
+
+Typical loss functions are mean absolute error (MAE) and mean squared
+error (MSE).
+
+The seven steps in SGD are:
+
+ 1) Initialize parameters (random)
+ 2) Calculate predictions
+ 3) Calculate loss
+ 4) Calculate gradients that minise the loss
+ 5) Update the weights based on the gradients
+ 6) While not yet good enough, jump to 2)
+ 7) Stop
+
+* Learning rate                                :hyperparameter:learning_rate:
+
+The learning rate determines by what extent we update the model
+parameters often expressed as a percentage of the gradients per
+parameter.
+
+A large percentage implies a greater jump in the direction that
+optimizes the gradient.
+
+While it may converge to the optimal value faster there's a risk of
+overshooting the optimal value in the graph of the function we're
+optimizing meaning a similarly large adjustment will have to be made
+to the parameters in the opposite direction. This may make the
+function approach the optimal value at a slower rate as it oscillates
+around the optimal value.
+
+
 
 How are the files and folders in the MNIST_SAMPLE dataset structured? Why?
 Explain how the "pixel similarity" approach to classifying digits works.
@@ -78,16 +130,16 @@ How can you apply a calculation on thousands of numbers at once, many thousands 
 Create a 3×3 tensor or array containing the numbers from 1 to 9. Double it. Select the bottom-right four numbers.
 What is broadcasting?
 How is a grayscale image represented on a computer? How about a color image?
-
 Are metrics generally calculated using the training set, or the validation set? Why?
 What is SGD?
-Why does SGD use mini-batches?
-What are the seven steps in SGD for machine learning?
-How do we initialize the weights in a model?
 What is "loss"?
 Why can't we always use a high learning rate?
+How do we initialize the weights in a model?
+What are the seven steps in SGD for machine learning?
 What is a "gradient"?
 Do you need to know how to calculate gradients yourself?
+
+Why does SGD use mini-batches?
 Why can't we use accuracy as a loss function?
 Draw the sigmoid function. What is special about its shape?
 What is the difference between a loss function and a metric?
