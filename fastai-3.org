@@ -118,43 +118,87 @@ to the parameters in the opposite direction. This may make the
 function approach the optimal value at a slower rate as it oscillates
 around the optimal value.
 
+* Mini Batches in SGD                                      :sgd:mini_batches:
 
+While updating parameters of a neural network, we typically need to
+learn from a collection of data items in order to learn general
+patterns, rather than learning from single items in sequence which
+exhibits a lot of variability between them.
 
-How are the files and folders in the MNIST_SAMPLE dataset structured? Why?
-Explain how the "pixel similarity" approach to classifying digits works.
-What is a list comprehension? Create one now that selects odd numbers from a list and doubles them.
-What are RMSE and L1 norm?
-What is a "rank-3 tensor"?
-What is the difference between tensor rank and shape? How do you get the rank from the shape?
-How can you apply a calculation on thousands of numbers at once, many thousands of times faster than a Python loop?
-Create a 3×3 tensor or array containing the numbers from 1 to 9. Double it. Select the bottom-right four numbers.
-What is broadcasting?
-How is a grayscale image represented on a computer? How about a color image?
-Are metrics generally calculated using the training set, or the validation set? Why?
-What is SGD?
-What is "loss"?
-Why can't we always use a high learning rate?
-How do we initialize the weights in a model?
-What are the seven steps in SGD for machine learning?
-What is a "gradient"?
-Do you need to know how to calculate gradients yourself?
+However, updating the parameters after a whole pass through the entire
+dataset would result if very slow learning cycles.
 
-Why does SGD use mini-batches?
-Why can't we use accuracy as a loss function?
-Draw the sigmoid function. What is special about its shape?
-What is the difference between a loss function and a metric?
-What is the function to calculate new weights using a learning rate?
-What does the DataLoader class do?
-Write pseudocode showing the basic steps taken in each epoch for SGD.
-Create a function that, if passed two arguments [1,2,3,4] and 'abcd', returns [(1, 'a'), (2, 'b'), (3, 'c'), (4, 'd')]. What is special about that output data structure?
-What does view do in PyTorch?
-What are the "bias" parameters in a neural network? Why do we need them?
-What does the @ operator do in Python?
-What does the backward method do?
-Why do we have to zero the gradients?
-What information do we have to pass to Learner?
-Show Python or pseudocode for the basic steps of a training loop.
-What is "ReLU"? Draw a plot of it for values from -2 to +2.
-What is an "activation function"?
-What's the difference between F.relu and nn.ReLU?
-The universal approximation theorem shows that any function can be approximated as closely as needed using just one nonlinearity. So why do we normally use more?
+A mini-batch helps us compromise between learning from a high
+variability between individual items in the dataset, and the
+generality of the entire data set.
+
+For each pass through the data set, the dataloader will shuffle and
+batch items so to prevent the model from learning from the order of
+items the training set.
+
+* Accuracy Metric vs Loss :accuracy:loss:mae:mse:gradients:calculus:classification:
+
+The accuracy metric is useful for humans evaluating the performance of
+a model because it tells us the percentage of items that we classified
+correctly by the model.
+
+However, in attempting to use the accuracy metric as a loss function
+in SGD, we run into an issue where small changes in parameters may
+result in no changes to the accuracy of the model.
+
+Because we use calculus in calculating the gradients used in SGD,
+using accuracy as a metric will result in large parts of the function
+of the graph where the output is constant (0.5 threshold not crossed
+for altering classification) and therefore gradients being zero.
+
+At the point where the threshold that alters is crossed, the gradient
+will be infinity. 
+
+We therefore need to use a function that shows minute changes in the
+output for minute changes to the input parameters. That's why we
+typically use something like MAE or MSE.
+
+* tensor().view                                                :pytorch:view:
+
+The view method of a pytorch tensor returns another tensor with the
+same number of items as the original but with a different shape.
+
+If any axis has ~-1~, it will be made as large as necessary to fit
+all the data.
+
+* bias parameters                                                      :bias:
+
+Bias parameters are used to make more general functions that can
+have a varied y-intercept. Without the bias, all the functions
+expressed by a neural network layer have the y-intercept at zero.
+
+* backward pass, forward pass                      :pytorch:backward:forward:
+
+In ml terms, a forward pass implies making a prediction and a backward
+pass implies calculating gradients from the outcome and loss.
+
+The backward method on a tensor of the loss output tensor calculates
+the gradients for each of the parameters used in the forward pass.
+
+We have to zero the gradients before the next call to backwards because
+pytorch will by default add new gradients to the existing ones.
+
+* Rectified Linear unit :ReLU:relu:activation_function:universal_approximation_theorem:
+
+A rectified linear unit is a function that outputs a minimum of
+of zero for all input ranges.
+
+An activation function is a layer in the neural network consisting of
+a ReLU.
+
+It is used to separate 2 linear functions in a neural network. This is
+because we need linear functions in different layers of a neural
+network behave differently, yet the composition of one or more linear
+functions results in another linear function. The activation function
+(or nonlinearity) prevents this coupling of linear function layers.
+
+The universal approximation theorem shows that any function can be
+approximated as closely as possible with one nonlinearity in between
+two linear units. However, in practice, we use more layers because it
+is easier to get better models with less parameters using a more narrow
+layers, than use just two linear units with a large number of parameters.
