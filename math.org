@@ -1,7 +1,15 @@
 #+FILETAGS: :math:
-* Evaluating limits                  :math:limits:evaluating_limits:calculus:
+* Evaluating limits                  :limits:evaluating_limits:calculus:
 
  - simple substitution
  - factoring polynomials
  - multiply both top and bottom in fractions by conjugate
    (take advantage of difference of squares to simplify)
+
+https://www.mathsisfun.com/calculus/limits-evaluating.html
+
+* Derivatives and Differentiation      :calculus:derivatives:differentiation:
+
+The process of finding derivatives is called differentiation
+
+

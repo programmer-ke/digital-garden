@@ -97,6 +97,16 @@ cursor is on the headline itself, C-c C-c does the same thing
 
 To search by tags, use C-c / m or C-c \
 
+To search by tags globally, use the command M-x org-agenda, then
+select m.
+
+Locations added to ~org-agenda-files~ like below will be searched.
+
+#+begin_src elisp
+;; Set list of agenda files
+(setq org-agenda-files '("~/digital-garden"))
+#+end_src
+
 * Links and images                                             :links:images:
 
 Let's download an image to the current directory with:
