@@ -59,7 +59,41 @@ Some rules applied by fastai during tokenization are:
  - Insert special characters signifying upper case and capitalized
    words then lowercasing all words.
  - Insert special characters signfying repeated words and
-   characters. This aids compression of the input
+   characters. This aids compression of the input saving space.
+
+* Numericalization                                   :numericalization:vocab:
+
+Numericalization is the process of converting the tokens into numbers
+according to the vocabulary.
+
+The vocabulary can either be infered (e.g. constructed based on the
+most common tokens) or provided explicitly.
+
+The vocabulary is represented as an ordered list of tokens and each
+token in the stream is replaced by its index in this list.
+
+** xxunk                                                              :xxunk:
+
+Words who's frequency is below a certain threshold, for instance,
+outside the most common x words or who's frequency is below the
+minimum configured can be assigned the 'unknown word' token e.g. xxunk
+in fastai
+
+This reduces space required by the model and typically there's not
+enough relevant data to train the model about these words.
+
+* LMDataLoader                                                 :LMDataLoader:
+
+Data loading process for each epoch.
+
+1) shuffle all the entries (separate documents)
+2) concatenate into single stream e.g. 50k tokens
+3) Divide into mini streams according block size. e.g a block size of
+   5 will give 5 mini streams of length 1000 in order: 0 - 999, 1000 -
+   1999 etc
+4) For each mini-stream, while retaining their order, select an offset
+   of a certain sequence length and consecutively feed batches of the
+   given size (block size * sequence length) in order to the model.
 
 What is "self-supervised learning"?
 What is a "language model"?
@@ -74,10 +108,14 @@ Name three different approaches to tokenization.
 What is xxbos?
 List four rules that fastai applies to text during tokenization.
 Why are repeated characters replaced with a token showing the number of repetitions and the character that's repeated?
-
 What is "numericalization"?
 Why might there be words that are replaced with the "unknown word" token?
-With a batch size of 64, the first row of the tensor representing the first batch contains the first 64 tokens for the dataset. What does the second row of that tensor contain? What does the first row of the second batch contain? (Careful—students often get this one wrong! Be sure to check your answer on the book's website.)
+With a batch size of 64, the first row of the tensor representing the
+first batch contains the first 64 tokens for the dataset. What does
+the second row of that tensor contain? What does the first row of the
+second batch contain? (Careful—students often get this one wrong! Be
+sure to check your answer on the book's website.)
+
 Why do we need padding for text classification? Why don't we need it for language modeling?
 What does an embedding matrix for NLP contain? What is its shape?
 What is "perplexity"?
