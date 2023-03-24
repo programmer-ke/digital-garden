@@ -95,30 +95,68 @@ Data loading process for each epoch.
    of a certain sequence length and consecutively feed batches of the
    given size (block size * sequence length) in order to the model.
 
-What is "self-supervised learning"?
-What is a "language model"?
-Why is a language model considered self-supervised?
-What are self-supervised models usually used for?
-Why do we fine-tune language models?
-What are the three steps to create a state-of-the-art text classifier?
-How do the 50,000 unlabeled movie reviews help us create a better text classifier for the IMDb dataset?
-What are the three steps to prepare your data for a language model?
-What is "tokenization"? Why do we need it?
-Name three different approaches to tokenization.
-What is xxbos?
-List four rules that fastai applies to text during tokenization.
-Why are repeated characters replaced with a token showing the number of repetitions and the character that's repeated?
-What is "numericalization"?
-Why might there be words that are replaced with the "unknown word" token?
-With a batch size of 64, the first row of the tensor representing the
-first batch contains the first 64 tokens for the dataset. What does
-the second row of that tensor contain? What does the first row of the
-second batch contain? (Careful—students often get this one wrong! Be
-sure to check your answer on the book's website.)
+* Text Classification                                   :text_classification:
 
-Why do we need padding for text classification? Why don't we need it for language modeling?
-What does an embedding matrix for NLP contain? What is its shape?
-What is "perplexity"?
-Why do we have to pass the vocabulary of the language model to the classifier data block?
-What is "gradual unfreezing"?
-Why is text generation always likely to be ahead of automatic identification of machine-generated texts?
+** padding                                        :padding:data_augmentation:
+
+For each training epoch, the classifier needs to pass in batches of
+similarly sized tensors to the learner. Since the texts to be classified
+are of different lengths, padding will have to be applied to have them
+all of the same size.
+
+To do this, the text will be roughly sorted in order by length so that
+for each batch, the texts are of similar sizes, which will help save
+space. The texts are then padded to the length of the largest one in
+the batch using a token that will be ignored by the model.
+
+* Language model loss and metrics
+
+Typically, the loss function used in language models is
+~cross-entropy~, because predicting the next word is essentially a
+classification problem of selecting the next token from the
+vocabulary.
+
+Metrics commonly used are ~perplexity~, which is the exponent of the
+cross-entropy, and ~accuracy~, which is easier to interpret.
+
+* Passing the vocabulary of the language model to classifier data block :DataBlock:vocab:
+
+After fine tuning the pre-trained language model using corpus of the
+target text to be classified, we pass the vocab of the language model
+to the datablock of the classifier because we need the classifier use
+the updated vocabulary for numericalization for classification rather
+than use the limited one that comes with the original pre-trained
+model.
+
+* Gradual unfreezing                                     :gradual_unfreezing:
+
+With gradual unfreezing, a pretrained model can be have target layers
+fine-tuned while the rest have their weights frozen.
+
+For example, a pre-trained language model can be frozen and trained
+just to update its embeddings for the new vocabulary.
+
+A text-classifier can be fine tuned from a language model by
+unfreezing and fitting the latter task-specific layers first to
+adapt them to the classification task and then eventually opening up
+all layers to the fitting process.
+
+* Machine generated text detection
+
+Automatic detection of machine generated text is always likely to be
+behind text generation techniques because automated text detection
+relys on having a large corpus of machine generated text available
+in order to learn them.
+
+Therefore, new text generation techniques will always be ahead of
+automated text detection techniques.
+
+* Embedding matrix                                         :embedding_matrix:
+
+This acts as the first layer of the neural network.
+
+It contains a row for each index of the corpus' vocabulary.
+
+It's shape is (vocab_size x embedding_size), where vocab_size is the
+length of the vocabulary, and embedding_size is an arbitrary number
+defining the number of latent factors of the tokens.
