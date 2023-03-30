@@ -52,3 +52,13 @@ https://geohot.github.io/blog/jekyll/update/2022/12/31/eacc.html
 * npm install ERR! ENOTEMPTY                              :npm:err:enotempty:
 
 https://github.com/npm/cli/issues/4096
+
+* Data leakage :data_leakage:machine_learning:ml:train_test_contamination:target_leakage:
+
+ - target leakage :: when using historical data to train a model,
+   accidentally including an attribute that is dependent on the target
+   variable in training e.g. when predicting house price based on its
+   attributes, including average house prices in the locality
+ - train test contamination :: accidentally including data that is
+   available in the test set when training which will make the model
+   overfit the test data.
