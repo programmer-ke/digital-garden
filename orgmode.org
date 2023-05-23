@@ -31,9 +31,9 @@ and M-S-right also change the levels of any subheadings.)
 2) Like that
 3) and this
 
-*** checklists [3/5]
-- [X] we can have check lists. M-S-RET gives a new item with a check box
-- [X] Like that
+*** checklists [1/5]
+- [ ] we can have check lists. M-S-RET gives a new item with a check box
+- [ ] Like that
 - [X] C-c C-c checks/unchecks a checkbox
 - [-] You can have sub items (M-S-RET TAB)
   - [ ] like this
@@ -285,8 +285,10 @@ like the following in the emacs config file
 #+end_src
 
 #+RESULTS:
-: todays date is Tue Feb 14 15:00:39 2023
+: todays date is Thu May 11 16:04:59 2023
 : 2 + 2
 : 4
-: 2.7.17 (default, Nov 28 2022, 18:51:39) 
-: [GCC 7.5.0]
+: 3.8.10 (default, Mar 13 2023, 10:26:41) 
+: [GCC 9.4.0]
+
+More on literate programming [[file:literate_programming.org][here]]

@@ -1,3 +1,7 @@
+* work through:
+
+https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-python.html
+
 * Python Virtual Env example
 
 - [[https://github.com/doomemacs/doomemacs/issues/2416][explicitely creating virtual environment]]

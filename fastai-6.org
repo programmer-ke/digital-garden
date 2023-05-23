@@ -1,0 +1,50 @@
+#+FILETAGS: :fastai:machine_learning:tabular_data:random_forests:
+* Continuous vs categorical variables
+
+A continuous variable has a numeric value while a categorical variable
+has a finite set of possible values (a discrete set of levels).
+
+* Two main families of machine learning algorithms
+
+Decision trees: Good for structured data e.g. db tables
+Neural networks: Good for unstructured data e.g. text, images, sound
+
+However, structured data with a high-cardinality of levels for
+categorical variables e.g. street address, movie id may benefit from
+neural networks.
+
+    Provide two of the words that are used for the possible values of
+    a categorical variable.
+    What is a "dense layer"?
+    How do entity embeddings reduce memory usage and speed up neural networks?
+    What kinds of datasets are entity embeddings especially useful for?
+
+
+    Why do some categorical columns need a special ordering in their classes? How do you do this in Pandas?
+    Summarize what a decision tree algorithm does.
+    Why is a date different from a regular categorical or continuous variable, and how can you preprocess it to allow it to be used in a model?
+    Should you pick a random validation set in the bulldozer competition? If no, what kind of validation set should you pick?
+    What is pickle and what is it useful for?
+    How are mse, samples, and values calculated in the decision tree drawn in this chapter?
+    How do we deal with outliers, before building a decision tree?
+    How do we handle categorical variables in a decision tree?
+    What is bagging?
+    What is the difference between max_samples and max_features when creating a random forest?
+    If you increase n_estimators to a very high value, can that lead to overfitting? Why or why not?
+    In the section "Creating a Random Forest", just after <<max_features>>, why did preds.mean(0) give the same result as our random forest?
+    What is "out-of-bag-error"?
+    Make a list of reasons why a model's validation set error might be worse than the OOB error. How could you test your hypotheses?
+    Explain why random forests are well suited to answering each of the following question:
+        How confident are we in our predictions using a particular row of data?
+        For predicting with a particular row of data, what were the most important factors, and how did they influence that prediction?
+        Which columns are the strongest predictors?
+        How do predictions vary as we vary these columns?
+    What's the purpose of removing unimportant variables?
+    What's a good type of plot for showing tree interpreter results?
+    What is the "extrapolation problem"?
+    How can you tell if your test or validation set is distributed in a different way than your training set?
+    Why do we ensure saleElapsed is a continuous variable, even although it has less than 9,000 distinct values?
+    What is "boosting"?
+    How could we use embeddings with a random forest? Would we expect this to help?
+    Why might we not always use a neural net for tabular modeling?
+

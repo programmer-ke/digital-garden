@@ -63,3 +63,13 @@ https://github.com/npm/cli/issues/4096
    available in the test set when training which will make the model
    overfit the test data.
    
+* Spoof mail as authenticated user                    :sasl:spoof:smtp:swaks:
+
+Using swaks to spoof mail as an authenticated user
+
+swaks --from spoofedsender@domain --to recipient@domain --auth PLAIN --auth-user authenticateduser@domain --auth-password authenticatedpasswd --server smtp.domain.tld --tls
+
+* purge snapd                                             :snap:purge:ubuntu:
+
+https://web.archive.org/web/20200430055648/https://www.kevin-custer.com/blog/disabling-snaps-in-ubuntu-20-04/
+https://askubuntu.com/questions/1251809/can-i-completely-remove-snappy-packages-from-ubuntu-20-04-without-affecting-the
