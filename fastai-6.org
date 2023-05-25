@@ -13,21 +13,72 @@ However, structured data with a high-cardinality of levels for
 categorical variables e.g. street address, movie id may benefit from
 neural networks.
 
-    Provide two of the words that are used for the possible values of
-    a categorical variable.
-    What is a "dense layer"?
-    How do entity embeddings reduce memory usage and speed up neural networks?
-    What kinds of datasets are entity embeddings especially useful for?
+* Special ordering for categorical columns :decision_trees:categorical_variables:ordinals:pandas:
 
+Some categorical variables have an implied order that a human would
+recognize but not the decision tree algorithm e.g. a column that is
+either "small", "medium", or "large".
 
-    Why do some categorical columns need a special ordering in their classes? How do you do this in Pandas?
-    Summarize what a decision tree algorithm does.
-    Why is a date different from a regular categorical or continuous variable, and how can you preprocess it to allow it to be used in a model?
-    Should you pick a random validation set in the bulldozer competition? If no, what kind of validation set should you pick?
-    What is pickle and what is it useful for?
-    How are mse, samples, and values calculated in the decision tree drawn in this chapter?
-    How do we deal with outliers, before building a decision tree?
-    How do we handle categorical variables in a decision tree?
+We would need to let the algorithm know of this order. In pandas we
+can do this by transforming the column into a category datatype with
+its possible values listed in order.
+
+* Decision tree algorithm                                    :decision_trees:
+
+A decision tree that predicts a price, for example, can be constructed
+as follows
+
+ - For each column
+   - for each level in the column
+     - Calculate the average price of the two splits by that level
+     - calculate the Root Mean Squared Error (rmse) of each of the two split
+ - Determine the split that gives the lowest rmse values and use that
+   to split the dataset into two groups
+ - For each group, recursively repeat the above steps until we get to the
+   termination condition (e.g. maximum number of leaf nodes in the tree, or minimum number of
+   items in each group)
+
+* Special consideration for dates in decision trees    :dates:decision_trees:
+
+While date can be treated like a continuous variable since dates are
+ordered, often we want the algorithm to be aware of some important
+information in the date like day of the week, holidays etc that may 
+be useful in making predictions.
+
+We can preprocess dates by adding columns to the dataset that contain
+extra information on the date like day of the week, year, month,
+whether it is a special date like black friday e.t.c
+
+* Validation set                                            :validation_sets:
+
+When picking a validation set, we have to use one that resembles the
+test set.
+
+For example, in timeseries data, the test set will be a portion of data
+from the later period in the ordered dataset because we're interested
+in using the earlier data for making future predictions.
+
+Similarly, the validation set should be split off from the later end
+of the ordered training set so that we build the model with the
+training set and validate by making predictions in the validation set.
+
+* On one-hot encoding vs ordering predictor categories in decision trees: :decision_trees:categorical_variables:one_hot_encoding:fastai:
+
+Ordering categories results in less splits for the same essentially the same outcome.
+
+"The standard approach for nominal predictors is to consider all 2^k −
+1^− 1 2-partitions of the k predictor categories. However, this
+exponential relationship produces a large number of potential splits
+to be evaluated, increasing computational complexity and restricting
+the possible number of categories in most implementations. For binary
+classification and regression, it was shown that ordering the
+predictor categories in each split leads to exactly the same splits as
+the standard approach. This reduces computational complexity because
+only k − 1 splits have to be considered for a nominal predictor with k
+categories."
+
+https://peerj.com/articles/6339/
+
     What is bagging?
     What is the difference between max_samples and max_features when creating a random forest?
     If you increase n_estimators to a very high value, can that lead to overfitting? Why or why not?
@@ -48,3 +99,8 @@ neural networks.
     How could we use embeddings with a random forest? Would we expect this to help?
     Why might we not always use a neural net for tabular modeling?
 
+    Provide two of the words that are used for the possible values of
+    a categorical variable.
+    What is a "dense layer"?
+    How do entity embeddings reduce memory usage and speed up neural networks?
+    What kinds of datasets are entity embeddings especially useful for?

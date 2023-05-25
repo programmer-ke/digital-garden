@@ -73,3 +73,4 @@ swaks --from spoofedsender@domain --to recipient@domain --auth PLAIN --auth-user
 
 https://web.archive.org/web/20200430055648/https://www.kevin-custer.com/blog/disabling-snaps-in-ubuntu-20-04/
 https://askubuntu.com/questions/1251809/can-i-completely-remove-snappy-packages-from-ubuntu-20-04-without-affecting-the
+
