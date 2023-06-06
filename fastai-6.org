@@ -1,4 +1,4 @@
-#+FILETAGS: :fastai:machine_learning:tabular_data:random_forests:
+#+FILETAGS: :fastai:machine_learning:tabular_data:random_forests:decision_trees
 * Continuous vs categorical variables
 
 A continuous variable has a numeric value while a categorical variable
@@ -79,19 +79,108 @@ categories."
 
 https://peerj.com/articles/6339/
 
-    What is bagging?
-    What is the difference between max_samples and max_features when creating a random forest?
-    If you increase n_estimators to a very high value, can that lead to overfitting? Why or why not?
-    In the section "Creating a Random Forest", just after <<max_features>>, why did preds.mean(0) give the same result as our random forest?
-    What is "out-of-bag-error"?
-    Make a list of reasons why a model's validation set error might be worse than the OOB error. How could you test your hypotheses?
-    Explain why random forests are well suited to answering each of the following question:
-        How confident are we in our predictions using a particular row of data?
-        For predicting with a particular row of data, what were the most important factors, and how did they influence that prediction?
-        Which columns are the strongest predictors?
-        How do predictions vary as we vary these columns?
-    What's the purpose of removing unimportant variables?
-    What's a good type of plot for showing tree interpreter results?
+* bagging                                            :bagging:random_forests:
+
+Bagging is the process of training multiple decision trees on random
+subsets of the data (rows and columns) and aggregating their results
+during inference.
+
+* sklearn for random forests                           :sklearn:scikit_learn:
+
+ - max_samples :: parameter that specifies the  number of rows
+   that a tree can be trained on
+
+ - max_features :: parameter that specifies the max number of columns
+   that can be considered for splitting with each split.
+
+ - n_estimators :: the number of random trees to train
+
+* out of bag error                                     :out_of_bag_error:OOB:
+
+The out of bag error is the rmse between the y-values in the training
+set and the out of bag predictions for each row in the training set.
+
+The out of bag predictions are made for each row using aggregated
+predictions of the trees that didn't include it in its training
+samples.
+
+This is useful in situations were there's little data because it help
+determine whether a model generalizes without needing a separate
+validation set.
+
+* model interpretation                  :random_forests:model_interpretation:
+
+**  How confident are we in our predictions using a particular row of data?
+
+We examine the standard deviation of the predictions on the row by
+each of the trees in the random forest. The lower the standard deviation,
+the higher the confidence in the predictions since the differently trained
+trees gave more similar predictions.
+
+** For predicting with a particular row of data, what were the most important factors, and how did they influence that prediction? :tree_interpreter:waterfall_graph:
+
+We pick the row of interest and pass it through each tree in the
+random forest. We take the prediction of the model at the root of the
+tree as the bias for each tree. We then pass the row through the tree
+and for each split, record the effect each column has on the bias,
+either increasing it or reducing it. We then aggregate the deltas for
+each column in the random forest and can then sort and plot it. We can
+then identify the columns with the greatest effects on the row's
+prediction.
+
+To calculate this for each row, we use the tree intepreter library.
+We plot the results using a waterfall plot which shows the net effect
+of each column on the bias, and the net effect of all columns, which
+is the final prediction.
+
+** Which columns are the strongest predictors            :feature_importance:
+
+We determine the strongest predictors by calculating the feature
+importance.  This is done by looking at each split in each tree in the
+random forest.  For each split, we not record how much the model
+improves as a result, and add this to the column's importance score
+(weighted by number of rows in the group).
+
+The score for each column is aggregated, normalized and sorted,
+allowing us to determine the most important features.
+
+
+** How do predictions vary by the strongest predictors?
+
+For each of the important columns, we calculate the partial dependence.
+This is done by replacing the column's value in all the rows with a
+specific value and making predictions. For each possible value of this
+column in the dataset, we make predictions across all rows and average the
+final prediction.
+
+We can then plot a partial dependence graph for each column mapping each
+value with the resulting average prediction across all rows.
+
+By this, we can tell how the column's values affect the prediction, all
+other things being equal.
+
+* Removing unimportant features                          :feature_importance:
+
+Removing unimportant features helps minimize the model complexity
+and increase it's understandability without significantly impacting
+the model's accuracy.
+
+It results in fewer splits in the decision tree hence reducing training
+and inference time and helps focusing the analysis on only the important
+factors.
+
+This can be done by using the feature importance to remove the columns
+with low importance from the dataset and removing all but one of
+similar columns that are highly correlated with each other.
+
+
+    If you increase n_estimators to a very high value, can that lead
+    to overfitting? Why or why not?
+
+    Make a list of reasons why a model's validation set error might be
+    worse than the OOB error. How could you test your hypotheses?
+
+
     What is the "extrapolation problem"?
     How can you tell if your test or validation set is distributed in a different way than your training set?
     Why do we ensure saleElapsed is a continuous variable, even although it has less than 9,000 distinct values?

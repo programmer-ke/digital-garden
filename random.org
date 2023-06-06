@@ -74,3 +74,20 @@ swaks --from spoofedsender@domain --to recipient@domain --auth PLAIN --auth-user
 https://web.archive.org/web/20200430055648/https://www.kevin-custer.com/blog/disabling-snaps-in-ubuntu-20-04/
 https://askubuntu.com/questions/1251809/can-i-completely-remove-snappy-packages-from-ubuntu-20-04-without-affecting-the
 
+* bip 32 derivation paths                    :bip32:derivation_path:HDWallet:
+
+
+Knowing what a derivation path is and how it works is
+crucial. Derivation paths are related to HD Wallets, a type of wallets
+where you have a seed phrase that unlocks a number of accounts,
+addresses, or private keys across supported network.
+
+A derivation path is a piece of data which tells a Hierarchical
+Deterministic (HD) wallet how to derive a specific key within a tree
+of keys. Derivation paths are used as a Bitcoin standard and were
+introduced with HD wallets as a part of BIP32. BIP32-Ed25519 is some
+sort of extension of BIP32 in Cardano.
+
+A derivation path for up-to-date Cardano wallets looks this way:
+
+m / purpose' / coin_type' / account_index' / role / address_index
