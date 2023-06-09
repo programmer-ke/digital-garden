@@ -173,23 +173,51 @@ This can be done by using the feature importance to remove the columns
 with low importance from the dataset and removing all but one of
 similar columns that are highly correlated with each other.
 
+* The extrapolation problem :extrapolation_problem:random_forests:decision_trees:
 
-    If you increase n_estimators to a very high value, can that lead
-    to overfitting? Why or why not?
+The extrapolation problem happens when a model is unable to predict
+values outside the range it encountered in training.
 
-    Make a list of reasons why a model's validation set error might be
-    worse than the OOB error. How could you test your hypotheses?
+An example of this is when decision trees are used to predict trend
+over time, which gives values that are lower than actual figures. This
+is because a decision tree estimates the average value of each group,
+for data points that lie beyond the timeline used for training, the
+predicted value will be close to that of the tail end of the training
+set.
 
+* Finding out of domain data                :domain_shift:out_of_domain_data:
 
-    What is the "extrapolation problem"?
-    How can you tell if your test or validation set is distributed in a different way than your training set?
-    Why do we ensure saleElapsed is a continuous variable, even although it has less than 9,000 distinct values?
-    What is "boosting"?
-    How could we use embeddings with a random forest? Would we expect this to help?
-    Why might we not always use a neural net for tabular modeling?
+To tell if the validation set is different distributed differently
+from the training data, the model can be trained on the combined set
+of training and validation data to predict whether a row is found
+in the training or validation set.
 
-    Provide two of the words that are used for the possible values of
-    a categorical variable.
-    What is a "dense layer"?
-    How do entity embeddings reduce memory usage and speed up neural networks?
-    What kinds of datasets are entity embeddings especially useful for?
+After training the model, the feature importances of the columns
+can be examined to determine which columns are highly correlated 
+with the train/validate split.
+
+Columns that do not significantly lower the prediction accuracy
+can them be excluded.
+
+* Dates as continuous variables                  :continuous_variables:dates:
+
+We make sure that in tabular data, dates are treated as
+continuous variables so that predictions can be made for values outside
+the training domain.
+
+* boosting                                                :boosting:xg_boost:
+
+Boosting methods are where predictions by an ensemble of models are
+added to each other to predict the final value.
+
+The process is as follows using trees:
+
+ 1) A tree that underfits is trained on input data.
+ 2)For each data point, the difference between it's prediction and 
+  target values is calculated.
+ 3) This differences become the new target values
+ 4) The process repeats from step 1, until we reach some stopping
+    criteria e.g. max no of trees or overfitting
+
+During inference, the predictions of each tree will be added up
+to get the final predictions.
