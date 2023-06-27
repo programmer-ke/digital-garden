@@ -1,9 +1,148 @@
+* Sessions and Return values
+
+In non-session mode, the code block is wrapped in a function, so to
+return a value (in the default :results value mode), a return
+statement has to be used.
+
+#+begin_src python :results value
+  def foo(x):
+    if x > 0:
+      return "positive"
+    else:
+      return "zero or negative"
+
+  return foo(1)
+#+end_src
+
+#+RESULTS:
+: positive
+
+In session mode, the last statement's value is returned if it is a 
+top level expression
+
+#+begin_src python :session :results value
+  def foo(x):
+    if x > 0:
+      return "positive"
+    else:
+      return "zero or negative"
+
+  foo(1)
+#+end_src
+
+#+RESULTS:
+: positive
+
+To return the value of an idented block, assign to a variable and set
+it as the last statement
+
+#+begin_src python :results value :session
+  import random
+  if random.randint(0, 10) % 2:
+    results = "even"
+  else:
+    results = "false"
+  results
+#+end_src
+
+#+RESULTS:
+: false
+
+The default :results mode is value, but one can instead output stdout
+
+#+begin_src python :results output
+  import datetime
+  print("The date today is", datetime.date.today())
+#+end_src
+
+#+RESULTS:
+: The date today is 2023-06-11
+
+* Setting a python virtual env
+
+Ref: [[https://github.com/doomemacs/doomemacs/issues/2416][explicitly creating virtual environment]]
+- todo: investigate use of dir-locals
+
+Use bash to create the env and install packages
+
+#+begin_src bash
+  mkdir -p ~/.envs
+  python3 -m venv ~/.envs/babel
+  . ~/.envs/babel/bin/activate
+  pip install matplotlib pandas
+#+end_src
+
+#+RESULTS:
+| Collecting   | matplotlib                                                                |                                            |               |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Downloading  | matplotlib-3.7.1-cp38-cp38-manylinux_2_12_x86_64.manylinux2010_x86_64.whl | (9.2                                       | MB)           |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Collecting   | pandas                                                                    |                                            |               |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Downloading  | pandas-2.0.2-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl     | (12.3                                      | MB)           |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Collecting   | contourpy>=1.0.1                                                          |                                            |               |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Downloading  | contourpy-1.0.7-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl  | (300                                       | kB)           |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Collecting   | kiwisolver>=1.0.1                                                         |                                            |               |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Downloading  | kiwisolver-1.4.4-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.whl     | (1.2                                       | MB)           |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Collecting   | pillow>=6.2.0                                                             |                                            |               |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Downloading  | Pillow-9.5.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl     | (3.3                                       | MB)           |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Collecting   | importlib-resources>=3.2.0;                                               | python_version                             | <             | 3.1              |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Downloading  | importlib_resources-5.12.0-py3-none-any.whl                               | (36                                        | kB)           |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Collecting   | numpy>=1.20                                                               |                                            |               |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Downloading  | numpy-1.24.3-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl     | (17.3                                      | MB)           |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Collecting   | cycler>=0.10                                                              |                                            |               |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Using        | cached                                                                    | cycler-0.11.0-py3-none-any.whl             | (6.4          | kB)              |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Collecting   | pyparsing>=2.3.1                                                          |                                            |               |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Using        | cached                                                                    | pyparsing-3.0.9-py3-none-any.whl           | (98           | kB)              |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Collecting   | python-dateutil>=2.7                                                      |                                            |               |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Using        | cached                                                                    | python_dateutil-2.8.2-py2.py3-none-any.whl | (247          | kB)              |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Collecting   | packaging>=20.0                                                           |                                            |               |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Using        | cached                                                                    | packaging-23.1-py3-none-any.whl            | (48           | kB)              |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Collecting   | fonttools>=4.22.0                                                         |                                            |               |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Downloading  | fonttools-4.39.4-py3-none-any.whl                                         | (1.0                                       | MB)           |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Collecting   | tzdata>=2022.1                                                            |                                            |               |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Downloading  | tzdata-2023.3-py2.py3-none-any.whl                                        | (341                                       | kB)           |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Collecting   | pytz>=2020.1                                                              |                                            |               |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Downloading  | pytz-2023.3-py2.py3-none-any.whl                                          | (502                                       | kB)           |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Collecting   | zipp>=3.1.0;                                                              | python_version                             | <             | 3.1              |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Downloading  | zipp-3.15.0-py3-none-any.whl                                              | (6.8                                       | kB)           |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Collecting   | six>=1.5                                                                  |                                            |               |                  |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Using        | cached                                                                    | six-1.16.0-py2.py3-none-any.whl            | (11           | kB)              |                            |                  |                  |                      |                |              |              |                  |                       |             |             |               |             |        |
+| Installing   | collected                                                                 | packages:                                  | numpy,        | contourpy,       | kiwisolver,                | pillow,          | zipp,            | importlib-resources, | cycler,        | pyparsing,   | six,         | python-dateutil, | packaging,            | fonttools,  | matplotlib, | tzdata,       | pytz,       | pandas |
+| Successfully | installed                                                                 | contourpy-1.0.7                            | cycler-0.11.0 | fonttools-4.39.4 | importlib-resources-5.12.0 | kiwisolver-1.4.4 | matplotlib-3.7.1 | numpy-1.24.3         | packaging-23.1 | pandas-2.0.2 | pillow-9.5.0 | pyparsing-3.0.9  | python-dateutil-2.8.2 | pytz-2023.3 | six-1.16.0  | tzdata-2023.3 | zipp-3.15.0 |        |
+
+Next, set the python interpretter used by org-mode
+
+#+begin_src elisp
+  (setq org-babel-python-command "~/.envs/babel/bin/python")
+#+end_src
+
+#+RESULTS:
+: ~/.envs/babel/bin/python
+
+#+begin_src python :results output
+  import matplotlib
+  print(matplotlib.__file__)
+#+end_src
+
+#+RESULTS:
+: /home/krm/.envs/babel/lib/python3.8/site-packages/matplotlib/__init__.py
+
+Return a plotted image
+
+#+begin_src python :results file :session foo
+  import matplotlib.pyplot as plt
+  fig = plt.figure(figsize=(3, 2))
+  plt.plot([1, 3, 2])
+  fig.tight_layout()
+
+  fname = "img/myfig.pdf"
+  plt.savefig(fname)
+  fname
+#+end_src
+
+#+RESULTS:
+[[file:img/myfig.pdf]]
+
 * work through:
 
 https://orgmode.org/worg/org-contrib/babel/languages/ob-doc-python.html
 
-* Python Virtual Env example
-
-- [[https://github.com/doomemacs/doomemacs/issues/2416][explicitely creating virtual environment]]
-- todo: investigate use of dir-locals
-
+read: https://orgmode.org/manual/Working-with-Source-Code.html

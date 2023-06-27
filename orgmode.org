@@ -22,8 +22,10 @@ and M-S-right also change the levels of any subheadings.)
  - we might also like nested bullets (with M-RET TAB to ident it)
    - like this one. M-RET now gives another one on the same level
    - like this one
- - the nice thing is that for long lines of text, emacs wraps them so that you can use them with the bullet (doesn't seem to happen)
- - you can also re-order list items and change identation with M-up and M-down and M-left and M-right
+ - the nice thing is that for long lines of text, emacs wraps them so
+   that you can use them with the bullet (doesn't seem to happen)
+ - you can also re-order list items and change identation with M-up
+   and M-down and M-left and M-right
  - you can change bullet style with S-left and S-right
 
 *** numbered lists
@@ -238,7 +240,11 @@ kind of source code it is e.g. sh for shell.
   exit
 #+end_src
 
-We can get org to syntax highlight by addint the following in the
+#+RESULTS:
+| hello     | krm! | Today | is | Sun | 11 | Jun | 2023 | 10:41:15 | AM | EAT |
+| Goodbye!! |      |       |    |     |    |     |      |          |    |     |
+
+We can get org to syntax highlight by adding the following in the
 emacs config file
 
 #+begin_src elisp
@@ -285,10 +291,12 @@ like the following in the emacs config file
 #+end_src
 
 #+RESULTS:
-: todays date is Thu May 11 16:04:59 2023
+: todays date is Sun Jun 11 10:42:08 2023
 : 2 + 2
 : 4
-: 3.8.10 (default, Mar 13 2023, 10:26:41) 
+: 3.8.10 (default, May 26 2023, 14:05:08) 
 : [GCC 9.4.0]
 
 More on literate programming [[file:literate_programming.org][here]]
+
+Compact guide: https://orgmode.org/guide/
