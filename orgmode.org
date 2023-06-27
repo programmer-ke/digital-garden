@@ -10,9 +10,19 @@ Headings can be expanded or collapsed by moving to the (sub) heading
 and pressing TAB. S-TAB cycles all headings. You can jump to the next
 and previous headings by C-c C-n and C-c C-p respectively.
 
+Use C-c C-f and C-c C-b to navigate between headers at the same level
+
+C-c C-u to navigate backwards to higher level heading
+
 Move headings up and down to reorder them with M-up and M-down. You
 can change the level of headings with M-left and M-right. (M-S-left
 and M-S-right also change the levels of any subheadings.)
+
+** default global state
+Can be set per-file with the STARTUP keyword e.g.
+#+STARTUP: content
+
+Other options are: overview, showall ...
 
 ** lists
 
@@ -300,3 +310,5 @@ like the following in the emacs config file
 More on literate programming [[file:literate_programming.org][here]]
 
 Compact guide: https://orgmode.org/guide/
+
+
