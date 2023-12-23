@@ -1,0 +1,33 @@
+* lead acid battery voltage chart    :solar:battery:voltage:chart:sla:charge:
+
+12V Flooded Lead Acid Batteries
+Voltage	Capacity
+12.64V	100%
+12.53V	90%
+12.41V	80%
+12.29V	70%
+12.18V	60%
+12.07V	50%
+11.97V	40%
+11.87V	30%
+11.76V	20%
+11.63V	10%
+11.59V	0%
+
+12V Sealed Lead Acid Batteries (AGM & Gel)
+Voltage	Capacity
+12.89V	100%
+12.78V	90%
+12.65V	80%
+12.51V	70%
+12.41V	60%
+12.23V	50%
+12.11V	40%
+11.96V	30%
+11.81V	20%
+11.70V	10%
+11.63V	0%
+
+Note: Estimating state of charge based on open circuit voltage is only
+accurate when batteries are at room temperature and have been resting
+— i.e. disconnected from all loads and chargers — for several hours.

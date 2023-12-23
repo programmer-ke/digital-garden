@@ -2,8 +2,8 @@
 
 * MNIST_SAMPLE file structure                                         :mnist:
 
-There are 2 directories, =train= and =valid=. Once can train using images in the
-former directory and validate using the latter.
+There are 2 directories, =train= and =valid=. One can train using
+images in the former directory and validate using the latter.
 
 Inside each of =train= and =valid=, we have directories that serve
 as labels for the data e.g. images of number 7 will be under the 
@@ -34,10 +34,10 @@ A rank-3 tensor is a tensor with 3 axis i.e. a cube.
 
 * Parallel computation of thousands of numbers with python :numpy:pytorch:tensor:array:gpu:cuda:
 
-Rather than use python itself, we can use a lower language for better
-performance. Two common ways are using =numpy=, which will implement
-the operations in optimized C, and =pytorch=, which will implement
-the operations parallelized on a GPU via CUDA if available.
+Rather than use python itself, we can use a lower-level language for
+better performance. Two common ways are using =numpy=, which will
+implement the operations in optimized C, and =pytorch=, which will
+implement the operations parallelized on a GPU via CUDA if available.
 
 =numpy= provides the ~array~ data structure for this, while =pytorch=
 provides the ~tensor~ data structure.
@@ -82,12 +82,13 @@ this loss.
 
 The process of updating the weights is called backward propagation.
 For each weight, calculus is used to calculate the value of the
-derivative of the loss function with respect to it. The collection
-of these values for each of the weights (parameters) are called the
-gradients and represent the slope of the function for each parameter.
+derivative of the loss function with respect to it, i.e, the partial
+derivative. The collection of these values for each of the weights
+(parameters) are called the gradients and represent the slope of the
+function for each parameter.
 
-The goal is for these gradients to be as close to zero as possible,
-so we update the weights in the direction that makes this true.
+The goal is for these gradients to be as close to zero as possible, so
+we update the weights in the direction that makes this true.
 
 Typical loss functions are mean absolute error (MAE) and mean squared
 error (MSE).
@@ -126,7 +127,7 @@ patterns, rather than learning from single items in sequence which
 exhibits a lot of variability between them.
 
 However, updating the parameters after a whole pass through the entire
-dataset would result if very slow learning cycles.
+dataset would result in very slow learning cycles.
 
 A mini-batch helps us compromise between learning from a high
 variability between individual items in the dataset, and the

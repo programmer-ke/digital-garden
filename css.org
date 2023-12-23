@@ -1,0 +1,39 @@
+#+FILETAGS: :css:
+* units of measurement                                          :measurement:
+** absolute measurements
+
+ - cm, mm, in -- centimeters, millimeters, and inches. Honestly real
+   physical size specifiers don't work well on computer screens.
+ - px -- pixels, which is as good a fixed unit as you'll find, but
+   given the varying resolutions of screens probably isn't as exact as
+   some people want.
+ - pt -- points, which is based on 1/72nd of an inch and actually not
+   that useful on the screen except for when giving sizes of fonts
+   where it's more common.
+ - pc -- picas which is another font based measurement that's not
+   incredibly reliable
+
+** relative measurements
+
+ - em -- font-size of the element.
+ - ex -- the x-height of the current font.
+ - ch -- the width of the "0" (zero).
+ - rem -- the font-size of the root element.
+ - vw -- 1% of the width of the viewport. That means if someone is on a 3200x900 pixel sized monitor then 1vw will be 32 pixels wide.
+ - vh -- 1% of the height of the viewport. That means if someone on a 3200x900 pixel sized monitor then 1vh will be 9 pixels high.
+ - vmin -- 1% of the viewport's smaller dimension. On a 3200x900 pixel monitor that's the 900 side, so 1vmin will be 9 pixels.
+ - vmax -- 1% of the vieport's larger dimension. On a 3200x900 pixel monitor that's the 3200 side, so 1vmax will be 32 pixels.
+ - % --- % of the parent element's dimension.
+
+* layering                                                  :layers:layering:
+
+1) Create each element as siblings of a parent tag.
+2) Set the parent tag to position: relative.
+3) Set the children to position: absolute and give them top: 0 or any other coordinates they need.
+4) If they're out of order I then add z-index to reshuffle them.
+
+* Avoiding specifity hell               :custom_tags:classless_css:specifity:
+
+1) Use mostly tags in your CSS with full (or mostly complete) DOM paths for the selectors.
+2) Use .class for different variants or states of those tags.
+3) Use .id for one time localized changes for a single view.

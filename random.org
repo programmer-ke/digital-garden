@@ -91,3 +91,28 @@ sort of extension of BIP32 in Cardano.
 A derivation path for up-to-date Cardano wallets looks this way:
 
 m / purpose' / coin_type' / account_index' / role / address_index
+
+* Balanced log loss                      :ml:kaggle:metrics:log_loss:logloss:
+
+
+#+begin_src python
+  from sklearn.metrics import log_loss
+  def balanced_log_loss(y_true, y_pred):
+      nc = np.bincount(y_true)
+      return log_loss(y_true, y_pred, sample_weight = 1/nc[y_true], eps=1e-15)
+#+end_src
+
+Explanation [[https://www.kaggle.com/competitions/icr-identify-age-related-conditions/discussion/422442][here]]
+
+* ACID in databases                                          :acid:databases:
+
+- Atomicity :: statements constituting a transaction all succeed or
+  fail together as a single unit.
+- Consistency :: each transaction brings the database from one
+  consistent state to another, preserving all invariants
+  (e.g. contraints, cascades, referential integrity)
+- Isolation :: End result of transactions executed concurrently is as
+  if they were executed serially i.e. they don't interfere with each
+  other
+- Durability :: once a transaction is committed, it remains commited
+  even in the case of system failure.

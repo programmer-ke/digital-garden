@@ -1,0 +1,32 @@
+* Setting up llama.cpp                                            :llama_cpp:
+
+You don't need so many layers of stuff (or API keys, signups, or other nonsense).
+
+Llama.cpp (to serve the model) + the Continue VS Code extension are enough.
+
+The rough list of steps to do so are:
+
+  Part A: Install llama.cpp and get it to serve the model:
+  --------------------------------------------------------
+  1. Install the llama.cpp repo and run make.
+  2. Download the relevant model (e.g. wizardcoder-python-34b-v1.0.Q4_K_S.gguf).
+  3. Run the llama.cpp server (e.g., ./server -t 8 -m models/wizardcoder-python-34b-v1.0.Q4_K_S.gguf -c 16384 --mlock).
+  4. Run the OpenAI like API server [also included in llama.cpp] (e.g., python ./examples/server/api_like_OAI.py).
+
+  Part B: Install Continue and connect it to llama.cpp's OpenAI like API:
+  -----------------------------------------------------------------------
+  5. Install the Continue extension in VS Code.
+  6. In the Continue extension's sidebar, click through the tutorial and then type /config to access the configuration.
+  7. In the Continue configuration, add "from continuedev.src.continuedev.libs.llm.ggml import GGML" at the top of the file.
+  8. In the Continue configuration, replace lines 57 to 62 (or around) with:
+
+    models=Models(
+        default=GGML(
+            max_context_length=16384,
+            server_url="http://localhost:8081"
+        )
+    ),
+
+  9. Restart VS Code, and enjoy!
+
+https://news.ycombinator.com/item?id=37295192

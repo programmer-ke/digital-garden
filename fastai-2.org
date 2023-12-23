@@ -46,9 +46,11 @@ consoomed, but not an entirely new one that may be useful.
 * Steps of the Drivetrain approach       :drivetrain:self_driving:end_to_end:
 
  1) Identify the objective
- 2) Identify levers (controllable actions) that can be used to achieve the objective
+ 2) Identify levers (controllable actions) that can be used to achieve
+    the objective
  3) Collect data needed (existing or new)
- 4) Construct the models that can make predictions that lead to the appropriate action
+ 4) Construct the models that can make predictions that lead to the
+    appropriate action
 
 In self driving:
 

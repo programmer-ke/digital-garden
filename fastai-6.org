@@ -136,8 +136,8 @@ is the final prediction.
 ** Which columns are the strongest predictors            :feature_importance:
 
 We determine the strongest predictors by calculating the feature
-importance.  This is done by looking at each split in each tree in the
-random forest.  For each split, we not record how much the model
+importance.  This is done by inspecting each split in each tree in the
+random forest.  For each split, we record how much the model
 improves as a result, and add this to the column's importance score
 (weighted by number of rows in the group).
 

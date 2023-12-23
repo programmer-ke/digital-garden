@@ -2,7 +2,7 @@
 
 * Self-supervised learning              :self_supervised:nlp:language_models:
 
-Self-supervised learning occurs when the label exist within the
+Self-supervised learning occurs when the label exists within the
 training data itself. For example in NLP, teaching the model how to
 predict the next word by feeding it a large corpus of text.
 
@@ -145,7 +145,7 @@ all layers to the fitting process.
 
 Automatic detection of machine generated text is always likely to be
 behind text generation techniques because automated text detection
-relys on having a large corpus of machine generated text available
+relies on having a large corpus of machine generated text available
 in order to learn them.
 
 Therefore, new text generation techniques will always be ahead of

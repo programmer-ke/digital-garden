@@ -5,18 +5,11 @@ one or more * so we are curently in a section!
 ** A subheading
 Starts with an extra * and so on
 
-** navigation
-Headings can be expanded or collapsed by moving to the (sub) heading
-and pressing TAB. S-TAB cycles all headings. You can jump to the next
-and previous headings by C-c C-n and C-c C-p respectively.
+To start a new header of same level or list item, use M-RET
 
-Use C-c C-f and C-c C-b to navigate between headers at the same level
-
-C-c C-u to navigate backwards to higher level heading
-
-Move headings up and down to reorder them with M-up and M-down. You
-can change the level of headings with M-left and M-right. (M-S-left
-and M-S-right also change the levels of any subheadings.)
+** Like this
+ - and
+ - like this
 
 ** default global state
 Can be set per-file with the STARTUP keyword e.g.
@@ -57,6 +50,13 @@ Other options are: overview, showall ...
  - definition lists :: these are useful sometimes
  - item 2 :: M-RET again gives another item
  - term :: definition
+
+*** todo items
+
+Create new todo item with same header level using M-S RET 
+
+*** TODO like so
+
 
 ** tables                                                            :tables:
 Org creates tables by using | to separate columns and a line of ---
@@ -110,7 +110,7 @@ cursor is on the headline itself, C-c C-c does the same thing
 To search by tags, use C-c / m or C-c \
 
 To search by tags globally, use the command M-x org-agenda, then
-select m.
+ select m.
 
 Locations added to ~org-agenda-files~ like below will be searched.
 
@@ -118,6 +118,34 @@ Locations added to ~org-agenda-files~ like below will be searched.
 ;; Set list of agenda files
 (setq org-agenda-files '("~/digital-garden"))
 #+end_src
+
+** navigation
+
+Headings can be expanded or collapsed by moving to the (sub) heading
+and pressing TAB. S-TAB cycles all headings. You can jump to the next
+and previous headings by C-c C-n and C-c C-p respectively.
+
+Use C-c C-f and C-c C-b to navigate between headers at the same level
+
+C-c C-u to navigate backwards to higher level heading
+
+Move headings up and down to reorder them with M-up and M-down. You
+can change the level of headings with M-left and M-right. (M-S-left
+and M-S-right also change the levels of any subheadings.)
+
+To only display current subtree in buffer, use
+
+C-x n s and,
+
+C-x n w to widen again
+
+To move region or entry to new location in the document tree, used
+
+C-c C-w
+
+** Sparse trees
+To construct a sparse tree for selected info, with as much of the document as possible
+folded, use C-c /
 
 * Links and images                                             :links:images:
 
