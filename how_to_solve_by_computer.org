@@ -1,0 +1,65 @@
+* How to solve it by computer by Dromey                        :dromey:htsbc:
+
+- Data structures are symbiotically linked to algorithms for
+  efficient problem solving e.g. looking up a phone number in
+  an ordered directory
+
+** Process
+
+- Problem definition
+  - Precisely and formally define the problem
+
+- Work out an implementation-independent solution postponing the
+  details for later
+
+- How to get started on a problem
+  - Work on a specific example of the problem to get started, then
+    inspect the generality of the solution (test cases, proofs)
+
+  - Look at how similar problems have been solved in the past.
+    - Be careful though to not be too blinded by existing methods to
+      consider new approaches.
+    - learn to look at problems from multiple angles or solving them
+      independently
+  - Have a guess at the solution and try working back to initial
+    conditions
+
+** Strategies
+*** Divide and conquer
+*** dynamic programming
+
+** top-down design/step wise refinement
+  - Deal with the problem at the right level of abstraction at each
+    step
+  - General outline: input conditions -> algorithm -> output conditions
+    - algorithm:
+      - subtask 1 
+      - subtask 2
+      - ...
+      - subtask n
+    - Choice of data structure shapes computation approach
+      - Questions to ask
+        - can intermediate results be cached for re-use
+	- can it be easily searched
+	- can it be easily updated
+	- can an earlier state of the computation be recovered
+
+*** Checking the output conditions are fulfilled                :correctness:
+  - example test cases
+  - mathematical proofs
+    - problem is that proofs tend to be longer than their related
+      programs
+
+** Efficiency of algorithms
+  - Consider trade-offs between CPU and memory
+    - e.g. pre-computing intermediate results
+  - Avoid repeated computations
+    e.g. looping to end of array in bubblesort in each iteration
+  - Storing an array value accessed repeatedly in a variable (one lookup), rather 
+    than referencing by index (2 lookups). Useful for low level programming and
+    readability
+  - Early detection of desired output conditions
+    - e.g. are you sorting an already sorted list with bubblesort?
+  - Avoiding late termination
+    - e.g. searching to end of sorted list for missing element
+  
