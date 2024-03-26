@@ -31,7 +31,7 @@ Other options are: overview, showall ...
    and M-down and M-left and M-right
  - you can change bullet style with S-left and S-right
 
-*** numbered lists
+*** TODO numbered lists
 1) numbered lists are also possible. M-RET gives the next number
 2) Like that
 3) and this
@@ -58,7 +58,7 @@ Create new todo item with same header level using M-S RET
 *** TODO like so
 
 
-** tables                                                            :tables:
+** TODO tables                                                       :tables:
 Org creates tables by using | to separate columns and a line of ---
 (inserted with C-c - while at the end of the previous row) to add horizontal lines
 

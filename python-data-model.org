@@ -1,0 +1,29 @@
+* objects, values and types
+ - Every object has a type and a value as its identity, that are unchangeable.
+  In CPython, id() returns the object's address in memory. type() returns the
+  object's type, which in turn is an object
+ - containers contain references to other objects
+ - In CPython, unreachable objects are garbage collected as determined by reference counting
+
+* the standard type hierarchy
+ - None
+ - NotImplemented
+ - Elipsis
+ - Number
+   - Integral
+     - Bool
+   - Real
+   - Complex
+ - Sequences
+   - Immutable
+     - tuple
+     - string
+     - bytes
+   - Mutable
+     - list
+     - bytearray
+ - Set types
+   - sets
+   - frozen sets
+ - Mappings
+   - dictionaries
