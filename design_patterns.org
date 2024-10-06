@@ -1,0 +1,10 @@
+#+FILETAGS: :design_patterns:
+
+* chain of responsibility
+
+Each object handles a request or passes it to another object
+
+* null object
+
+A placeholder object used instead of Null with dummy methods. Prevents
+repeated null checking

@@ -1,4 +1,4 @@
-* How to solve it by computer by Dromey                        :dromey:htsbc:
+* How to solve it by computer by Dromey        :dromey:htsbc:how_to_solve_it:
 
 - Data structures are symbiotically linked to algorithms for
   efficient problem solving e.g. looking up a phone number in

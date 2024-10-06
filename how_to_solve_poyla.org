@@ -1,0 +1,16 @@
+* Poyla's algorithm                                   :poyla:how_to_solve_it:
+
+1) Understand the problem
+2) Devise a plan
+3) Implement the plan
+4) Reflect/Revise
+
+** Heuristics for devising a plan
+ - Draw a figure
+ - Be systematic
+ - Can it be reformulated as another familiar problem
+ - Induction: is it possible to generalize from specific cases
+ - Decomposing, recomposing
+ - Solve an easier/auxiliary problem
+ - Define vague parts of the problem to help reason around them
+ - Work backwards from a solution

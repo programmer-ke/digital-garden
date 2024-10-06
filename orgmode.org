@@ -266,7 +266,7 @@ x^2 + \left(\frac{y}{z}\right)^4 = 0
 #+end_export
 
 
-** Source code blocks
+`** Source code blocks
 
 To enclose souce code, we use a source block. We can tell org-mode what
 kind of source code it is e.g. sh for shell.
