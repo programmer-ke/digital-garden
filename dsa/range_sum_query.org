@@ -1,0 +1,38 @@
+* Range Sum Query                                   :prefix_sum:leetcode:dsa:
+
+:PROPERTIES:
+:Title: 303. Range Sum Query - Immutable
+:Link: https://leetcode.com/problems/range-sum-query-immutable/description/
+:END:
+
+** Approach                                                         :insight:
+
+Use a running sum. Difference between the two indices gives the solution. 
+
+** Solution
+
+#+begin_src python
+class NumArray:
+
+    def __init__(self, nums: List[int]):
+        self.sums = []
+        running_sum = 0
+        for i in nums:
+            running_sum += i
+            self.sums.append(running_sum)
+
+    def sumRange(self, left: int, right: int) -> int:
+        if left > 0:
+            left_sum = self.sums[left - 1]
+        else:
+            left_sum = 0
+        right_sum = self.sums[right]
+        return right_sum - left_sum
+#+end_src
+
+** Analysis
+
+*** Space complexity
+0(1)
+*** Time complexity
+0(n)

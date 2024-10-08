@@ -1,0 +1,43 @@
+* Subarray Sum Equals k                        :prefix_sum:leetcode:dsa:hash_table:
+
+:PROPERTIES:
+:Title: 560. Subarray Sum Equals k
+:Link: https://leetcode.com/problems/subarray-sum-equals-k/description/
+:END:
+
+** Approach                                                         :insight:
+
+We can store the prefix sums. If we have previously stored
+(current_sum - k), then we have incremented running sum by k,
+therefore we increment our counter of sub-array matches.
+
+Negative numbers can cause repeated running sum values.  At that point the
+sub-array sum is zero between the two relevant indices This indicates
+an additional subarray match.
+
+** Solution
+
+#+begin_src python
+class Solution:
+    def subarraySum(self, nums: List[int], k: int) -> int:
+
+        sum_store = {0: 1}  # boundary condition, where subarray matches from beginning of list
+        count = 0
+        prefix_sum = 0
+        for n in nums:
+            prefix_sum += n
+            if prefix_sum - k in sum_store:
+                count += sum_store[prefix_sum - k]
+            sum_store[prefix_sum] = 1 + sum_store.get(prefix_sum, 0)
+        return count
+
+#+end_src
+
+** Analysis
+
+*** Space complexity
+space complexity: O(n) - worst case, all prefix sums are stored in
+dict.
+
+*** Time complexity
+0(n)

@@ -1,0 +1,43 @@
+* Contiguous Array                             :prefix_sum:leetcode:dsa:hash_table:
+
+:PROPERTIES:
+:Title: 525. Contiguous Array
+:Link: https://leetcode.com/problems/contiguous-array/description/
+:END:
+
+** Approach                                                         :insight:
+
+Increment prefix sum on encountering 1 and decrement it on zero.  If
+prefix sum is repeated, then equal no. 0s and 1s between 2 indices.
+Find the longest such subset.
+
+Before starting, prefix sum is 0. Assume index here is -1.  if a zero
+is encountered again, this will give length from start of string.
+
+** Solution
+
+#+begin_src python
+class Solution:
+    def findMaxLength(self, nums: List[int]) -> int:
+        prefix_sums = {0: -1}
+        max_length_subset = 0
+        prefix_sum = 0
+        for i, n in enumerate(nums):
+            prefix_sum += 1 if n == 1 else -1
+            if prefix_sum in prefix_sums:
+                prev_index = prefix_sums[prefix_sum]
+                max_length_subset = max(max_length_subset, i - prev_index)
+            else:
+                prefix_sums[prefix_sum] = i
+        return max_length_subset
+
+#+end_src
+
+** Analysis
+
+*** Space complexity
+space complexity: O(n) - worst case, all prefix sums are stored in
+dict.
+
+*** Time complexity
+0(n)
