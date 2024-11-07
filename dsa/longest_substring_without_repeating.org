@@ -1,0 +1,44 @@
+* Longest substring without repeating characters :leetcode:dsa:sliding_window:
+
+:PROPERTIES:
+:Title: Longest substring without repeating characters
+:Link: https://leetcode.com/problems/longest-substring-without-repeating-characters
+:END:
+
+** Approach                                                         :insight:
+
+Maintain start and end pointer of a window without repeating
+characters and a set to track seen characters in window.
+
+Advance window any time repeating character is detected
+
+** Solution
+
+#+begin_src python
+class Solution:
+    def lengthOfLongestSubstring(self, s: str) -> int:
+        max_length = 0
+        left = 0
+        seen = set()
+        for right, c in enumerate(s):
+            if c in seen:
+                # advance left to remove duplicate
+                while s[left] != c:
+                    seen.remove(s[left])
+                    left += 1
+                left += 1
+            else:
+                seen.add(c)
+            length = right - left + 1
+            max_length = max(max_length, length)
+        return max_length
+#+end_src
+
+** Analysis
+
+*** Space complexity
+O(1) - the set of all possible characters is limited
+
+*** Time complexity
+
+O(n)

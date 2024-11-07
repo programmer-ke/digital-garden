@@ -1,0 +1,67 @@
+* Minimum Window Substring                      :leetcode:dsa:sliding_window:
+
+:PROPERTIES:
+:Title: Minimum Window Substring
+:Link: https://leetcode.com/problems/minimum-window-substring
+:END:
+
+** Approach                                                         :insight:
+
+Maintain a window of a substring with 2 valid pointers.
+When window contains all the required characters, shrink from
+left to find smallest valid window.
+
+Use a dict counter to maintain counter of required characters since
+a character may be required more than once.
+
+Update counts to reflect characters seen, still needed, for a valid
+window.
+
+** Solution
+
+#+begin_src python
+from collections import defaultdict
+
+class Solution:
+    def minWindow(self, s: str, t: str) -> str:
+        counter = defaultdict(int)
+        for c in t:
+            counter[c] += 1
+        needed = len(t)
+        min_left, min_right = 0, len(s)
+
+        left = 0
+        for right, c in enumerate(s):
+            if c in counter:
+                counter[c] -= 1
+                if counter[c] >= 0:
+                    # if count[c] is -ve, then we have already
+                    # seen more of c than required by window property
+                    needed -= 1
+
+            while needed == 0:
+                # all of t are in window, find minimum valid substr
+                if (right - left) < (min_right - min_left):
+                    # update minimum substring pointers
+                    min_right, min_left = right, left
+                # remove leftmost window character
+                left_c = s[left]
+                if left_c in counter:
+                    counter[left_c] += 1
+                    if counter[left_c] > 0:
+                        # if count[left_c] is <= 0
+                        # then removing left_c does not violate window property
+                        needed += 1
+                left += 1
+        
+        return "" if min_right == len(s) else s[min_left:min_right+1]
+#+end_src
+
+** Analysis
+
+*** Space complexity
+O(1) - the set of all possible characters is limited
+
+*** Time complexity
+
+O(s + t)
