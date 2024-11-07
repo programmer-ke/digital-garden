@@ -1,0 +1,34 @@
+* Two Sum                                         :two_pointers:leetcode:dsa:
+
+:PROPERTIES:
+:Title: 157. Two sum
+:Link: https://leetcode.com/problems/two-sum-ii-input-array-is-sorted
+:END:
+
+** Approach                                                         :insight:
+
+The array is already sorted. Start with two pointers at the extremes
+of the array. If sum is greater than target, decrement higher pointer
+position, if less than target, increment lower pointer position.
+
+** Solution
+
+#+begin_src python
+class Solution:
+    def twoSum(self, numbers: List[int], target: int) -> List[int]:
+        left, right = 0, len(numbers) - 1
+        while numbers[left] + numbers[right] != target:
+            if numbers[left] + numbers[right] > target:
+                right -= 1
+            else:
+                left += 1
+        return [left + 1, right + 1]
+#+end_src
+
+** Analysis
+
+*** Space complexity
+space complexity: O(1) - No extra space utilized
+
+*** Time complexity
+0(n)
