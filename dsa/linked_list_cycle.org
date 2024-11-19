@@ -1,0 +1,44 @@
+* Linked List Cycle                             :leetcode:dsa:fast_slow_pointers:
+
+:PROPERTIES:
+:Title: Linked List Cycle (141)
+:Link: https://leetcode.com/problems/linked-list-cycle
+:END:
+
+** Approach                                                         :insight:
+
+Have a fast and slow pointer traverse the list. The fast one takes 2
+steps at a time and the slower 1 step at a time.
+
+If they intersect before the fast pointer reaches the end of the list,
+a cycle exists.
+
+
+** Solution
+
+#+begin_src python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, x):
+#         self.val = x
+#         self.next = None
+
+class Solution:
+    def hasCycle(self, head: Optional[ListNode]) -> bool:
+        hare = tortoise = head
+        while hare:
+            tortoise = tortoise.next
+            hare = hare.next.next if hare.next else None
+            if hare and hare is tortoise:
+                return True
+        return False
+#+end_src
+
+** Analysis
+
+*** Space complexity
+O(1)
+
+*** Time complexity
+
+O(n)

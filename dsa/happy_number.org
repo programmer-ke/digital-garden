@@ -1,0 +1,50 @@
+* Happy Number                              :leetcode:dsa:fast_slow_pointers:
+
+:PROPERTIES:
+:Title: Happy Number (202)
+:Link: https://leetcode.com/problems/happy-number
+:END:
+
+** Approach                                                         :insight:
+
+Fast pointer generates the sequences two at a time, while the slower
+pointer generates the sequences 1 at a time.
+
+This stops when fast pointer stops at a 1, or when the pointers have equal values.
+
+** Solution
+
+#+begin_src python
+
+class Solution:
+    def isHappy(self, n: int) -> bool:
+        slow_pointer = self.square_sum_digits(n)
+        fast_pointer = self.square_sum_digits(slow_pointer)
+        while slow_pointer != fast_pointer and fast_pointer != 1:
+            slow_pointer = self.square_sum_digits(slow_pointer)
+            fast_pointer = self.square_sum_digits(self.square_sum_digits(fast_pointer))
+        return fast_pointer == 1
+
+    def square_sum_digits(self, n):
+        squares = [d ** 2 for d in self.digits(n)]
+        return sum(squares)
+    
+    def digits(self, n):
+        while n:
+            n, r = divmod(n, 10)
+            yield r
+#+end_src
+
+** Analysis
+
+*** Space complexity
+O(1)
+
+*** Time complexity
+
+Generating sum of square per sequence is a O(logn) operation.
+
+Empirically, generating the sequences converges quickly to 1 or a
+cycle, under a small constant k iterations for most numbers.
+
+Overall time complexity is O(klogn) which can be simplified to O(logn)

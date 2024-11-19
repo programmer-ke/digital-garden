@@ -1,0 +1,63 @@
+* Add two numbers                           :leetcode:dsa:linked_lists:
+
+:PROPERTIES:
+:Title: Add two numbers (2)
+:Link: https://leetcode.com/problems/add-two-numbers
+:END:
+
+** Approach                                                         :insight:
+
+Add the two place values and append ones place digit to result, carrying
+over the other digits for next place value sum.
+
+** Solution
+
+#+begin_src python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def addTwoNumbers(self, l1: Optional[ListNode], l2: Optional[ListNode]) -> Optional[ListNode]:
+
+        left, right = l1, l2
+        result = latest_result = None
+        carry = 0
+
+        while l1 or l2:
+            if not l1:
+                l1 = ListNode(0)
+            if not l2:
+                l2 = ListNode(0)
+
+            total = l1.val + l2.val + carry
+            carry, ones_place = divmod(total, 10)
+
+            if not latest_result:
+                result = latest_result = ListNode(ones_place)
+            else:
+                latest_result.next = ListNode(ones_place)
+                latest_result = latest_result.next
+
+            l1 = l1.next
+            l2 = l2.next
+
+        if carry:
+            latest_result.next = ListNode(carry)
+            
+        return result
+#+end_src
+
+#+RESULTS:
+
+** Analysis
+
+Assuming length of n as the maximum length of the two input lists:
+*** Space complexity
+
+O(n) - the result linked list will have a length of utmost n + 1
+
+*** Time complexity
+
+O(n) - We traverse each node of the input lists to sum their values

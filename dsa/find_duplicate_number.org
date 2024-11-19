@@ -1,0 +1,61 @@
+* Find duplicate Number :leetcode:dsa:fast_slow_pointers:pigeon_hole_principle:
+
+:PROPERTIES:
+:Title: Find duplicate Number (287)
+:Link: https://leetcode.com/problems/find-the-duplicate-number
+:END:
+
+** Approach                                                         :insight:
+
+If there's n+1 numbers in nums and all numbers are in the range [1,
+n], then there is at least one duplicate (pigeon hole principle).
+
+If we treat the elements as next pointer indices, then the duplicate
+implies a loop.
+
+With the floyd hare and tortoise approach, the pointers are guaranteed
+to meet.
+
+To find the duplicate, reset one pointer to beginning after they meet,
+then have them move in equal steps. They'll meet at the duplicate
+number, which is the loop entry node
+
+See: https://keithschwarz.com/interesting/code/?dir=find-duplicate
+for mathematical proof
+
+** Solution
+
+#+begin_src python
+
+class Solution:
+    def findDuplicate(self, nums: List[int]) -> int:
+        fast = slow = 0
+        while True:
+            fast = nums[nums[fast]]
+            slow = nums[slow]
+            if fast == slow:
+                # loop detected
+                break
+        # reset one pointer and make equal sized steps
+        fast = 0
+        while nums[fast] != nums[slow]:
+            # iterate until they point to the same node at the beginning of the loop
+            fast = nums[fast]
+            slow = nums[slow]
+        return nums[fast]
+
+#+end_src
+
+** Analysis
+
+*** Space complexity
+O(1)
+
+*** Time complexity
+
+Generating sum of square per sequence is a O(logn) operation.
+
+Empirically, generating the sequences converges quickly to 1 or a
+cycle, under a small constant k iterations for most numbers.
+
+Overall time complexity is O(klogn) which can be simplified to O(logn)

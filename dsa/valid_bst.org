@@ -1,0 +1,57 @@
+* Valid BST                                       :leetcode:dsa:binary_search_tree:
+
+:PROPERTIES:
+:Title: Valid BST (98)
+:Link: https://leetcode.com/problems/validate-binary-search-tree/
+:END:
+
+** Approach                                                         :insight:
+
+We can traverse the tree recursively.
+
+Each node has to be beetween some lower and upper bound to maintain
+the BST property.
+
+These bounds can be determined by pre-order traversal and passing
+down the bounds as new nodes are encountered.
+
+At the root, the bounds are -ve and +ve infinity.
+
+** Solution
+
+#+begin_src python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+
+    def _valid_subtree(self, node, min_val, max_val):
+        if node is None: return True
+        return (
+            min_val < node.val < max_val and
+            self._valid_subtree(node.left, min_val, node.val) and
+            self._valid_subtree(node.right, node.val, max_val)
+        )
+
+    
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        min_val, max_val = float('-inf'), float('inf')
+        return self._valid_subtree(root, min_val, max_val)
+#+end_src
+
+#+RESULTS:
+
+** Analysis
+
+*** Space complexity
+
+space complexity: O(n) worst case, an unbalanced tree of height n.
+
+For a balanced tree, the space complexity is O(logn)
+
+*** Time complexity
+
+O(n) - Each node of the tree is traversed for a valid bst.
