@@ -1,0 +1,62 @@
+* Find first and last position in sorted array :leetcode:dsa:binary_search:
+
+:PROPERTIES:
+:Title: Find first and last position in sorted array (34)
+:Link: https://leetcode.com/problems/find-first-and-last-position-of-element-in-sorted-array/
+:END:
+
+** Approach                                                         :insight:
+
+The brute force approach would be to iterate through the list finding the
+ranges.
+
+A sublinear approach would be to use binary search to find the position of the
+target.
+
+Once target is identified, if the first occurence is required iteratively search
+left subarray, otherwise, iteratively search the right subarray.
+
+** Solution
+
+#+begin_src python
+
+class Solution:
+    def searchRange(self, nums: List[int], target: int) -> List[int]:
+        first = self.binary_search(nums, 0, len(nums) - 1, target, first_occurrence=True)
+        last = self.binary_search(nums, 0, len(nums) - 1, target, first_occurrence=False)
+        return [first, last]
+
+    def binary_search(self, nums, lo, hi, target, first_occurrence):
+        while not lo > hi:
+            mid = (lo + hi) // 2
+            if nums[mid] < target:
+                lo = mid + 1
+            elif nums[mid] > target:
+                hi = mid - 1
+            elif first_occurrence:
+                # match found, looking for first occurrence
+                if mid == 0 or nums[mid - 1] < target:
+                    return mid
+                else:
+                    hi = mid - 1
+            else:
+                # match found, looking for last occurrence
+                if mid == len(nums) - 1 or nums[mid + 1] > target:
+                    return mid
+                else:
+                    lo = mid + 1
+                            
+        return -1
+
+#+end_src
+
+** Analysis
+
+*** Space complexity
+O(1) - no extra space used with an iterative approach. A recursive
+approach would use 0(logn) space for the function stack.
+
+*** Time complexity
+
+O(logn) - Each iteration halves the search space
+
