@@ -1,0 +1,69 @@
+* Permutations                              :leetcode:dsa:permutations:backtracking:
+
+:PROPERTIES:
+:Title: Permutations (46)
+:Link: https://leetcode.com/problems/permutations
+:END:
+
+** Approach                                                         :insight:
+
+Treat it as a recursive problem where we find permutations of each
+subarray by placing all possible values in the first position
+and recursively find permutations of a smaller subarray.
+
+Iterative version simulates recursive call stack in list.
+
+** Solution
+
+#+begin_src python
+
+class Solution:
+    def permute(self, nums: List[int]) -> List[List[int]]:
+        #return list(self._permutations(nums, start_pos=0))
+        #return list(self._permutations_accum(nums, []))
+        return list(self._permutations_iter(nums))
+
+    def _permutations(self, nums, start_pos):
+        if start_pos == len(nums) - 1:
+            yield nums[:]
+
+        for i in range(start_pos, len(nums)):
+            nums[i], nums[start_pos] = nums[start_pos], nums[i]
+            yield from self._permutations(nums, start_pos + 1)
+            nums[start_pos], nums[i] = nums[i], nums[start_pos]
+
+    def _permutations_accum(self, nums, accum):
+        if not nums:
+            yield accum
+
+        for i in range(len(nums)):
+            rest = nums[:i] + nums[i+1:]
+            yield from self._permutations_accum(rest, accum + [nums[i]])
+
+    def _permutations_iter(self, nums):
+        accum = []
+        stack = [(nums, accum)]
+
+        while stack:
+            nums, accum = stack.pop()
+            if not nums:
+                yield accum
+                continue
+            for i in range(len(nums)):
+                rest = nums[:i] + nums[i+1:]
+                stack.append((rest, accum + [nums[i]]))
+
+#+end_src
+
+#+RESULTS:
+
+** Analysis
+
+*** Space complexity
+
+O(n!) because we maintain a list of all possible permutations
+
+*** Time complexity
+
+O(n*n!) - We generate an n! number of possible permuations for a list of n
+numbers. For each permutation, we recurse in n steps
