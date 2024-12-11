@@ -1,0 +1,66 @@
+* Maximum value in stack                          :stack:dsa:
+
+:PROPERTIES:
+:Title: Maximum value in stack
+:Link: 
+:END:
+
+** Approach                                                         :insight:
+
+The array is already sorted. Start with two pointers at the extremes
+of the array. If sum is greater than target, decrement higher pointer
+position, if less than target, increment lower pointer position.
+
+** Solution
+
+#+begin_src python
+class MaxStack:
+    def __init__(self):
+        self.stack = []
+        self.maxes = []
+
+    def push(self, val):
+        self.stack.append(val)
+
+        if self.maxes and val < self.maxes[-1]:
+            self.maxes.append(self.maxes[-1])
+        else:
+            self.maxes.append(val)
+
+    def pop(self):
+        self.maxes.pop()
+        return self.stack.pop()
+
+    def max(self):
+        return self.maxes[-1]
+    
+
+s = MaxStack()
+s.push(1)
+s.push(2)
+s.push(3)
+s.push(2)
+assert s.max() == 3
+assert s.pop() == 2
+assert s.max() == 3
+
+assert s.pop() == 3
+assert s.max() == 2
+
+assert s.pop() == 2
+assert s.max() == 1
+
+assert s.pop() == 1
+
+#+end_src
+
+#+RESULTS:
+: None
+
+** Analysis
+
+*** Space complexity
+space complexity of push and pop ops: O(2n)
+
+*** Time complexity
+time complexity of push, pop, max: 0(1)

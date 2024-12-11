@@ -1,0 +1,73 @@
+* Reverse linkedlist                              :linked_list:leetcode:dsa:
+
+:PROPERTIES:
+:Title: Reverse linked list (206)
+:Link: https://leetcode.com/problems/reverse-linked-list/
+:END:
+
+** Approach                                                         :insight:
+
+
+** Solution
+
+#+begin_src python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class SolutionIterative:
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        # key: have 3 pointers: prev, current, next
+        # Reverse connection between prev and current, and advance prev to current and current to next
+        prev = None
+        current = head
+        
+        while current:
+            nxt = current.next
+            current.next = prev
+            prev = current
+            current = nxt
+        
+        return prev
+
+class SolutionRecursive:
+    # Recursive
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        return self.reverse(prev=None, current=head)
+
+    def reverse(self, prev, current):
+        if not current:
+            return prev
+
+        nxt = current.next
+        current.next = prev
+
+        return self.reverse(prev=current, current=nxt)
+
+class Solution:
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        # treat the begining of the list as a stack
+        # with a sentinel pointing to current topmost item
+        if not head:
+            return head
+
+        sentinel = ListNode(0, head)
+        current = sentinel.next
+
+        while current.next:
+            prev_head = sentinel.next
+            sentinel.next = current.next
+            current.next = current.next.next
+            sentinel.next.next = prev_head
+
+        return sentinel.next
+#+end_src
+
+** Analysis
+
+*** Space complexity
+space complexity: O(1) - No extra space utilized
+
+*** Time complexity
+0(n)

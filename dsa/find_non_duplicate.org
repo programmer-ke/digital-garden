@@ -1,0 +1,45 @@
+* Find non-duplicated number                           :sorting:
+
+:PROPERTIES:
+:Title: Find non-duplicate number in a list
+:Link: 
+:END:
+
+** Approach                                                         :insight:
+
+Naive solution, store counts in a map
+
+Optimized solution, use xor to cancel out duplicates.
+
+** Solution
+
+#+begin_src python
+def single_number_hashmap(nums):
+    counts = {}
+    for n in nums:
+        counts[n] = counts.get(n, 0) + 1
+
+    for n in counts:
+        if counts[n] == 1:
+            return n
+    return None
+
+def single_number(nums):
+    result = 0
+    for n in nums:
+        result = result ^ n
+    return result
+
+assert single_number([4, 3, 2, 4, 1, 3, 2]) == 1
+#+end_src
+
+#+RESULTS:
+: None
+
+** Analysis
+
+*** Space complexity
+space complexity: O(1) for xor solution
+
+*** Time complexity
+O(n) - iterating through the list

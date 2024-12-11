@@ -1,0 +1,37 @@
+* Queue Reconstruction by height                  :leetcode:dsa:sorting:
+
+:PROPERTIES:
+:Title: Queue Reconstruction by height (406)
+:Link: https://leetcode.com/problems/queue-reconstruction-by-height
+:END:
+
+** Approach                                                         :insight:
+
+For each person, the count of people ahead only matters for people
+equal or greater in height.
+
+If we insert into a queue starting by the tallest ones, ordered by
+number of people ahead, then each time we add a person, they are
+guaranteed to the the shortest so far, (so won't affect arrangement
+of the taller ones), and can be placed after the expected count of
+people (which corresponds to the index position in the array)
+
+** Solution
+
+#+begin_src python
+class Solution:
+    def reconstructQueue(self, people: List[List[int]]) -> List[List[int]]:
+        people.sort(key=lambda x: [-x[0], x[1]])
+        queue = []
+        for p in people:
+            queue.insert(p[1], p)
+        return queue
+#+end_src
+
+** Analysis
+
+*** Space complexity
+space complexity: O(n) - we create a new list of all input elements
+
+*** Time complexity
+O(nlogn) for sorting and O(n) average case for insertion into new queue
