@@ -1,0 +1,63 @@
+* Course Schedule                                 :leetcode:dsa:dfs:directed_graphs:topological_sort:
+
+:PROPERTIES:
+:Title: Course Schedule (207)
+:Link: https://leetcode.com/problems/course-schedule
+:END:
+
+** Approach                                                         :insight:
+
+Courses form a dependency graph, which can be represented as an
+adjacency matrix.
+
+An invalid setup will result in a cycle in the graph.
+
+We can cache traversed edges to speed up computation
+
+** Solution
+
+
+#+begin_src python
+class Solution:
+    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+        
+        graph = {}
+        for course, dependency in prerequisites:
+            if course in graph:
+                graph[course].append(dependency)
+            else:
+                graph[course] = [dependency]
+
+        for course in graph:
+            if self.has_cycle(graph, course, seen=set(), cache={}):
+                return False
+        return True
+
+    def has_cycle(self, graph, node, seen, cache):
+        if node in seen:
+            return True
+
+        if node not in graph:
+            return False
+
+        if node in cache:
+            return cache[node]           
+
+        seen.add(node)
+        for neighbour in graph[node]:
+
+            if self.has_cycle(graph, neighbour, seen, cache):
+                return True
+
+        seen.remove(node)
+        cache[node] = False
+        return False
+#+end_src
+
+** Analysis
+
+*** Space complexity
+O(E), where E is the no. of edges in the graph
+
+*** Time complexity
+O(V) - caching prevents recursive traversal of already seen nodes
