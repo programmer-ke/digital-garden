@@ -1,0 +1,3 @@
+#+TITLE: Recent Posts
+
+#+INCLUDE: "posts.org" :lines "3-21"

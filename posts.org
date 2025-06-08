@@ -1,0 +1,104 @@
+#+TITLE: Blog Posts
+
+- [[file:dsa/product_or_array.org][product or array]]
+  #+html: <p class='pubdate'>by krm on Mar 13, 2025 05:50.</p>
+- [[file:dsa/basic_calculator.org][basic calculator]]
+  #+html: <p class='pubdate'>by krm on Mar 13, 2025 04:46.</p>
+- [[file:legal_docs.org][legal docs]]
+  #+html: <p class='pubdate'>by krm on Feb 22, 2025 16:58.</p>
+- [[file:fastai-1.org][fastai 1]]
+  #+html: <p class='pubdate'>by krm on Jan 30, 2025 14:59.</p>
+- [[file:fastai-2.org][fastai 2]]
+  #+html: <p class='pubdate'>by krm on Jan 30, 2025 14:59.</p>
+- [[file:fastai-6.org][fastai 6]]
+  #+html: <p class='pubdate'>by krm on Jan 30, 2025 14:45.</p>
+- [[file:default_post.org][default post]]
+  #+html: <p class='pubdate'>by krm on Jan 23, 2025 00:00.</p>
+- [[file:dsa/pushing_dominoes.org][pushing dominoes]]
+  #+html: <p class='pubdate'>by krm on Dec 18, 2024 09:54.</p>
+- [[file:dsa/pythagorean_triplets.org][pythagorean triplets]]
+  #+html: <p class='pubdate'>by krm on Dec 16, 2024 15:20.</p>
+- [[file:remember.org][remember]]
+  #+html: <p class='pubdate'>by krm on Dec 14, 2024 14:48.</p>
+- [[file:dsa/course_schedule.org][course schedule]]
+  #+html: <p class='pubdate'>by krm on Dec 12, 2024 09:11.</p>
+- [[file:dsa/max_stack.org][max stack]]
+  #+html: <p class='pubdate'>by krm on Dec 11, 2024 14:50.</p>
+- [[file:dsa/reverse_linkedlist.org][reverse linkedlist]]
+  #+html: <p class='pubdate'>by krm on Dec 11, 2024 14:26.</p>
+- [[file:dsa/find_non_duplicate.org][find non duplicate]]
+  #+html: <p class='pubdate'>by krm on Dec 11, 2024 12:55.</p>
+- [[file:dsa/queue_reconstruction_by_height.org][queue reconstruction by height]]
+  #+html: <p class='pubdate'>by krm on Dec 11, 2024 12:29.</p>
+- [[file:dsa/sort_3_unique.org][sort 3 unique]]
+  #+html: <p class='pubdate'>by krm on Dec 09, 2024 15:03.</p>
+- [[file:dsa/valid_bst.org][valid bst]]
+  #+html: <p class='pubdate'>by krm on Dec 07, 2024 11:32.</p>
+- [[file:dsa/permutations.org][permutations]]
+  #+html: <p class='pubdate'>by krm on Dec 07, 2024 11:32.</p>
+- [[file:dsa/contiguous_array.org][contiguous array]]
+  #+html: <p class='pubdate'>by krm on Dec 07, 2024 11:32.</p>
+- [[file:dsa/find_range_in_sorted.org][find range in sorted]]
+  #+html: <p class='pubdate'>by krm on Nov 21, 2024 12:12.</p>
+- [[file:dsa/add_two_nums_linked_list.org][add two nums linked list]]
+  #+html: <p class='pubdate'>by krm on Nov 19, 2024 14:03.</p>
+- [[file:dsa/find_duplicate_number.org][find duplicate number]]
+  #+html: <p class='pubdate'>by krm on Nov 14, 2024 10:40.</p>
+- [[file:dsa/happy_number.org][happy number]]
+  #+html: <p class='pubdate'>by krm on Nov 14, 2024 10:31.</p>
+- [[file:dsa/linked_list_cycle.org][linked list cycle]]
+  #+html: <p class='pubdate'>by krm on Nov 14, 2024 10:10.</p>
+- [[file:dsa/minimum_window_substring.org][minimum window substring]]
+  #+html: <p class='pubdate'>by krm on Nov 07, 2024 10:22.</p>
+- [[file:dsa/longest_substring_without_repeating.org][longest substring without repeating]]
+  #+html: <p class='pubdate'>by krm on Nov 07, 2024 09:58.</p>
+- [[file:dsa/max_avg_subarray.org][max avg subarray]]
+  #+html: <p class='pubdate'>by krm on Nov 07, 2024 09:44.</p>
+- [[file:dsa/container_most_water.org][container most water]]
+  #+html: <p class='pubdate'>by krm on Oct 23, 2024 11:54.</p>
+- [[file:dsa/three_sum.org][three sum]]
+  #+html: <p class='pubdate'>by krm on Oct 23, 2024 11:45.</p>
+- [[file:dsa/two_sum.org][two sum]]
+  #+html: <p class='pubdate'>by krm on Oct 23, 2024 11:37.</p>
+- [[file:dsa/subarray_sum.org][subarray sum]]
+  #+html: <p class='pubdate'>by krm on Oct 08, 2024 12:43.</p>
+- [[file:dsa/range_sum_query.org][range sum query]]
+  #+html: <p class='pubdate'>by krm on Oct 08, 2024 12:27.</p>
+- [[file:how_to_solve_by_computer.org][how to solve by computer]]
+  #+html: <p class='pubdate'>by krm on Oct 05, 2024 16:01.</p>
+- [[file:how_to_solve_poyla.org][how to solve poyla]]
+  #+html: <p class='pubdate'>by krm on Oct 05, 2024 16:00.</p>
+- [[file:design_patterns.org][design patterns]]
+  #+html: <p class='pubdate'>by krm on Sep 27, 2024 04:26.</p>
+- [[file:unicode_normalization.org][unicode normalization]]
+  #+html: <p class='pubdate'>by krm on Sep 18, 2024 14:39.</p>
+- [[file:orgmode.org][orgmode]]
+  #+html: <p class='pubdate'>by krm on Jul 22, 2024 06:28.</p>
+- [[file:literate_programming.org][literate programming]]
+  #+html: <p class='pubdate'>by krm on Apr 30, 2024 17:04.</p>
+- [[file:python-data-model.org][python data model]]
+  #+html: <p class='pubdate'>by krm on Mar 09, 2024 15:55.</p>
+- [[file:random.org][random]]
+  #+html: <p class='pubdate'>by krm on Dec 23, 2023 11:12.</p>
+- [[file:llm.org][llm]]
+  #+html: <p class='pubdate'>by krm on Dec 18, 2023 08:12.</p>
+- [[file:fastai-3.org][fastai 3]]
+  #+html: <p class='pubdate'>by krm on Oct 13, 2023 15:15.</p>
+- [[file:fastai-4.org][fastai 4]]
+  #+html: <p class='pubdate'>by krm on Sep 27, 2023 16:26.</p>
+- [[file:css.org][css]]
+  #+html: <p class='pubdate'>by krm on Aug 01, 2023 10:00.</p>
+- [[file:solar.org][solar]]
+  #+html: <p class='pubdate'>by krm on Jul 30, 2023 09:53.</p>
+- [[file:math.org][math]]
+  #+html: <p class='pubdate'>by krm on Feb 23, 2023 14:36.</p>
+- [[file:babel-python.org][babel python]]
+  #+html: <p class='pubdate'>by krm on Feb 14, 2023 16:14.</p>
+- [[file:javascript-dev.org][javascript dev]]
+  #+html: <p class='pubdate'>by krm on Feb 10, 2023 11:38.</p>
+- [[file:ethereum-app-dev.org][ethereum app dev]]
+  #+html: <p class='pubdate'>by krm on Feb 10, 2023 11:35.</p>
+- [[file:emom.org][emom]]
+  #+html: <p class='pubdate'>by krm on Jan 28, 2023 10:09.</p>
+- [[file:calculus.org][calculus]]
+  #+html: <p class='pubdate'>by krm on Jan 07, 2023 05:53.</p>

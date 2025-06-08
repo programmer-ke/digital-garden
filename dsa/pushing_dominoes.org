@@ -1,0 +1,62 @@
+* Push Dominoes                                   :leetcode:dsa:arrays
+
+:PROPERTIES:
+:Title: Push Dominoes (838)
+:Link: https://leetcode.com/problems/push-dominoes
+:END:
+
+** Approach                                                         :insight:
+
+With each direction for which force is applied, we indicate a
+countdown timestamp from when the force was applied. If force is
+applied on a domino from each direction, we select the direction of
+the earlier timestamp.
+
+** Solution
+
+#+begin_src python
+class Solution:
+    def pushDominoes(self, dominoes: str) -> str:
+        timestamps = [0] * len(dominoes)
+
+        # right forces
+        stamp = 0
+        for i, char in enumerate(dominoes):
+            if char == "R":
+                stamp = len(dominoes)
+            elif char == "L":
+                stamp = 0
+            else:
+                stamp = max(0, stamp - 1)
+            timestamps[i] = stamp
+
+        # left forces
+        result = [None] * len(dominoes)
+        stamp = 0
+        for i in range(len(dominoes) - 1, -1, -1):
+            char = dominoes[i]
+            if char == "R":
+                stamp = 0
+            elif char == "L":
+                stamp = len(dominoes)
+            else:
+                stamp = max(0, stamp - 1)
+            
+            diff = timestamps[i] - stamp
+            if diff > 0:
+                result[i] = 'R'
+            elif diff < 0:
+                result[i] = 'L'
+            else:
+                result[i] = "."
+
+        return "".join(result)
+#+end_src
+
+** Analysis
+
+*** Space complexity
+O(n) - we create an intermediate list and a result string.
+
+*** Time complexity
+0(n) - We iterate the dominoes list twice in either direction.

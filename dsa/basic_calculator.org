@@ -1,0 +1,67 @@
+* Basic Calculator                       :leetcode:dsa:recursion:stack:
+
+:PROPERTIES:
+:Title: 224. Basic Calculator
+:Link: https://leetcode.com/problems/basic-calculator/description/
+:END:
+
+** Approach                                                         :insight:
+
+Iterate through string with a running value and a state machine
+that determines the operations on it.
+
+Handle nested expressions using recursion.
+
+Alternative approach, use a stack.
+
+** Solution
+
+#+begin_src python
+class Solution:
+    def calculate(self, s: str) -> int:
+        value, _ = self._eval(s, 0)
+        return value
+
+    def _eval(self, expr, start_index):
+        i = start_index
+        running_value = 0
+        op = "+"
+        while i < len(expr):
+            char = expr[i]
+            if char in ['+', '-']:
+                op = char
+            elif char.isdigit():
+                value, i = self._get_value(expr, i)
+                if op == "+":
+                    running_value += value
+                else:
+                    running_value -= value
+            elif char == "(":
+                value, i = self._eval(expr, i+1)
+                if op == "+":
+                    running_value += value
+                else:
+                    running_value -= value               
+            elif char == ")":
+                return running_value, i
+            
+            i += 1
+        return running_value, i
+
+    def _get_value(self, expr, start_index):
+        i = start_index + 1
+        value = int(expr[start_index])
+        while i < len(expr) and expr[i].isdigit():
+            value = value * 10 + int(expr[i])
+            i += 1
+        return value, i - 1
+#+end_src
+
+** Analysis
+
+*** Space complexity
+Worst case, deep recursion with 0(n).
+
+*** Time complexity
+We iterate through the string with 0(n).
+

@@ -1,0 +1,49 @@
+* Akash Supercloud
+
+#+FILETAGS: :akash:DePIN:web3:AWS:AI
+
+** Overview notes
+
+1. The purpose of Akash supercloud is to provide decentralized and
+   affordable and permissionless compute
+2. Users have the freedom to select resources at the prices they
+   are willing to pay
+3. The significance of Akash achieving IBC communication with Cosmos
+   enable it to achieve seamless communication with other chains in
+   the Cosmos ecosystem
+4. Using Akash's orchestration layer powered by SDL allows intricate
+   application deployment setups in the Akash cloud
+5. The text-to-image model from Stability AI deployed on Akash is
+   called AkashGen
+
+** Akash comparison to traditional cloud providers
+
+1. The main goal of Akash as described is to serve as a decentralized
+   marketplace where providers match with tenants efficiently and
+   effectively.
+2. Differences between the Akash Network and traditional cloud service
+   models like AWS:
+   - The Akash network is distributed whereas traditional cloud providers
+     are limited to specific regions
+   - Resources in Akash are provided on demand whereas traditional
+     cloud providers may require lengthy contracts in some cases
+   - The Akash network is standardized using open source technologies
+     whereas traditional cloud vendors provide custom interfaces and
+     services that subject users to vendor lock-in
+3. The key components of Akash are:
+   a) The providers who run kubernetes clusters and sell infrastructure
+   b) The tenants who purchase resources to run their containerized
+      applications
+   c) The Akash network that provides a standardized marketplace that
+      connects providers and tenants
+4. Challenges of decentralized compute that Akash intends to solve
+   include underutilization of infrastructure, non-standardized
+   deployment processes across multiple infra owners and lack of an
+   on demand marketplace.
+5. Benefits Akash tenants gain include cost effective prices,
+   standardized access to resources (no vendor lock-in), open source
+   community participation in the network.
+
+** AKT Token
+
+

@@ -1,4 +1,4 @@
-#+FILETAGS: :fastai:machine_learning:tabular_data:random_forests:decision_trees
+#+FILETAGS: :fastai:machine_learning:tabular_data:random_forests:decision_trees:
 * Continuous vs categorical variables
 
 A continuous variable has a numeric value while a categorical variable

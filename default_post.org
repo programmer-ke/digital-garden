@@ -1,0 +1,7 @@
+#+title: default_post
+#+date: <2025-01-23 Thu>
+#+author: krm
+#+email: krm@vger-mac
+
+
+Lorem Ipsum is simply dummy text of the printing and typesetting industry.

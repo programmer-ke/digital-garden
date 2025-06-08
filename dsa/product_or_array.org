@@ -1,0 +1,43 @@
+* Product of array except self                 :prefix_sum:leetcode:dsa:math:
+
+:PROPERTIES:
+:Title: 238. Product of array except self
+:Link: https://leetcode.com/problems/product-of-array-except-self/description/
+:END:
+
+** Approach                                                         :insight:
+
+Brute force solution would be 0(n^2)
+
+A better approach, store partial products in result with two passes
+in opposite directions.
+The first pass stores products of the prefixes, the
+last pass increments by products of the suffixes.
+
+** Solution
+
+#+begin_src python
+class Solution:
+    def productExceptSelf(self, nums: List[int]) -> List[int]:
+        results = [1] * len(nums)
+        
+        prod = 1
+        for i in range(1, len(nums)):
+            prod *= nums[i-1]
+            results[i] = prod
+
+        prod = 1
+        for i in range(len(nums) - 2, -1, -1):
+            prod *= nums[i+1]
+            results[i] *= prod
+        
+        return results
+#+end_src
+
+** Analysis
+
+*** Space complexity
+0(n) the results array 
+
+*** Time complexity
+0(2n) = 0(n), two passes across the array

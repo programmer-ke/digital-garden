@@ -1,6 +1,8 @@
-#+FILETAGS: :fastai:
+#+FILETAGS: :fastai:machine_learning:deep_learning:
+#+INDEX: fastai
 
 * Areas where deep learning is now the best in the world :deep_learning:chatgpt:
+#+INDEX: applications!fastai
  - Computer Vision :: self-driving cars, face recognition
  - NLP :: surmarizing documents, chatbots e.g. openGPT
  - Medicine :: finding anomalies in radiology images

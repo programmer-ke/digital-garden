@@ -1,0 +1,50 @@
+* Find Pythagorean triplets                       :dsa:sets:
+
+:PROPERTIES:
+:Title: Find Pythagorean triplets
+:Link:
+:END:
+
+** Approach                                                         :insight:
+
+Naive solution, triple nested loop to check.
+Improved solution, pre-compute squares then check with double nested loop.
+
+Math insight: a pythagorean triple will always be made up of distinct numbers
+
+** Solution
+
+#+begin_src python
+
+#def find_pythagorean_triplets(nums):
+#    for a in nums:
+#        for b in nums:
+#            for c in nums:
+#                if a*a + b*b == c*c:
+#                    return True
+#    return False
+
+def find_pythagorean_triplets(nums):
+    squares = set([n*n for n in nums])
+    for a in nums:
+        for b in nums:
+            if a*a + b*b in squares:
+                return True
+    return False
+
+assert find_pythagorean_triplets([3, 5, 12, 5, 13]) == True
+assert find_pythagorean_triplets([3, 5, 12, 5, 17]) == False
+#+end_src
+
+#+RESULTS:
+: None
+
+** Analysis
+
+*** Space complexity
+Naive solution is O(1)
+Improved solution is O(n)
+
+*** Time complexity
+Naive solution is O(n^3)
+Improved solution is O(n^2)
