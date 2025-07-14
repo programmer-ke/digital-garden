@@ -1,0 +1,14 @@
+* Intro
+
+- Software systems tend towards chaos and complexity, known as the
+  "Big Ball of Mud" antipattern.
+- Encapsulation and abstraction are key tools for maintaining order
+  and simplicity in code.
+- Layered architectures can help manage dependencies between code
+  components.
+- The Dependency Inversion Principle (DIP) is crucial for decoupling
+  high-level business logic from low-level technical details.
+- DIP states that high-level modules should depend on abstractions,
+  not low-level modules.
+- A Domain Model pattern can help keep business logic organized and
+  maintainable.
