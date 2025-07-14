@@ -1,6 +1,6 @@
 * Akash Supercloud
 
-#+FILETAGS: :akash:DePIN:web3:AWS:AI
+#+FILETAGS: :akash:DePIN:web3:AWS:AI:cloud:
 
 ** Overview notes
 
@@ -9,14 +9,14 @@
 2. Users have the freedom to select resources at the prices they
    are willing to pay
 3. The significance of Akash achieving IBC communication with Cosmos
-   enable it to achieve seamless communication with other chains in
+   enables it to achieve seamless communication with other chains in
    the Cosmos ecosystem
 4. Using Akash's orchestration layer powered by SDL allows intricate
    application deployment setups in the Akash cloud
 5. The text-to-image model from Stability AI deployed on Akash is
    called AkashGen
 
-** Akash comparison to traditional cloud providers
+** Akash comparison to traditional cloud providers               :comparison:
 
 1. The main goal of Akash as described is to serve as a decentralized
    marketplace where providers match with tenants efficiently and
@@ -36,20 +36,42 @@
       applications
    c) The Akash network that provides a standardized marketplace that
       connects providers and tenants
-4. Challenges of decentralized compute that Akash intends to solve
-   include underutilization of infrastructure, non-standardized
-   deployment processes across multiple infra owners and lack of an
-   on demand marketplace.
+4. Challenges of existing decentralized compute setups that Akash
+   intends to solve include underutilization of infrastructure,
+   non-standardized deployment processes across multiple infra owners
+   and lack of an on demand marketplace.
 5. Benefits Akash tenants gain include cost effective prices,
    standardized access to resources (no vendor lock-in), open source
    community participation in the network.
 
-** AKT Token
+** AKT Token                                                          :token:
 
+1. The primary function of the AKT token is to support the development and
+   operation of the Akash network the following ways:
+   - Governance :: Holders of AKT vote on proposals
+   - Security :: The Akash network is secured via PoS
+   - Store of Value :: The means via which value is stored and exchanged on the network
 
-What is the primary function of the AKT token in the Akash Network?
+2. Staking contributes to the security of the network by allowing
+   validators to secure the network through PoS
 
-How does staking AKT contribute to the security of the network?
+3. Some key features of AKT 2.0 are:
+   - allowing funding of specialized pools
+   - providing a wide range of currency options for lease settlement
 
-What are some of the exchanges where AKT is available for purchase?
+4. AKT tokens can be bought from centralized exchanges like Coinbase
+   and Kraken and decentralized exchanges like Osmosis
 
+** Community                                                      :community:
+
+1. The main purpose of the community is to contribute to development
+   of the Akash network and help shape the future of Akash
+2. Users can become part of the Insiders program by applying
+3. Contributions that build the network are eligible for financial
+   rewards
+4. The Akash EDU program helps developers master cloud computing on
+   Akash
+5. Benefits of joining the Akash network community include getting to
+   shape Akash through code and culture
+
+   
