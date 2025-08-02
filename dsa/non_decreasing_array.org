@@ -1,0 +1,60 @@
+* Non-decreasing array                          :leetcode:dsa:arrays:
+
+:PROPERTIES:
+:Title: Non-decreasing Array
+:Link: https://leetcode.com/problems/non-decreasing-array
+:END:
+
+** Approach                                                         :insight:
+
+A violation is index =i= where =nums[i] > nums[i+1]=
+
+If more that two violations detected, cannot be made non-decreasing.
+
+If the first index violates, then it can be fixed by decreasing its
+value.
+
+If the second-last index violates, then it can be fixed by increasing
+the last index's value.
+
+If neither of the above, it can be fixed by either decreasing the value
+at violating index or increasing the value after violating index with
+the following constraints:
+
+- nums[i-1] <= nums[i+1], where i is violating index, nums[i] can be
+  decreased.
+- nums[i] <= nums[i+2], where i is violating index, nums[i+1] can be
+  increased.
+
+Otherwise, it cannot be made non-decreasing.
+
+** Solution
+
+#+begin_src python
+class Solution:
+    def checkPossibility(self, nums: List[int]) -> bool:
+        bad_index = None
+        for i in range(len(nums)-1):
+            if nums[i] > nums[i+1]:
+                if bad_index is None:
+                    bad_index = i
+                else:
+                    return False
+        if bad_index in (0, None, len(nums)-2):
+            return True
+        if nums[bad_index - 1] <= nums[bad_index+1]:
+            return True
+        if nums[bad_index] <= nums[bad_index + 2]:
+            return True
+        return False
+#+end_src
+
+** Analysis
+
+*** Space complexity
+O(1) - constant space used
+
+*** Time complexity
+
+O(n) - The list is iterated through at most once.
+

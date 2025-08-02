@@ -1,0 +1,68 @@
+* Word search                                           :leetcode:dsa:backtracking:recursion:
+
+:PROPERTIES:
+:Title: Word Search
+:Link: https://leetcode.com/problems/word-search/
+:END:
+
+** Approach                                                         :insight:
+
+For each cell in the board, recursively check that any of the left,
+top, right or bottom neighbours will extend the match
+
+Ignore out of bounds cells and while within a possible match, mark
+seen cells to avoid reuse within the match.
+
+** Solution
+
+#+begin_src python
+class Solution:
+    def exist(self, board: List[List[str]], word: str) -> bool:
+        nrows = len(board)
+        ncols = len(board[0])
+
+        def word_found(row, col, word_index, seen):
+            if word_index == len(word):
+                return True
+
+            if not (0 <= row < nrows and 0 <= col < ncols):
+                return False
+
+            cell = (row, col)
+
+            if cell in seen or word[word_index] != board[row][col]:
+                return False
+
+            seen.add(cell)
+
+            # check if any neighbour matches, else return False
+            neighbours = [(row, col-1), (row-1, col), (row, col+1), (row+1, col)]
+            for nrow, ncol in neighbours:
+                if word_found(nrow, ncol, word_index+1, seen):
+                    return True
+
+            seen.remove(cell)
+            return False
+
+        for row in range(nrows):
+            for col in range(ncols):
+                if word_found(row, col, 0, seen=set()):
+                    return True
+
+        return False
+#+end_src
+
+** Analysis
+
+*** Space complexity
+O(l) for the recursion stack + O(m*n) for the seen stack where l is
+length of the string and m*n are board dimension.
+
+A trick to eliminate seen stack space requirement is to temporarily
+modify seen board cells while matching
+
+*** Time complexity
+
+O(m*n*4^l) - For each cell of board, 4 possible directions are tested
+for each letter of the word of length l
+

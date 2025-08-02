@@ -74,4 +74,100 @@
 5. Benefits of joining the Akash network community include getting to
    shape Akash through code and culture
 
-   
+*** Akash Validators                                   :validators:sig:chain:
+
+1. An Akash Network Validator helps keep the blockchain running
+   reliably by validating transactions, securing the network and
+   participating in governance.
+2. To become a validator, one needs to stake AKT, and have the
+   necessary hardware and connectivity to participate in the network
+   consensus
+3. Validators contribute to the security of the Akash Network by
+   committing valid transactions and preventing issues like double-spend
+   through consensus
+4. Validators who engage in malicious activities or network disruptions
+   are penalized.
+5. Akash Network Validators are rewarded via AKT for their participation
+
+** Development
+
+*** open source contributions                                   :open_source:
+
+1. The 3 types of community groups in the Akash Network are:
+
+   - Special Interest Groups (SIGs) :: These are vertically specialized
+     persistent groups working on foundational aspects of the Akash
+     Network
+   - Working Groups (WGs) :: These are horizontally aligned groups that
+     work on cross cutting concerns that involve multiple SIGs. They are
+     typically time-limited and define high level requirements that are
+     further refined by SIGs
+   - Committees :: These are groups that handle sensitive topic for
+     which some level of discretion and confidentiality may be involved,
+     although as much openess as possible is encouraged e.g. security,
+     code of conduct etc
+
+2. The Steering Committee's role is to evaluate projects and define
+   priorities and decide which SIGs and WGs tackle specific tasks.
+
+3. Contributions in form of writing code, docs, testing and more are
+   welcome.
+
+Links:
+ - [[https://github.com/orgs/akash-network/projects][List of Projects]]
+ - [[https://github.com/orgs/akash-network/discussions/811][Akash Contributions Program]]
+
+*** Product Strategy                                                :product:
+
+1. Akash's long-term goal is to become a viable alternative to centralized
+   public clouds.
+
+2. Primary themes guiding Akash's product development in the short term are:
+   - Node operators :: RPC, validation nodes
+   - Web hosting :: alternatives to services like Vercel
+   - AI/ML applications :: Inference and fine-tuning
+
+3. Akash plans to achieve Cloud Parity by providing foundational
+   infrastructure like compute and partnering with third parties
+   to provide managed services.
+
+4. Akash is specifically targeting the following use-cases:
+   - Node deployments
+   - AI/ML workloads
+   - Web/Application hosting
+
+5. Akash's execution framework borrows from the Kubernetes project:
+   - Different community groups working on projects (WGs, SIGs)
+   - A prioritized pipeline of projects/ideas to be built in [[https://akash.network/development/current-projects/#list-of-projects][project list]]
+   - Documented places to discuss/publish/comment/review/approve specifications
+     for each project
+   - States a given project can be in
+   - Regular documented meetings to discuss progress of projects
+
+*** Funding Programs                                                :funding:
+
+**** Contributions program
+
+AKT funding available for small contributions helping build and
+progress the network through the Community Support Governance
+Proposals managed by Overclock labs.
+
+[[https://github.com/orgs/akash-network/discussions/811][Application]]
+
+**** Community Pool Spend Proposals
+
+Permissionless and managed by the community, anyone can [[https://www.mintscan.io/akash/address/community-pool][request funds]].
+
+Must pass on-chain governance.
+
+[[https://github.com/orgs/akash-network/discussions/170][Best Practices]]
+
+**** Delegations
+
+Earned and maintained over time by consistent, professional,
+value-adding contributions.
+
+**** Overclock labs based Grants
+
+Has funds available for projects and teams that align with the Akash
+Network goals

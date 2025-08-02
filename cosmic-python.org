@@ -12,3 +12,24 @@
   not low-level modules.
 - A Domain Model pattern can help keep business logic organized and
   maintainable.
+
+* Domain Modeling 
+
+- Unit testing the domain model can help describe the domain and
+  define the domain interfaces
+
+- Entities have long-lived identities and can change over time, while
+  value objects are defined by their attributes and are usually
+  immutable.
+
+- Frozen dataclasses and tuples are great for value objects
+
+- Entities classes can extend =__eq__= and =__hash__= for custom
+  equality comparisons
+
+- A domain service can be a function that performs a specific business
+  operation, and doesn't have to be a class
+
+- Exceptions can be used to represent domain concepts, such as being
+  out of stock, and should be named using the ubiquitous language of
+  the business domain

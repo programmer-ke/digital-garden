@@ -9,7 +9,7 @@ the production environment)
 Hardhat is an SDK that makes it easy to develop and deploy ethereum
 Dapps.
 
-** npx hardhat                                                          :npx:
+** npx hardhat                                                      :npx:npm:
 Executes the hardhat command in the local node_modules/.bin directory
 or in $PATH.
 
