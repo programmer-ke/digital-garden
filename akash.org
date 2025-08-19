@@ -53,7 +53,7 @@
    - Store of Value :: The means via which value is stored and exchanged on the network
 
 2. Staking contributes to the security of the network by allowing
-   validators to secure the network through PoS
+   validators to secure the network through PoS.
 
 3. Some key features of AKT 2.0 are:
    - allowing funding of specialized pools
@@ -61,6 +61,10 @@
 
 4. AKT tokens can be bought from centralized exchanges like Coinbase
    and Kraken and decentralized exchanges like Osmosis
+
+5. Providers are required to stake AKT as collateral to participate in
+   the marketplace. This incentivizes them to offer reliable services
+   because they have vested interest in its success.
 
 ** Community                                                      :community:
 
@@ -88,6 +92,14 @@
 4. Validators who engage in malicious activities or network disruptions
    are penalized.
 5. Akash Network Validators are rewarded via AKT for their participation
+
+**** Validator Nodes
+
+- Verify transactions included in a block
+- Propagate blocks to other nodes
+- Participate in concensus via the tendermint based PoS algo
+- Take part in governance by voting on proposals to modify network
+  params, upgrades to protocl and community funds
 
 ** Development
 
@@ -171,3 +183,77 @@ value-adding contributions.
 
 Has funds available for projects and teams that align with the Akash
 Network goals
+
+** Bids and Leases                                              :bids:leases:
+
+*** Users
+
+ - Tenants
+ - Providers
+
+*** Reverse Auction
+ - tenants create orders
+ - providers bid on orders
+ - tenant chooses winning bid
+
+*** Deposits and Payments :escrow:escrow_accounts:payments:settlement:accounting:
+
+- Tenants deposit AKT on placing an order min 0.5akt
+- Providers deposit AKT on placing a bid
+
+**** Escrow Accounts
+
+A mechanism for time-based payments between accounts without block by
+block micropayments.
+
+Necessary because:
+ - Although leases are priced in blocks, performance and security
+   considerations prevent payments from being made by the block
+ - Bidding should not be free for performance and security reasons.
+   Funds are held in an escrow account and returned to bidder when bid
+   is closed.
+
+Deposits are made to escrow accounts and can be topped up.
+
+Payments represent transfers from Escrow account to another account.
+
+**** Account settlement
+
+This is updating the internal accounting of an escrow account to the
+current block height.
+
+Process:
+
+1. Determine blockRate - the amount owed for every block.
+2. Determine heightDelta - the number of blocks since last settlement.
+3. Determine numFullBlocks - the number of blocks that can be paid for in full.
+4. Transfer amount for numFullBlocks to payments.
+5. If numFullBlocks is less than heightDelta (account overdrawn), then
+   1) Distribute remaining balance among payments, weighted by each payment’s rate
+   2) Distribute any remaining balance from above as evenly as possible
+   3) Set account and payments to state OVERDRAWN.
+   
+   
+** DSEQ, GSEQ, OSEQ                                          :dseq:oseq:gseq:
+
+*** GSEQ (Group Sequence)
+Groups of containers in a deployment leased independently on a
+specific provider
+
+It is possible to create multiple leases to different providers in
+a single deployment
+
+*** DSEQ (Deployment Sequence)
+
+Unique identifier assigned to each deployment on Akash
+
+*** OSEQ (Order Sequence)
+
+Distinguishes multiple orders associated with a single deployment.
+
+It is possible to move a deployment between providers. This can be
+done by by closing the lease and creating a new order while leaving
+the deployment open.
+
+The new order will have a new OSEQ associated with it and is referenced
+in the bids.
