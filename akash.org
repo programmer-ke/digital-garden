@@ -257,3 +257,73 @@ the deployment open.
 
 The new order will have a new OSEQ associated with it and is referenced
 in the bids.
+
+** Stack Definition Language (SDL)                                      :sdl:
+
+*** Services                                                       :services:
+
+Defines workloads to be run on an Akash deployment.
+
+Includes the docker image, env variables, exposed ports etc
+
+*** Profiles                                                       :profiles:
+
+**** Compute                                                        :compute:
+
+Defines a mapping of named profiles to compute resources like cpu,
+gpu, memory, storage.
+
+**** Placement
+
+Defines named datacenter profiles which describe required attributes,
+signoffs and max prices per block for the compute profiles.
+
+*** Deployment
+
+Describes how to deploy the services. Maps each service to a
+datacenter and compute profile.
+
+** Archtecture overview
+
+Composed of 4 layers:
+
+*** Blockchain Layer
+This is the distributed consensus mechanism that maintains the
+  distributed ledger, validator management, governance and token
+  transactions
+
+Built on:
+
+- Tendermint Core :: The Byzantine Fault Tolerant consensus engine
+- Cosmos SDK :: Framework that allows the creation of custom blockchains
+
+*** Application Layer
+
+- Manages the application lifecycle on the Akash network:
+  - User makes Deployment
+  - User makes an order
+  - Providers place bids for orders
+  - Lease created between user and provider once user selects bid
+  - Deployment closed once lease is terminated
+
+*** Provider Layer    
+
+The ecosystem of datacenters, cloud providers and server operators that
+provide their resources to the Akash Network.
+
+Components:
+
+- Provider Daemon :: software that does resource allocation and
+  communicates to the blockchain
+- Container Orchestration :: manages the deployment and scaling
+  of user applications.
+
+*** User Layer
+
+These are the developers or businesses that use the Akash Network
+to run their applications.
+
+They use the following interfaces:
+
+- The Akash CLI
+- The Akash Console

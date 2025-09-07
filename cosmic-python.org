@@ -1,5 +1,5 @@
 #+FILETAGS: :python:ddd:domain_driven_design:cosmicpython:
-* Intro
+* Intro                  :big_ball_of_mud:DIP:depencency_inversion_principle:
 
 - Software systems tend towards chaos and complexity, known as the
   "Big Ball of Mud" antipattern.
@@ -14,10 +14,10 @@
 - A Domain Model pattern can help keep business logic organized and
   maintainable.
 
-* Domain Modeling 
+* Domain Modeling                                          :domain_model:
 
 - Unit testing the domain model can help describe the domain and
-  define the domain interfaces
+  define its interfaces
 
 - Entities have long-lived identities and can change over time, while
   value objects are defined by their attributes and are usually
@@ -29,8 +29,78 @@
   equality comparisons
 
 - A domain service can be a function that performs a specific business
-  operation, and doesn't have to be a class
+  operation, and doesn't have to be a class.
 
 - Exceptions can be used to represent domain concepts, such as being
   out of stock, and should be named using the ubiquitous language of
   the business domain
+
+* Repository Pattern                                             :repository:
+
+- The Repository pattern is an abstraction over persistent storage
+  that hides data access details.
+- It allows decoupling the domain model from infrastructure concerns,
+  making it easier to test and change.
+- The pattern involves defining an interface (e.g.,
+  AbstractRepository) and implementing it with a concrete class (e.g.,
+  SqlAlchemyRepository).
+- Using the Repository pattern makes it easy to create fake
+  repositories for testing.
+- The repository will typically have simple methods like =.add()=,
+  =.get()= and which make it easier to decouple from underlying
+  infrastructure.
+  - ideally we handle one model at a time, delete is usually a
+    soft-delete e.g. =batch.cancel()= and update is taken care of by
+    the unit of work pattern
+
+* Coupling and abstractions
+
+- To improve testability, simplify the interface between business
+  logic and I/O by finding the right abstraction.
+  - Use the Functional core imperative shell (FCIS) idea to
+    separate what the system should do, and how it does it
+- Prefer fakes over mocks for test doubles, as they represent working
+  implementations. Fakes enable edge-to-edge testing which helps
+  make high-level assertions about the code.
+  - Mocks encourage a high coupling with infrastructure
+- Design for testability means designing for extensibility, allowing
+  for novel use cases.
+
+* Service layer
+
+- The service layer defines use-cases and orchestrates the workflows
+  e.g. fetching required domain objects, making updates and commiting
+  them, raising errors etc.
+  - Distict from domain services e.g. a use case may involve calculating
+    tax. The service layer will take care of fetching and assembling
+    the required data and storing the results, but a domain service
+    is responsible for the actual calculations.
+
+- Depends on abstractions e.g. AbstractRepository instead of
+  low level details.
+
+- Allows more and faster unit tests to be written in an end-to-end
+  fashion for use-cases e.g. using FakeRepository.  Reduces the need
+  for a larger no of slower end-to-end tests across infrastructure
+  layer.
+
+- Sample package structure:
+  
+  + domain
+    * model.py
+  + service_layer
+    * services.py
+  + adapters
+    * orm
+    * repositories
+  + entrypoints
+    * flask_app.py
+  + tests
+    * unit
+      - test_services.py
+      - test_domain.py
+    * integration
+      - test_orm.py
+      - test_repositories.py
+    * e2e
+      - test_flask_app.py

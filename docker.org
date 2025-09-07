@@ -1,0 +1,24 @@
+#+FILETAGS: :docker:
+
+* build cache                              :layers:build_cache:cache:caching:
+
+Docker layer caching rules:
+
+Any changes to the command of a RUN instruction invalidates that
+layer. Docker detects the change and invalidates the build cache if
+there's any modification to a RUN command in your Dockerfile.
+
+Any changes to files copied into the image with the COPY or ADD
+instructions. Docker keeps an eye on any alterations to files within
+your project directory. Whether it's a change in content or properties
+like permissions, Docker considers these modifications as triggers to
+invalidate the cache.
+
+Once one layer is invalidated, all following layers are also
+invalidated. If any previous layer, including the base image or
+intermediary layers, has been invalidated due to changes, Docker
+ensures that subsequent layers relying on it are also
+invalidated. This keeps the build process synchronized and prevents
+inconsistencies.
+
+
