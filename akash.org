@@ -2,6 +2,8 @@
 
 #+FILETAGS: :akash:DePIN:web3:AWS:AI:cloud:
 
+#+STARTUP: content
+
 ** Overview notes
 
 1. The purpose of Akash supercloud is to provide decentralized and
@@ -99,7 +101,7 @@
 - Propagate blocks to other nodes
 - Participate in concensus via the tendermint based PoS algo
 - Take part in governance by voting on proposals to modify network
-  params, upgrades to protocl and community funds
+  params, upgrades to protocol and community funds
 
 ** Development
 
@@ -327,3 +329,120 @@ They use the following interfaces:
 
 - The Akash CLI
 - The Akash Console
+
+** Akash Node                                           :blockchain:node:rpc:
+
+Roles:
+
+*** Blockchain synchronization
+- Proposes and validates new blocks via consensus
+- Uses a gossip protocol for communication
+    
+*** Transaction Submission
+- Validates, adds and propagates transactions to the mempool e.g.
+  creating deployments, leases, bids etc
+  
+*** Querying network state
+
+- Maintains an indexed view of the blockhain to allow querying of
+  information such as user balances and deployment status
+
+** Akash Providers                                                :providers:
+
+*** Key components
+
+**** Provider Daemon (akashd)                                 :daemon:akashd:
+Communicates to the blockchain and manages the providers resources
+
+**** Container orchestration                                     :kubernetes:
+Provision of containers for deploying and scaling user applications
+
+** Deployments
+
+*** Akash CLI deployment
+
+#+begin_src bash
+
+# Create account
+AKASH_KEYRING_BACKEND=os
+provider-services keys add $AKASH_KEY_NAME
+
+# Get Address
+export AKASH_ACCOUNT_ADDRESS="$(provider-services keys show $AKASH_KEY_NAME -a)"
+echo $AKASH_ACCOUNT_ADDRESS
+
+# Check account balance
+provider-services query bank balances --node $AKASH_NODE $AKASH_ACCOUNT_ADDRESS
+
+# Create and publish certificate
+provider-services tx cert generate client --from $AKASH_KEY_NAME
+provider-services tx cert publish client --from $AKASH_KEY_NAME
+
+# Create deployment
+provider-services tx deployment create deploy.yml --from $AKASH_KEY_NAME
+
+# view bids
+export AKASH_DSEQ=CHANGETHIS
+AKASH_OSEQ=1
+AKASH_GSEQ=1
+
+provider-services query market bid list --owner=$AKASH_ACCOUNT_ADDRESS --node $AKASH_NODE --dseq $AKASH_DSEQ --state=open
+
+# create lease
+AKASH_PROVIDER=CHANGETHIS
+provider-services tx market lease create --dseq $AKASH_DSEQ --provider $AKASH_PROVIDER --from $AKASH_KEY_NAME
+provider-services query market lease list --owner $AKASH_ACCOUNT_ADDRESS --node $AKASH_NODE --dseq $AKASH_DSEQ
+
+# send manifest
+provider-services send-manifest deploy.yml --dseq $AKASH_DSEQ --provider $AKASH_PROVIDER --from $AKASH_KEY_NAME
+
+# find deployment endpoint
+provider-services lease-status --dseq $AKASH_DSEQ --from $AKASH_KEY_NAME --provider $AKASH_PROVIDER
+
+# See logs
+provider-services lease-logs \
+  --dseq "$AKASH_DSEQ" \
+  --provider "$AKASH_PROVIDER" \
+  --from "$AKASH_KEY_NAME"
+
+# update deployment
+provider-services tx deployment update deploy.yml --dseq $AKASH_DSEQ --from $AKASH_KEY_NAME
+provider-services send-manifest deploy.yml --dseq $AKASH_DSEQ --provider $AKASH_PROVIDER --from $AKASH_KEY_NAME
+
+# Close deployment
+provider-services tx deployment close --from $AKASH_KEY_NAME
+#+end_src
+
+** Audited Attributes
+
+Attributes can specified on the SDL and only providers that support
+those attributes can bid for the deployment.
+
+A signedby spec can be used to only select providers who's attributes
+have been audited by the an auditor with the specified keys:
+ - Can use =anyOf= or =allOf= to select from multiple auditor keys
+
+Attributes and Signed by keys are each optional, and are specified
+in the SDL profile placement section.
+
+** IP Leases
+
+Not all providers support IP leasing. The bid engine automatically
+filters them out during the bidding process.
+
+IP leases can be tranfered to new deployment on the same provider.
+
+All valid ports, 1 - 65535 are available for use with IP
+leases. Unique ports can be used for different services within a
+deployment on the provider.
+ 
+** Persistent Storage
+
+Persists only during the lease.
+
+Shared volumes between services not supported. If a single profile is
+used by multiple services, separate storage volumes will be assigned.
+
+If not marked as persistent, it will be cleared during restarts.
+
+** Security

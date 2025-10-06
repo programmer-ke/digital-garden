@@ -1,7 +1,8 @@
 #+FILETAGS: :christian:christianity:essentials:paul:timothy:denominationalism
 #+URL: https://theschoolofchrist.org/zoom-obs-20250619
+#+STARTUP: content
 
-* The contigency plan
+* The Contigency Plan
 Ref: 2 Timothy 2
 
 ** Criteria
@@ -48,7 +49,7 @@ Matthew 13:33
   - Authority of scripture
   - Centrality of the cross
 
-* Essential: God the Father
+* Essential: God the Father                                      :the_father:
 
 ** Atheism, Deism, Theism
 
@@ -91,7 +92,7 @@ Rev 19:1-6: God is great and God is good
 - Omnibenevolent :: all loving or full of love or personification of love
   - displayed by attributes like merciful, long-suffering, gracious, kind etc
 
-* Essential: God the Son                                       :Jesus:Christ:
+* Essential: God the Son                               :Jesus:Christ:the_son:
 
 The need: Bridging a heavenly father (spiritual) and earthy children
 (fleshly)
@@ -184,7 +185,7 @@ Pre-eminence:
 Up next: How can we know Jesus as a living person, and not just a
 historical figure?
 
-* Essential: God the Holy Spirit
+* Essential: God the Holy Spirit                                :holy_spirit:
 
 Question: How can we know Jesus as he is, and not a historical figure?
 
@@ -238,7 +239,7 @@ Answer:
   - 1 John 5:6-10
     - We cannot know the Son without the Spirit, the Spirit reveals the Son
     - We cannot know the Father without the Son, the Son reveals the Father
-* Essential: Inspiration of Scripture
+* Essential: Inspiration of Scripture                             :scripture:
 
 ** Why Scripture?
 - Challenge :: How do we know that any of this is true?
@@ -296,7 +297,7 @@ Answer:
   - Both the scriptures and the Spirit are Christ-centered
   - The scriptures and inspired by the Spirit, and are used by the
     Spirit to lead us to all truth
-* Essential: The Fall of Mankind
+* Essential: The Fall of Mankind                               :fall:mankind:
 Challenge:
  - What is God saving us from?
  - If everything God made is good, why is there death, suffering and destruction?
@@ -387,7 +388,7 @@ Response:
     - Mankind does not have the power to do so on their own, but only in the Christ
     - God will not do it without us, and we cannot do it on our own
 
-* Essential: The Salvation of Mankind
+* Essential: The Salvation of Mankind                     :salvation:mankind:
 
 ** The Defeat of the Satan
 - Heb 2:14-18
@@ -540,7 +541,7 @@ The cross is:
  - Love so deep it lays down it's life for others
  - Love so powerful it absorbs all sin and evil
 
-* Essential: The offence of the Cross
+* Essential: The Offense of the Cross                                 :cross:
 
 ** The stumbling block of the cross
 
@@ -640,7 +641,7 @@ To embrace the message of the cross is:
  - achieving the greatest possible good
  - demonstrating the greatest possible love
 
-* Essential: Salvation by Grace
+* Essential: Grace                                                    :grace:
 
 ** Another Gospel
 Galatians 1:6-10
@@ -712,3 +713,238 @@ Grace vs Mercy
     - To seek the lost, rather than condemn them
   - Provides discernment into religion as the antithesis of Grace
   - Accurately represets God's character and will
+
+* Essential: Salvation                                            :salvation:
+
+** What is Faith?
+
+Hebrews 11:1,5,6
+
+- Faith is not a force, power or thing we build up for health and
+  wealth.
+- Faith is not a collection of things I believe or doctrines I agree with.
+- Faith is trust without proof/guarantees.
+  - Conviction of things not seen
+  - Exists in the context of a relationship with God
+  - God is who he says he is a rewarder of those who seek him
+- The object of Faith
+  - A person, thing or place
+    - Attempting to apply faith as a power toward something I want
+  - Myself
+    - Attempting to increase my willpower, strength or goodness
+  - God
+    - Accepting that with me it is impossible, but with God everything
+      is possible.
+
+** The Role of Faith in Salvation
+
+Ephesians 2:4-9
+
+- God offers salvation through grace, we receive it by faith
+- Justified by faith, not works
+  - Romans 5:1,2
+- Believing that God is who he says he is, and has reconciled all
+- It is already true, faith does not make it truer, but more real
+- Faith is not proof, but trust
+  - Jesus did many signs, but still many did not believe.
+- Luke 8:50: Faith is not absence of doubt, but absence of fear
+
+*** The source of Faith
+- 1 Corinthians 12:9: A gift of the Spirit
+- Galatians 5:22: A fruit of the Spirit
+- Romans: 12:3: A spiritual measure
+
+** Salvation through Faith
+
+John 1:6-17
+
+- The true light gives light to every man
+  - Salvation is for all
+- His own people did not receive him
+  - They didn't believe him, receive salvation by faith
+- Those who believed he gave the right to become children of God, not
+  blood, flesh or will of man
+  - They received the gift by virtue of faith. They believed Jesus was
+    who he said he was, and would do what he said he'd do
+- Things to beware:
+  - Making salvation a legal transaction; it is a mystery
+  - Making faith a formula, ritual or prayer
+  - Putting faith in people, places and things; Faith should be in the
+    Christ alone
+
+- Instances of Salvation freely given by faith
+  - Luke 5:8,10,11: Peter invited to follow Jesus
+  - Luke 19:8-10: Zaccheus freely given salvation
+  - Luke 7:48-50: Woman freely forgiven through faith
+  - John 9:35-38: The formely blind man received salvation by
+    believing in the Son of Man
+  - Acts 8:36-38: The ethiopian eunuch receives salvation upon
+    believing with all his heart. Baptism was the outward testimony of
+    the inward change
+  - Acts 16:30-34: The jailer and his family receive salvation of believing
+- What is true about all these example?
+  - No 2 are alike
+  - Each demonstrated trust in a way that seemed right to them
+  - All freely received what was freely given by faith
+  - All became believers, instead of unbelievers
+- Three impossible cases:
+  - John 20:25-29
+    - Thomas did not believe because he hadn't seen
+    - Jesus revealed himself and he believed
+  - Acts 9:3-6
+    - Paul was actively persecuting Jesus' disciples
+    - Jesus revealed himself and he believed
+  - Romans 11:1-32
+    - Israel rejected Jesus
+    - All of Israel will be saved
+
+Q) Is it possible to receive grace butn not walk in faith? How do we
+walk in Faith? (Spiritual maturity)
+
+* Essential: Spiritual Maturity (Walking in Faith)
+
+** Beyond forgiveness
+
+Ephesians 1:3-14
+
+- While we were still enemies of God, he reconciled us.
+- Forgiveness of sins is the first step in the process of salvation.
+  - God did on our behalf what we could not do on our own
+- God freely forgives by grace, we freely receive by faith
+- God's purpose beyond forgiveness:
+  "To gather together all things in heaven and earth in the Christ"
+- Having believed, we were sealed by the Holy Spirit as a sign of the
+  future promise.
+
+*** Complete Salvation
+
+- Healing:
+  - of thoughts, emotions, spirit
+- Deliverance:
+  - from adversaries in the spiritual realm
+- Reconciliation:
+  - we become agents of reconciliation of fellow mankind to God
+- Restitution:
+  - everything that was lost through sin and death will be restored to
+    use in the new age
+- Perfection in Love:
+  - Romans 8:28,29
+    - Being fully conformed to the image of the Christ
+  - The North Star
+
+** The Gate and the Path
+
+Matthew 7:13,14
+
+- The narrow gate is the Christ: John 10:7-9
+- The difficult path is also the Christ: John 14:6
+  - Difficult because of:
+    - doubts and fears on the inside
+    - religious baggage on the outside
+      - John 7:15-18: man made teaching
+      - takes us from the simplicity of the Christ
+
+Colossians 2:6-10	
+- "As you have received him" (the gate)
+  - by grace, through faith. it is a gift
+- "So walk in him" (the path)
+  - It is also by grace, through faith
+  - Christ-centered: "rooted and built up in him"
+- We cannot earn it or repay it, we are already made complete in him
+
+- Being Completed vs Being Perfected:
+  + Completed:
+    - "as you have received him"
+    - Grace sufficient for today
+    - Lacking nothing for the journey
+    - We cannot add anything
+    - Dependent of the Lord in humility
+  + Perfected:
+    - "so walk in him"
+    - the end of the path
+    - Goal is not salvation (already accomplished at the gate), goal
+      is perfection in love
+- Philippians 3:12-14: We are completed but not yet perfected
+
+** 3 Stages of Spiritual Maturity
+1 John 2:12-14
+
+1) Little Children:
+   - They know the forgiveness of sins
+2) Young men (adolescents):
+   - Stronger, experiencing victory by overcoming sin, self, satan
+   - Word of God dwells in them
+3) Fathers:
+   - Know he who is from the beginning
+     - His purpose, will, heart
+       - 2 Tim 2:2: Faithful people who'll teach others
+
+- Galatians 4:19: Paul as a spiritual father/mother:
+  - In labour for his children
+
+** Summary
+- Discipleship is walking in him by Grace, through faith
+- Being complete in him makes perfection in him possible
+- Spiritual growth is: "less of me, and  more of him", John 3:30
+
+ * Essential: Fellowship (The Ekklesia)           :church:ekklesia:fellowship:
+
+** The Revelation of His Body
+
+Revelations 1:9-20
+
+- The revelation of the body of Christ starts with the revelation of
+  Christ
+- If the Christ is not in the midst, all is mere decoration
+- The essence of a Christ-centered faith:
+  - Christ in the midst of his people
+    - Rev 2:4, they left their first love
+
+** The foundation of fellowship
+
+Matthew 18:18-20
+
+- Minimum requirement is that just 2 or 3 agree, not hundreds or
+  thousands
+- They must be gathered in his name
+- They must be committed to the preeminence of the Christ first and
+  foremost
+  - The work of the Lord cannot become more important than the Lord
+    of the work
+- The presence of Jesus in their midst affirms the foundation of the
+  fellowship
+
+** The Basis of Fellowship
+
+1 John 1:1-7
+
+- No mention of meetings
+- Fellowship is based on having seen and heard something of the Lord
+  - We have fellowship if we walk in the light, just as he is in the
+    light
+  - Everyone who walks in the light has fellowship with everyone else
+    who walks in the light
+    - If no light exists, no fellowship exists even if the meetings
+      continue
+
+** The Called-Out Assembly
+
+Matthew 16:13-18
+
+- The revelation of the Christ is the foundation and basis of the
+  church that Jesus is building
+- 'Church' is from greek word 'Ekklesia'
+  - 'ek': out of; 'klesis': a calling
+    - A called-out assembly (concept in ancient greek)
+    - 
+  - Literal meaning of 'building my church'
+    - 'I will establish a new assembly of called-out peoples'
+
+** Summary
+
+- The Ekklesia does not exist without Christ in the middle
+- The Christ is the one who gathers us in his name
+- Fellowship is walking in the light as Christ is the light
+
+Question: Where have the ekklesia been called out from and why?
+
