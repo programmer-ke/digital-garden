@@ -359,7 +359,7 @@ Provision of containers for deploying and scaling user applications
 
 ** Deployments
 
-*** Akash CLI deployment
+*** Akash CLI deployment                                    :cli:deployments:
 
 #+begin_src bash
 
@@ -410,8 +410,25 @@ provider-services tx deployment update deploy.yml --dseq $AKASH_DSEQ --from $AKA
 provider-services send-manifest deploy.yml --dseq $AKASH_DSEQ --provider $AKASH_PROVIDER --from $AKASH_KEY_NAME
 
 # Close deployment
-provider-services tx deployment close --from $AKASH_KEY_NAME
+provider-services tx deployment close --from $AKASH_KEY_NAME --dseq $AKASH_DSEQ
+
+# execute remote shell
+./provider-services lease-shell --from $AKASH_KEY_NAME --dseq $AKASH_DSEQ --provider=$AKASH_PROVIDER <service_name> cat /etc/passwd
 #+end_src
+
+# Authorize spending
+./provider-services tx authz grant $AKASH_TEST_ACCOUNT_ADDRESS deposit --spend-limit=20000000uakt --from $AKASH_ACCOUNT_ADDRESS --scope deployment
+
+# View authorization
+provider-services query authz grants $AKASH_ACCOUNT_ADDRESS $AKASH_TEST_ACCOUNT_ADDRESS
+
+
+# Authorize feegrant for tx fees
+./provider-services tx feegrant grant $AKASH_TEST_ACCOUNT_ADDRESS --spend-limit 10000000uakt --from $AKASH_ACCOUNT_ADDRESS 
+
+# View feegrant
+./provider-services query authz grants $AKASH_ACCOUNT_ADDRESS $AKASH_TEST_ACCOUNT_ADDRESS
+
 
 ** Audited Attributes
 

@@ -1,0 +1,90 @@
+#+FILETAGS: :unix:
+
+* Unix Overview
+
+* The Unix Programming Environment
+** overview
+
+*** Terminal and shell interaction                           :terminal:shell:
+(from llama4)
+
+1. Terminal emulator creates a new pseudo-terminal (PTY) pair.
+2. Forks a new process, which becomes the shell (e.g., =bash=, =zsh=).
+3. The child process (shell) is connected to the PTY slave device.
+4. The terminal emulator process (parent) is connected to the PTY
+   master device.
+
+
+Here's a simple representation:
+
+- Terminal Emulator (parent)
+	+ Forks → Shell (child)
+		- Connected to PTY slave
+	+ Remains connected to PTY master, displaying output and
+          receiving input
+
+The shell then runs in the terminal, reading input from the user,
+executing commands, and displaying output.
+
+*** I/O model
+- Most commands take input from a file or read the standard input.
+- Output is sent to the standard output
+- Error messages are sent to the standard error
+- Pipes are used to connect programs  
+- Input can be redirected from a file or received through a pipe
+- Output can be redirected to a file or sent to a pipe
+
+*** commands
+date, who, mail, stty, ed, ls, cat, pr, mv, rm, wc, sort, tail, cmp,
+diff, pwd, grep, cd, rmdir, echo, nohup, at, kill
+
+** The File System
+*** Detecting EOF
+  - There's no special character to represent end of a file
+  - The =read= kernel subroutine used to read from files returns the
+    number of bytes read
+  - When the bytes read is zero, end-of-file is assumed
+  - ctrl-d sends all currently pending input to the program. If
+    there's no pending input, the program assumes end of file
+    e.g. logging out of the shell using ctrl-d
+
+- Unix defaults to text file formats with no assumptions except
+  newline termination
+  - Makes programs interoperable
+  - Avoids the need for specialized set of programs for each file format
+- The current working directory is a property of each running process
+  in the system
+- Each logged in user is assigned a user id and group id
+  - Relevant files: =/etc/passwd= and =/etc/group=
+- The =set-uid= bit e.g. on the =passwd= command allows any user
+  executing a program run it as the program's owner (allowing users to
+  change own passwords).
+- A directory is a file that is written to using special system routines
+- Directory permissions are different from file permissions:
+  - read permission allow listing directory contents
+  - write permission allow adding/removing directory content
+  - execute permission allows searching directory content
+
+*** Inodes
+
+- An inode is an entry to a table that stores file metadata such as
+  name, time created or modified, length of the file, location of the
+  file, etc
+- =ls -i= show a files inode number
+- =ln= creates a different link to the file (different name for same
+  file).  A file is deleted when it has zero links. (inode is shared)
+- =mv= changes the existing file link (inode remains the same)
+- =cp= creates a new file with identical content as the original file
+  (new inode created)
+
+
+*** commands
+od, du, crypt, ls -c, ls -u, ls -t, ls -i
+      
+** The Shell
+** Filters
+** Shell Programming
+** Programming with Standard I/O
+** Unix System Calls
+** Programs Development
+** Document Preparation
