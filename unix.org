@@ -73,15 +73,52 @@ diff, pwd, grep, cd, rmdir, echo, nohup, at, kill
 - =ls -i= show a files inode number
 - =ln= creates a different link to the file (different name for same
   file).  A file is deleted when it has zero links. (inode is shared)
-- =mv= changes the existing file link (inode remains the same)
+- =mv= changes the existing file link (name) (inode remains the same)
 - =cp= creates a new file with identical content as the original file
-  (new inode created)
+  (new inode and link created)
 
+*** Devices
+
+- Peripheral devices are represented as files in the /dev subdirectory.
+  - Instead of special routines to access these devices, programs read
+    from and write to them as files
+  - In the kernel, references to the device files are translated to
+    hardware commands
+  - =ls -l= shows the type of device (character or block) as the first
+    character of the mode
+  - The mount command shows mapping of storage devices to directories
+- the =tty= command shows the user's current controlling terminal in /dev
+  - =mesg= can be used to alter permissions on the terminal e.g. to
+    allow/disallow other users from sending messages via =talk= or
+    =write=
+  - =/dev/tty= is a synonym for a user's controlling terminal that
+    programs can use to send messages
+- writing to =/dev/null= discards the data and reading from it gives
+  zero bytes.
 
 *** commands
-od, du, crypt, ls -c, ls -u, ls -t, ls -i
+od, du, crypt, ls -c, ls -u, ls -t, ls -i, tty, mesg, write
       
 ** The Shell
+*** Command line structure
+
+- =;= terminates commands
+- =()= group commands
+- =|= creates a pipeline and has a higher precedence than =;=
+  - =date; who | wc= has pipeline taking precedence
+  - =(date; who) | wc=  has =;= taking precedence
+
+- =&= terminates command without waiting for output, turns it into a
+  background job
+- =tee= copies input to a named file as well as its output
+- the various special characters like =;, >, <, |, &= are interpretted
+  by the shell and not sent to programs as arguments. The following
+  are equivalent:
+  - =echo hello >junk=, =>junk echo hello=.
+    - The program =echo= never sees =>=
+
+*** Metacharacters      
+
 ** Filters
 ** Shell Programming
 ** Programming with Standard I/O
