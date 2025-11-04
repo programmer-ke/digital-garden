@@ -1,4 +1,5 @@
 #+FILETAGS: :unix:
+#+STARTUP: content
 
 * Unix Overview
 
@@ -118,7 +119,11 @@ od, du, crypt, ls -c, ls -u, ls -t, ls -i, tty, mesg, write
     - The program =echo= never sees =>=
 
 *** Metacharacters      
-
+- Special characters that are interpreted by the shell before executing commands
+- Their interpretation can be escaped using quotes or backslashes
+- Single and double quotes escape each other
+  
+  
 ** Filters
 ** Shell Programming
 ** Programming with Standard I/O

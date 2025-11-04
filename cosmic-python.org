@@ -53,7 +53,7 @@
     soft-delete e.g. =batch.cancel()= and update is taken care of by
     the unit of work pattern
 
-* Coupling and abstractions
+* Coupling and abstractions      :fcis:FCIS:functional_core_imperative_shell:
 
 - To improve testability, simplify the interface between business
   logic and I/O by finding the right abstraction.
