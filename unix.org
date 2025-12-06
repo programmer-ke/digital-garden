@@ -123,7 +123,22 @@ od, du, crypt, ls -c, ls -u, ls -t, ls -i, tty, mesg, write
 - Their interpretation can be escaped using quotes or backslashes
 - Single and double quotes escape each other
   
-  
+*** Creating new commands
+- chmod x makes files executable by the shell
+- custom programs are set in PATH to be discoverable
+- $1 to $9 matches the (upto 9) arguments to a command
+- $* matches all the arguments provided
+- $0 is the name of the command itselt being executed by the subshell
+- backtics allow a program's output be used as arguments
+
+*** Shell variables
+
+- Defined for the current shell and not accessible in sub shells unless exported
+- the =.= operator can be used to read commands from a file to execute
+  in the current shell without using a sub shell
+- Variables can be temporarily exported to sub shells by declaring
+  them inline before the command
+
 ** Filters
 ** Shell Programming
 ** Programming with Standard I/O
