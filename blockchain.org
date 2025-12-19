@@ -1,3 +1,4 @@
+#+STARTUP: content
 #+FILETAGS: :blockchain:web3:ethereum
 
 * Sybil attack                                                        :sybil:
@@ -138,7 +139,7 @@ distributed system to gain outsized influence over it.
 - reverted :: Added to block but execution failed (state rolled back but gas consumed)
 - dropped :: removed from the mempool (too low gas fee or higher priority transaction with same nonce)
 
-* Account abstraction
+* Account abstraction                                   :account_abstraction:
 
 Currently there are two account types on ethereum:
 
@@ -149,3 +150,157 @@ Currently there are two account types on ethereum:
 
 Account abstraction abstracts away the distinction between the two
 combining their advantages by use of =smart wallets=.
+
+* Blockchain Use Cases
+
+** Defi                                                   :defi:aave:farming:
+
+- Decentralized Exchanges (DEXs) e.g. Uniswap and Curve
+- Lending and Borrowing e.g. Aave and Compound
+- Derivatives and Trading Platforms e.g. GMX
+- Yield Farming and Liquidity Mining
+- Asset Management e.g. Yearn Finance
+
+Example of composability:
+
+- Deposit eth into Aave to earn interest and receive an
+  interest-bearing token
+- Use the interest bearing token as collateral in another protocol to
+  borrowing a stable coin
+- Deposit the stable coin in a liquidity pool on a DEX like Uniswap
+
+User now earns both interest in the original lending yield from Aave
+plus a share of trading fees from Uniswap
+
+** Tokens                                                            :tokens:
+
+*** Categories                                                     :nft:NFTs:
+
+- Native Tokens :: primary currency associated with a given network
+  used for gas fees, transactions, security (PoS) and governance
+  (voting)
+
+- Fungible Tokens :: These are interchangeable and divisible. In
+  Ethereum, they're mostly based on the ERC20 standard. Native tokens
+  are also fungible.
+
+- Non-Fungible Tokens :: unique, non-interchangeable and
+  indivisible. Each has a unique ID and associated metadata. In
+  Ethereum they are mostly based on ERC721
+
+- Semi-Fungible Tokens :: a hybrid between fungible and non-fungible
+  where identical copies of a token type can exist, but are not
+  interchangeable across types
+
+*** Tokenization of Real-World Assets (RWAs)                            :rwa:
+
+- Creating tokens that represent a ownership of a physical or tradfi
+  asset.
+
+*** Stable Coins                                                :stablecoins:
+
+Provide a reliable medium of exchange and store of value without
+volatility associated with other cryptocurrencies
+
+- Fiat-Backed Stablecoins :: Backed by fiat held in a
+  reserve. Centralized and can be frozen
+- Crypto-Backed Stablecoins :: Backed by over-collateralized crypto
+  held in a smart contract. The value of the locked crypto is higher
+  than the stablecoins issued. Decentralized and cannot be frozen
+- Algorithmic stablecoins :: Use of complex algorithms and market
+  mechanisms to automatically manage supply to maintain their price
+  peg.
+
+** Exchanges
+
+*** Centralized Exchanges
+
+- Custodial (managed) accounts that require KYC
+- Orders are performed by an order book, matching buyers and sellers at set prices
+- Good for onramp from fiat and offramp into fiat
+- Smoother user experience, high liquidity hence less volatility
+- Major disadvantage is =custodial risk=, reliance on the exchange's
+  solvency and security.
+
+*** Decentralized Exchanges
+
+- Self-custody with no KYC
+- Exchange is via Automated Market Makers, trade happens in liquidity
+  pools instead of with another person.
+- Requires secure private key management to retain funds
+- Main risk is =smart contract risk= bugs in the smart contract code
+  can have people lose funds to attackers.
+
+** Decentralized Governance                                         :dao:DAO:
+
+- Distributed governance via Decentralized Autonomous Organizations
+  (DAOs).
+- Advantages like skin in the game and distributed decision making
+- Disadvantages include voter apathy, whales re-centralizing control
+  and technical complexity
+
+
+* Layer 1, Layer 2 and Rollup Scaling solutions
+
+- The blockchain trilema :: Blockchains can only optimize for 2 of
+  decentralization, security and scalability.
+
+- The Ethereum blockchain focuses on decentralization and security,
+  therefore scalability can be a bottleneck leading to high
+  transaction costs and congestion
+
+** L1
+
+A layer one is an independent blockchain protocol responsible for
+attaining concensus on the state of the ledger achieving finality and
+security without relying on any other network.
+
+** L2
+
+A layer two is a protocol built on a L1 inheriting its security and
+decentralization properties and providing higher scalability.
+
+*** Rollups
+
+This is the most widely used l2 scaling solution. It works by
+executing transactions off the l1 chain then bundling them (rolling
+them up) into a single compressed batch and posting them to the l1.
+
+Two primary types:
+
+**** Optimistic Rollups
+
+- Operates on the principle that all the transactions in the batch are
+  valid.
+- When an operator submits a batch to the l1, any other network
+  participant can provide a fraud proof of an invalid transaction
+  within a week.
+- If one is found, the transaction batch is reverted and the operator
+  penalized, otherwise the transactions are finalized.
+
+**** Zero Knowledge Rollups
+
+- Whenever a transaction batch is submitted by an operator to the L1, and
+  accompanying cryptographic Zero-Knowledge proof is provided to show that the
+  transactions are all valid.
+- A smart contract called a verifier instantly checks this proof and
+  if it is valid, immediately finalizes the transaction batch.
+
+*** Centralized Sequencers, a single point of failure in Blockchain Rollups
+
+- A sequencer is an operator responsible for maintaining the order of
+  transaction submitted by users in L2s and in some cases bundling
+  them before they are submitted to L1s
+- For simplicity and efficiency, they tend to be centralized but this
+  introduces some problems:
+  - A malicious sequencer can censor transactions or re-order them for
+    their own benefit e.g. front-running transactions
+  - An unreliable sequencer can prevent the transactions from being
+    submitted to the L1 resulting in a DoS
+- Most early stage L2s have centralized sequencers, but efforts are
+  underway to decentralize the sequencer role.
+
+*** A framework for L2 Maturity: Rollup Stages
+
+Analysis platform [[https://l2beat.com/scaling/summary][L2BEAT]] tracks L2s progress in maturing from Stage 0
+to Stage 2.

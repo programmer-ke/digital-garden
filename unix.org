@@ -128,7 +128,7 @@ od, du, crypt, ls -c, ls -u, ls -t, ls -i, tty, mesg, write
 - custom programs are set in PATH to be discoverable
 - $1 to $9 matches the (upto 9) arguments to a command
 - $* matches all the arguments provided
-- $0 is the name of the command itselt being executed by the subshell
+- $0 is the name of the command itself being executed by the subshell
 - backtics allow a program's output be used as arguments
 
 *** Shell variables
@@ -138,6 +138,40 @@ od, du, crypt, ls -c, ls -u, ls -t, ls -i, tty, mesg, write
   in the current shell without using a sub shell
 - Variables can be temporarily exported to sub shells by declaring
   them inline before the command
+
+*** I/O Redirection
+
+- Every program has 3 file descriptors by default when it starts,
+  standard input, standard output and standard error, represented by
+  number 0, 1 and 2 respectively
+- n>filename redirects the output from the file descriptor n to filename
+- n>&m merge output from file descriptors n and m
+- n<&m merges the input from file descriptor n with m
+- the =here document= construct can be used to specify the standard
+  input of a program along with the program itself
+  #+begin_src bash
+  wc -l <<End
+  once upon a time,
+  there were 3 little bears
+  End
+  #+end_src
+
+*** Looping
+
+- use the =for= statement:
+
+#+begin_src bash
+for i in *
+do
+	     echo $i
+done
+#+end_src
+
+- =do= and =done= appear either at the start of a line or after a semi-colon:
+
+#+begin_src bash
+for i in *; do echo $i; done
+#+end_src
 
 ** Filters
 ** Shell Programming

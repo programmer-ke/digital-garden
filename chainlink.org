@@ -1,0 +1,185 @@
+#+FILETAGS: :chainlink:
+
+* Oracles                                                           :oracles:
+
+Oracles allows deterministic blockchain interact with real-world data.
+
+** Types
+
+- Inbound Oracles :: Deliver external data to blockchains
+- Outbound Oracles :: Deliver data from the blockchain to external
+  systems
+- Consensus Oracles :: Aggregate data from multiple sources and
+  provide a single source of truth for smart contracts
+- Cross-chain Oracles :: Enable communication and data exchange
+  between multiple blockchain systems.
+
+** Centralized vs Decentralized Oracles
+
+- Centralized Oracles :: Operate through a single entity/node. Risks
+  include single point of failure, data manipulation
+- Decentralized Oracles :: Multiple independent nodes to fetch and
+  validate data. Enhances security, reliability and transparency
+  creating a trust-minimized system.
+
+* Chainlink                                :decentralized_oracle_network:DON:
+
+Chainlink is a decentralized oracle network that provides smart
+contracts off-chain and cross-chain data in a decentralized, reliable
+and secure manner.
+
+** Problems addressed
+
+*** The Trust Problem
+How can the blockchain trust data from the outside world?
+
+- Multiple operators forming a DON fetch data from different sources
+  and compare their findings, reaching consensus of the correct answer
+
+*** The Accuracy Problem
+How can we ensure the data is accurate?
+
+- Chainlink carefully selects nodes, verifies their reputation, and
+  use cryptographic proofs to verify who produces what information
+
+*** The Reliability Problem
+What happens when a data source goes down?
+
+- By using multiple independent nodes and data sources, when some of
+  them go down others will keep functioning.
+
+** Services                                                       :ccip:CCIP:
+
+- Data Feeds :: Allow smart contracts to access external data
+  e.g. price feeds
+- Data Streams :: Provide access to high-frequency low-latency data
+  and verifiable on-chain
+- Automation ::  Allows smart contracts to react to real-world events
+- Cross Chain Interoperability Protocol (CCIP) :: Allows
+  intra-blockchain communication in a secure and distributed manner
+- Chainlink Functions :: Provide the ability to perform custom
+  computation off-chain
+- Verifiable Random Function :: Acts as a fair and verifiable
+  random-number generator that cannot be manipulated or predicted
+
+** LINK Token                                                     :link:LINK:
+
+Serves two functions:
+
+- Payment to node operators for their services
+- Incentivizes good node operator behaviour since they stake their
+  LINK tokens to participate
+
+* Data Feeds                                                     :data_feeds:
+
+Components:
+
+- Consumer :: on-chain or off-chain contrct that uses the Chainlink
+  service.
+- Proxy Contract :: Points to the correct aggregator contract, acting
+  as an intermediary that allows underlying contract be upgraded
+  without service disruption
+- Aggregator Contract :: Managed by chainlink and receives data
+  updates from the decentralized oracle network
+  
+* Automation
+
+Automation is a decentralized service that allows smart contract code
+be executed based on some predefined offchain conditions or frequency.
+
+** Upkeep                                                            :upkeep:
+
+An upkeep is a registered job that the network will watch on-chain
+when appropriate.
+
+** Automation triggers
+
+Conditions that trigger automation:
+
+- Time-based :: execute based on a cron expression
+- Custom Logic :: Defined in the contract. The contract implements a
+  =checkUpkeep= that returns a boolean indicating conditions are right
+  for execution.
+- Log trigger :: Monitors blockchain events, and execute some custom
+  contract code based on these events
+
+** Automation Architecture                                     :architecture:
+
+- Coordinated by an =automation registry= smart contract onchain
+- Developers register upkeeps
+- Node operators register automation nodes
+- Automation nodes vote on which upkeeps to perform, sign and send to
+  Automation registry
+- Registry validates the reports, execute the upkeep functions and reward node operators.
+
+* Cross-Chain Interoperability Protocol (CCIP)                         :ccip:
+
+** Token bridging                                                  :bridging:
+
+4 mechanisms:
+
+- Lock and Mint :: Tokens are locked in a secure smart contract in the
+  source chain, and wrapped representations are minted in the
+  destination chain. In the reverse direction, the wrapped tokens are
+  burned and the locked tokens are released.
+- Burn and Mint :: Tokens are burned in the source chain and new ones
+  are minted in the destination chain, and the same in
+  reverse. Suitable for native tokens with mint authority.
+- Lock and Unlock :: Tokens are locked in the source chain and
+  released from a liquidity pool in the destination chain. Same in
+  reverse. Requires incentivized liquidity providers on both sides
+- Burn and Unlock :: Tokens burned in the source chain and released
+  from a liquidity reserve in the destination chain.
+
+** Security considerations                                         :security:
+
+Tradeoffs are made between 3 critical properties:
+
+- Security :: Resistance to attacks and manipulation
+- Trust assumptions :: The degree of trust placed on oracles and
+  operators. Chainlink tries to minimize this
+- Configuration flexibility :: Adaptability to different blockchain
+  architectures
+
+*** Security Features
+
+- Multiple independent nodes
+- 3 separate DONs with to separate responsibilities
+- Client diversity (different languages) to reduce centralization
+
+** Capabilities
+
+- Arbitrary messaging between blockchains
+- Token transfers
+- Programmable token transfers (Combine token transfers and execution
+  instruction e.g. staking,lending..)
+
+
+** Architecture                                                :architecture:
+
+- Router :: User facing contracts deployed on each blockchain managing
+  approvals and transfers
+- Sender :: An EOA or Smart contract account initiating transactions
+- Receiver :: An EOA or smart contract account that receives
+  transactions
+- Transactional DONs :: Execute and commit cross-chain transactions
+- Risk Managment DONs :: Reviews the batches committed transactions to
+  verify integrity and security
+
+** High-Level CCIP Flow Lifecycle                                 :lifecycle:
+
+- Sender calls the Router on the source chain.
+- Router routes the request to the appropriate OnRamp.
+- Committing DON observes and commits the message.
+- RMN independently validates the message.
+- Executing DON executes the message on the destination chain.
+- Receiver contract (or EOA) receives tokens and/or data via
+  =ccipReceive=.
+
+** Finality                                                        :finality:
+
+Finality determines the point at which a transaction is permanent and
+irreversible. Different blockchains have different mechanisms of
+determining finality. CCIP makes this considerations when determining
+finality in the source chain before proceeding with cross-chain
+transactions.
