@@ -173,6 +173,8 @@ done
 for i in *; do echo $i; done
 #+end_src
 
+output of the for loop can be redirected/piped.
+
 ** Filters
 ** Shell Programming
 ** Programming with Standard I/O

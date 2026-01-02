@@ -2,7 +2,7 @@
 
 * Oracles                                                           :oracles:
 
-Oracles allows deterministic blockchain interact with real-world data.
+Oracles allow deterministic blockchains interact with real-world data.
 
 ** Types
 
@@ -56,7 +56,7 @@ What happens when a data source goes down?
   and verifiable on-chain
 - Automation ::  Allows smart contracts to react to real-world events
 - Cross Chain Interoperability Protocol (CCIP) :: Allows
-  intra-blockchain communication in a secure and distributed manner
+  inter-blockchain communication in a secure and distributed manner
 - Chainlink Functions :: Provide the ability to perform custom
   computation off-chain
 - Verifiable Random Function :: Acts as a fair and verifiable
@@ -74,7 +74,7 @@ Serves two functions:
 
 Components:
 
-- Consumer :: on-chain or off-chain contrct that uses the Chainlink
+- Consumer :: on-chain or off-chain contract that uses the Chainlink
   service.
 - Proxy Contract :: Points to the correct aggregator contract, acting
   as an intermediary that allows underlying contract be upgraded
@@ -82,7 +82,7 @@ Components:
 - Aggregator Contract :: Managed by chainlink and receives data
   updates from the decentralized oracle network
   
-* Automation
+* Automation                                                     :automation:
 
 Automation is a decentralized service that allows smart contract code
 be executed based on some predefined offchain conditions or frequency.
@@ -90,7 +90,7 @@ be executed based on some predefined offchain conditions or frequency.
 ** Upkeep                                                            :upkeep:
 
 An upkeep is a registered job that the network will watch on-chain
-when appropriate.
+to trigger actions when appropriate.
 
 ** Automation triggers
 
@@ -144,7 +144,10 @@ Tradeoffs are made between 3 critical properties:
 *** Security Features
 
 - Multiple independent nodes
-- 3 separate DONs with to separate responsibilities
+- 3 separate DONs with to separate responsibilities:
+  - Committing in source chain
+  - Execution in dest chain
+  - Risk management
 - Client diversity (different languages) to reduce centralization
 
 ** Capabilities
@@ -183,3 +186,149 @@ irreversible. Different blockchains have different mechanisms of
 determining finality. CCIP makes this considerations when determining
 finality in the source chain before proceeding with cross-chain
 transactions.
+
+** Cross-Chain Token (CCT) Standard                                     :CCT:
+
+Enables developers to make new and existing ERC-20 tokens transferable
+via CCIP without manual involvement of chainlink
+
+*** Motivations
+
+- Avoid liquidity fragmentation across chains limiting accessibility
+- Enabling developer autonomy by eliminating the need for third-party
+  approvals by making deployment self-service.
+
+*** Benefits
+
+- Self-service and permissionless
+- Enhanced security through Chainlink's defence in depth
+- Supports programmable transfer (token transfer + custom
+  instructions)
+- Chainlink provides audited =TokenPool= contracts that simplify
+  deployment:
+  - Replaces the need for traditional liquidity pools for burn/mint
+    mechanisms
+  - For lock/unlock approaches, a liquidity pool is still needed in
+    the dest chain
+- Zero slippage on cross chain transfers - exact amount delivered
+
+*** How it works
+
+**** Components
+
+- Token Owner/CCIP Admin :: Entity that manages the token contract
+  (upgrades, ownership changes)
+- Token Administrator :: An entity (can be owner/admin) that manages
+  cross-chain operation and maps token to =TokenPool= in
+  =TokenAdminRegistry=
+- TokenPool :: Contracts that manage locking/burning/unlocking/minting
+  of tokens across chains
+
+**** Implementation Steps
+
+- Deploy the token in the every chain to support and with function to get owner/admin
+- Deploy =TokenPool= contracts in each chain (audited or custom)
+- Configure =TokenPool= contracts e.g. rate limits
+- Register token admin and link token to =TokenPool= via =TokenAdminRegistry=
+
+*** Supported Mechanisms
+
+- burn/mint
+- lock/unlock
+- burn/unlock
+- lock/mint
+
+* Chainlink Functions                                   :chainlink_functions:
+
+Provides off-chain trust-minimized compute infrastructure for custom
+computation.
+
+** Benefits
+
+- Enables access to traditional public facing API's
+- Enables custom computation that would be too expensive on-chain
+- DONs provide distributed computation minimizing single points of
+  failures
+- Results are aggregated using the =Offchain Reporting (OCR) Protocol=
+  giving trust-minimzed and consensus driven results
+- Threshold encryption is used to encrypt secrets so that they can
+  only be decrypted through multi-party decryption process.
+
+** How it works
+
+- Request initiation :: the smart contract sends JS code in a request
+- Distributed execution :: Each node independently executes it in a
+  secure serverless environment
+- Result Aggregation :: The DON aggregates all the independent
+  execution results
+- Response Delivery :: The final consensus result is returned to the
+  contract
+
+* VRF: Verifiable Random Function            :vrf:verifiable_random_function:
+
+Provides a cryptographically secure source of randomness for smart
+contracts.
+
+** How it works
+
+- VRF generates one or more random values
+- Creates a cryptographic proof demonstrating how the values were
+  determined
+- Publishes proof on-chain
+- Verifies the proof before they are used by smart contracts
+
+** How to access the Service
+
+- Subscription Method :: A subscription is created and funded, which
+  multiple contracts can connect to. Best for applications requiring
+  frequent randomness
+- Direct Funding Method :: Each contract directly pays for its
+  randomness requests. Best for applications requiring infrequent
+  randomness.
+
+* Data Streams                                                 :data_streams:
+
+Provides pull-based sub-second access to near real time data to smart
+contracts.
+
+Primarily provides market pricing data for assets.
+
+** Components
+
+- Data Stream DONs :: The nodes in the DON collect data from many
+  sources and agree on the median value of an item. They then sign
+  this value and deliver it to the aggregation network
+- Aggregation Network :: The aggregation data collects data and makes
+  it available to consumers. Uses an "active-active multi-site
+  deployment" architecture to make it highly available
+- Verifier contract :: Verifies the signature from the DON
+  cryptographically guaranteeing that it wasn't modified by the time
+  it is consumed by on-chain applications
+
+* Chainlink Proof of Reserve (PoR)                 :proof_of_reserve:PoR:por:
+
+Provides automated, real-time verification of reserves backing
+tokenized assets.
+
+** Use Cases
+
+- Stablecoin issuers proving that each token is fully backed by
+  reserves in real time
+- Wrapped assets proving that each asset is backed 1:1 with the
+  underlying asset
+- Tokenized commodities e.g. tokenized gold can be proven to be backed
+  with real commodities held in vaults
+- DEFI protocols utilize PoR to automate actions that maintain system
+  health e.g. adjusting risk parameters
+
+** How it works
+
+- Monitor reserve addresses to verify balance in reserve accounts
+- Verify off-chain reserves by connecting to APIs and other data
+  sources used in tradfi
+- Process reserve data in the DON by aggregating and validating it
+  through consensus
+- Create cryptographic proofs verifying the generated reports
+- Deliver verifiable reports on-chain for use by smart conntracts
+- Enable automated actions based on the reports e.g. control minting
+  based on collateralization ratios

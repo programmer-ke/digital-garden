@@ -1,0 +1,16 @@
+* Process
+- Copy in the context (problem statement, transcript)
+- Discuss overall approach
+- Work in small pieces and iterate
+  - work such that every error belongs in the last few lines of code
+
+
+* Getting a video transcript
+
+** Zoom
+- Save audio file for each participant
+- use mac whisper with the parakeet model
+
+* Docs via AI answers
+
+- Using docs for issues that are central to the problem
