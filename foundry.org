@@ -2,6 +2,10 @@
 
 #+begin_src bash
 
+# Initialize repo
+
+forge init
+
 # Import an account
 cast wallet import localdev --interactive
 
@@ -20,4 +24,18 @@ cast call 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9 "retrieve()"
 # Convert from hex to decimal
 cast --to-base 0x000000000000000000000000000000000000000000000000000000000000007b dec
 
+# test coverage
+forge coverage
+
+# tests
+forge test
+
+# forked tests (simulate live networks)
+forge test  --fork-url $SEPOLIA_RPC_URL
+
+# Run script
+forge script script/DeployFundMe.s.sol 
+
+# Install dependencies from github
+forge install smartcontractkit/chainlink-brownie-contracts
 #+end_src
