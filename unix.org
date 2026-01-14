@@ -39,8 +39,8 @@ executing commands, and displaying output.
 date, who, mail, stty, ed, ls, cat, pr, mv, rm, wc, sort, tail, cmp,
 diff, pwd, grep, cd, rmdir, echo, nohup, at, kill
 
-** The File System
-*** Detecting EOF
+** The File System                                         :files:filesystem:
+*** Detecting EOF                                        :setuid:set:uid:eof:
   - There's no special character to represent end of a file
   - The =read= kernel subroutine used to read from files returns the
     number of bytes read
@@ -66,7 +66,7 @@ diff, pwd, grep, cd, rmdir, echo, nohup, at, kill
   - write permission allow adding/removing directory content
   - execute permission allows searching directory content
 
-*** Inodes
+*** Inodes                                                     :inode:inodes:
 
 - An inode is an entry to a table that stores file metadata such as
   name, time created or modified, length of the file, location of the
@@ -119,7 +119,8 @@ od, du, crypt, ls -c, ls -u, ls -t, ls -i, tty, mesg, write
     - The program =echo= never sees =>=
 
 *** Metacharacters      
-- Special characters that are interpreted by the shell before executing commands
+- Special characters that are interpreted by the shell before
+  executing commands
 - Their interpretation can be escaped using quotes or backslashes
 - Single and double quotes escape each other
   
@@ -133,7 +134,8 @@ od, du, crypt, ls -c, ls -u, ls -t, ls -i, tty, mesg, write
 
 *** Shell variables
 
-- Defined for the current shell and not accessible in sub shells unless exported
+- Defined for the current shell and not accessible in sub shells
+  unless exported
 - the =.= operator can be used to read commands from a file to execute
   in the current shell without using a sub shell
 - Variables can be temporarily exported to sub shells by declaring
@@ -156,7 +158,7 @@ od, du, crypt, ls -c, ls -u, ls -t, ls -i, tty, mesg, write
   End
   #+end_src
 
-*** Looping
+*** Looping                                                             :for:
 
 - use the =for= statement:
 
@@ -176,6 +178,19 @@ for i in *; do echo $i; done
 output of the for loop can be redirected/piped.
 
 ** Filters
+*** grep family                                                        :grep:
+- for each input line matches a pattern defined as a regular
+  expression and prints it as output
+- grep :: matches ed's regular expressions
+- egrep :: supports more general expressions like or with | and
+  parentheses
+- fgrep :: supports parallel searching of patterns but without
+  metacharacter support
+- =egrep= and =fgrep= support -f flag to search patterns specified in
+  a file in parallel
+*** Other filters
+- sort, comm, tr, uniq, dd
+  
 ** Shell Programming
 ** Programming with Standard I/O
 ** Unix System Calls

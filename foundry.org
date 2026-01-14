@@ -1,3 +1,5 @@
+#+FILETAGS:  :foundry:solidity:
+
 * Basic commands
 
 #+begin_src bash
