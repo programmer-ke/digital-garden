@@ -14,6 +14,9 @@ cast wallet import localdev --interactive
 # List accounts
 cast wallet list
 
+# get imported account address
+cast wallet address --account foundry-testnet-account
+
 # Deploying a contract using a script
 forge script script/DeploySimpleStorage.s.sol --rpc-url http://127.0.0.1:8545 --broadcast --account localdev --sender 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
 

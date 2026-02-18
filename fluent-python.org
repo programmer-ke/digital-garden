@@ -1,0 +1,197 @@
+#+FILETAGS: :python:fluent_python:
+#+STARTUP: content
+
+* The Python data model                                          :data_model:
+
+- The python data model as a framework of the language.
+  - Formalized interfaces of the building blocks of the language itself
+    e.g. sequences, functions, iterators, context managers etc
+  - Example: Giving an object __getitem__ and __len__ allows
+    iteration, slicing, sorting etc
+  - Allows others to use custom objects without learning custom methods
+  - By composable interfaces, objects gain functionality that
+    they do not need to inherit e.g. from object
+  - __str__ vs __repr__
+    - __repr__ should be unambiguous and if possible show how to
+      recreate the object
+    - __str__ should display a pretty printed version for end users
+    - when __str__ is missing, __repr__ is used instead
+  - We rarely need to interact with special methods directly, Python's
+    language constructs itself will use them
+
+* Sequences                                                       :sequences:
+
+** Two ways of classifying sequences
+
+*** Mutability
+
+**** Mutable Sequences
+- list, bytearray, array.array, collections.deque
+- registered as virtual subclasses of abc.MutableSequence with itself
+  is a subclass of abc.Sequence
+
+**** Immutable sequences
+- tuple, str, bytes
+- registered as virtual subclasses of abc.Sequence
+  
+*** Elements
+
+**** Container sequences
+- list, tuple, collections.deque
+- each element is a reference to an object
+  - each object has a header with metadata
+
+#+begin_src python :results output
+l = [[]] * 2
+l[0].append(1)
+print(l)
+#+end_src
+
+#+RESULTS:
+: [[1], [1]]
+    
+**** Flat Sequences
+- str, bytes, array.array
+- each element is the data representing a value within the sequences
+  own memory space
+  - because of this, an array of floats is much more compact than
+    a tuple of floats
+
+** tuples
+- A good use of tuples is representing record whose fields can be
+  accessed by unpacking (not having to use indices)
+
+** Unpacking
+- with unpacking, we can avoid variable assignment from sequences
+  using indices
+- unpacking supports iterators
+
+** Sequence Pattern matching                               :pattern_matching:
+- A sequence pattern matches the subject if:
+  - the subject is a sequence
+  - The subject and pattern have same number of items
+  - each corresponding item matches
+- An optional =if= guard can be used to check against conditionals
+- Does not support iterables that are not sequences (e.g. iterators)
+- Expressions that match constructor calls e.g. =str(name)= in the
+  context of pattern matching are executed at run time and pass if
+  the expression is of the expected type.
+- Pattern matching is an example of declarative programming where you
+  specify what to match rather than how to match it, leading to more
+  succint and less error prone code.
+** slicing
+- It is possible to assign iterables to a slice of a mutable sequence
+
+* Dictionaries and sets  
+
+- Merging dicts can be done using the =**= operator
+  e.g. ={'a': 0, **{'x': 1}, 'y': 2, **{'z': 3, 'x': 4}}=
+
+- Merging mappings can also be done using the | operator
+  e.g =d1 | d2= (new dict) or d1 |= d2 (in place)
+
+- When pattern matching dicts, partial matches succeed and extra keys
+  ignored. To collect extra keys, use =**foo= operator at the end
+  to collect extra keys
+  e.g. =case {'category': 'ice cream', **details}=
+- Main value for collections.abc is documenting standard interfaces
+  and =isinstance= checking
+- A hashable object implement __hash__ and __eq__
+  - the hash code doesn't change over it's lifetime
+  - objects that compare equal must have the same hash code
+  - the hashcode is only guaranteed to be constant within the same
+    python process
+- =.setdefault= on dicts prevents double lookup of missing keys (as
+  opposed to using =.get= with default value)
+- =__missing__= can handle missing keys. However, care must be taken
+  to consider behaviour of =__getitem__=, =get= and =__contains__=
+  - inheriting from =collections.UserDict= rather than =dict= is more
+    convenient
+- =collections.OrderedDict= can handle re-ordering operations more
+  effficiently than dict. useful e.g. for LRU cache
+- =collections.ChainMap= does not copy input mappings, only has
+  references. Updates via the chainmap only affect the first dict
+- =shelve.Shelf= provides persistent storage for mapping that pickles
+  items to the disk
+- Dictionary views (=dict_keys=, =dict_values=, =dict_items=) are
+  readonly projections of internal structures of the dict
+  - using set operators with views can help avoid inefficient loops or
+    if statements when inspecting dicts
+- literal set syntax like ={1, 2, 3}= is faster and more readable than
+  using a constructor like =set([1, 2, 3])=
+  - avoids symbol lookup by using specialized BUILD_SET bytecode and
+    skips list creation.
+
+* Unicode and bytes                  :NFC:NFD:NFKC:NFKD:unicode:bytes:locale:
+- The unicode standard separates the identity of characters from their
+  byte representations
+  - The identity - its code point - is a number from 0 to 1114111 shown
+    in the unicode standard in hex from U+0000 to U+10FFFF
+  - The actual byte representation depends on the encoding in use i.e.
+    the algorithm that converts the code point to its byte sequence and
+    vice versa
+    e.g. letter A is byte sequence \x41 in utf-8 and \x41\x00 in utf-16LE
+- when handling unicode encoding errors, if one cannot afford to loose
+  the data, use =xmlcharrefreplace= error handling option.
+- The way utf-8 was designed, it is almost impossible for an arbitrary
+  byte sequence to be accidentally decoded into it as garbage. If one
+  can successfully decode some bytes > 127 as utf-8, the byte sequence is likely
+  utf-8
+- Best practice for text I/O is the =unicode sandwich=
+  - bytes should be decoded to strings as early as possible on input
+  - str should be encoded to bytes as late as possible on output.
+  - most processing should work with str (unicode) objects
+- Explicitly pass the encoding argument when opening files rather than
+  depend on encoding defaults which are different across systems
+- For reliable comparisons of unicode, the text is normalized
+  - Form C (NFC) composes code points to the shortest equivalent string
+  - Form D (NFD) decomposes composed characters to base characters and
+    combining characters
+  - Keyboard drivers usually generate composed characters
+  - It is good to normalize strings with NFC before saving. W3C
+    recommends it
+  - Some single characters are normalized to another single character
+    with NFC
+  - Some unicode characters, named compatibility characters, are
+    introduced to support conversion to and from existing standards
+    even though there's already a canonical code point for them.
+    e.g. U+00B5 (MICRO SIGN) added to support latin1 conversion even
+    though it exists in the greek alphabet as U+03BC (GREEK SMALL
+    LETTER MU)
+  - In the NFKC and NFKD forms, compatibility characters are replaced
+    by one or more characters considered the preferred representation.
+    - NFKC and NFKD normalization cause data loss. Should be applied
+      only to special cases like searching and indexing and not storage
+- Case folding is converting all unicode characters to lowercase with
+  additional transformation. There are approx 300 code points where
+  =str.casefold= and =str.lower= return different results.
+  - Case folding is used for case insensitive unicode comparison. First
+    normalize the string with NFC then apply casefold for reliable
+    comparison
+- In some cases, you are interested only in removing diacritics and
+  not proper normalization. A technique for this:
+  - do NFD normalization
+  - filter out combining characters
+  - do NFC normalization
+- =str.maketrans= can be used to create custom translation maps
+  between characters, applied via =str.translate=
+- consider =pyuca= and =pyICU= for locale sensitive sorting
+  - They use collation tables to determine order of unicode points
+    - these table map characters to collation elements (weights) determining
+      sorting priority
+    - pyuca uses the default collation table and PyICU allow custom
+      local specific tables 
+- The unicode database provides several structured files that map
+  code points to character names and metadata about different characters
+  - These are used by various str methods like =isprintable=, =isnumeric=,
+    =casefold= and the functionality from the =unicodedata= module
+- Regular expressions work on both strings and bytes. However, words
+  and digits outside of the ascii range are not detected in bytes regex
+- =os= module functionality that accept file names accept both str and
+  bytes.
+  - when str is provided, these the =sys.getfilesystemencoding= codec
+    to decode and encode the name
+  - when bytes are provided, bytes are returned giving you the responsibility
+    to do the right thing
+- In absence of metadata, the =chardet= package help automatically
+  detect some encodings

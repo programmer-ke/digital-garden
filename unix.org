@@ -100,7 +100,7 @@ diff, pwd, grep, cd, rmdir, echo, nohup, at, kill
 *** commands
 od, du, crypt, ls -c, ls -u, ls -t, ls -i, tty, mesg, write
       
-** The Shell
+** The Shell                                                          :shell:
 *** Command line structure
 
 - =;= terminates commands
@@ -141,7 +141,7 @@ od, du, crypt, ls -c, ls -u, ls -t, ls -i, tty, mesg, write
 - Variables can be temporarily exported to sub shells by declaring
   them inline before the command
 
-*** I/O Redirection
+*** I/O Redirection                                             :redirection:
 
 - Every program has 3 file descriptors by default when it starts,
   standard input, standard output and standard error, represented by
@@ -190,7 +190,50 @@ output of the for loop can be redirected/piped.
   a file in parallel
 *** Other filters
 - sort, comm, tr, uniq, dd
+*** sed
+- A streaming version of ed (stream editor) that supports ed's commands
+- A more general grep like tool that performs an action (print, delete, write etc)
+  on lines that match certain patterns
+- Sample commands:
+ `sed 'commands' filenames` - Apply commands to files
+ `sed -f cmdfile filenames` - Read commands from file
+ `sed -n` - Suppress automatic printing (use with `p`)
+ `sed '20,30p'` - Print lines 20-30 (with `-n`)
+ `sed '1,10d'` - Delete lines 1-10
+ `sed '/pattern/d'` - Delete lines containing pattern
+ `sed '/pattern/!d'` - Delete lines NOT containing pattern
+ `sed '/^$/,/^end/p'` - Print from empty line to line starting with "end"
+ `sed '$d'` - Delete last line
+ `s/old/new/` - Substitute first occurrence in line
+ `s/old/new/g` - Substitute all occurrences in line
+ `s/old/new/p` - Print line if substitution made
+ `s/old/new/w file` - Write changed lines to file
+- Limitations of sed:
+  - limited memory, makes only one pass, no forward references, no
+    manipulation of numbers (pure text processor)
+*** awk
+- fixes some of the limitations of =sed=
+- has the same form =awk 'program' filenames..=
+- program can be a sequence of instructions in the following form
+  sequencially performed on each line:
   
+  =pattern { action }=
+  =pattern { action }=
+
+- Either of pattern and action is optional. When no pattern is
+  specified, it matches all lines. When no action is specified,
+  the default is to print matched lines
+- By default, lines are broken into fields divided by whitespace.
+  - Each is assigned to variables $1 to $NF. NF is the number of fields
+  - A single character separator can alternatively be specified with option =-F=
+- =print= and =printf= can be used for printing.
+  -  =print= simply outputs comma separated fields separated by the
+    default whitespace separator
+- BEGIN actions are perfomed before processing the first line.
+- END actions are performed after processing all the lines
+- Richer filter functionality includes arithmetic, conditionals, control flow,
+  arrays, associative arrays
+
 ** Shell Programming
 ** Programming with Standard I/O
 ** Unix System Calls

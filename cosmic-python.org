@@ -157,7 +157,8 @@
     private members
 - We create one repository per aggregate
 - Aggregates are in charge of one =consistency boundary=
-  - Defined invariants and constraints apply to the whole aggregate e.g. serialized access.
+  - Defined invariants and constraints apply to the whole aggregate
+    e.g. serialized access.
 - Two options for concurrency control for updates:
   - optimistic :: using version numbers. Assume success as default and
     retry failures for increased throughput
@@ -211,7 +212,7 @@
     available at the same time, otherwise a single service failure can
     result in cascading failure.
 - Instead, designing microservices around consistency boundaries
-  e.g. ordering, allocating etch can allow use of asynchronous
+  e.g. ordering, allocating etc can allow use of asynchronous
   messaging with eventual consistency across consistency boundaries
 - Message brokers like Redis and RabbitMQ can be used for microservice
   communication.
