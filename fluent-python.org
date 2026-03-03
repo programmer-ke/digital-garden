@@ -195,3 +195,160 @@ print(l)
     to do the right thing
 - In absence of metadata, the =chardet= package help automatically
   detect some encodings
+
+* Data Class builders
+- Data class builders do not use inheritance for their functionality.
+  - =collections.namedtuple= and =typing.NamedTuple= use metaprogramming
+    to create =tuple= subclasses
+  - the =@dataclass= decorator does not modify the class hierarchy,
+    but uses metaprogramming to inject attributes and methods
+- =collections.namedtuple= is an inhancement to tuples and can
+  be used anywhere tuples are used.
+  - provides conveniences such as field names, class name and a useful repr
+- =typing.NamedTuple= adds type annotation to named tuples, accessible
+  at the attribute =__annotations__=
+- a dataclass =field= attribute can allow advanced customization of
+  dataclass fields
+- a =__post_init__= can be used to add custom initialization of dataclasses
+- =typing.ClassVar= can be used to declare class attributes in dataclasses
+- =InitVar= can be used to declare init parameters only used for
+  initialization and are not instant variables. These are passed to
+  =__post_init__=
+- the =__match_args__= attribute of classes enables classes work
+  with positional argument pattern matching. It provides args names
+  by position.
+- Dataclasses as a code smell - when logic is missing, it may have
+  been misplaced
+
+* Object References, mutability and recycling
+- It may be more useful to say a variable is bound to an object, rather
+  than assigning an object to a variable in Python.
+- An objects identity doesn't change once created. It's identity is
+  returned by =id= function
+- In practice, we rarely use =id=, but use the =is= operator for
+  identity checking
+  - Most useful for comparing against singleton objects like =None= or
+    a custom sentinel
+  - =is= is faster than equality operator because it cannot be overloaded
+- Using =[:]= or object constructor creates shallow copies. Same as
+  using =copy.copy=
+- Using =copy.deepcopy= copies nested objects too.
+  - it remembers copied objects to handle cyclic references gracefully.
+- =__copy__= and =__deepcopy__= can be used to customize copy behaviour
+- Python uses call by sharing, i.e. each function parameter gets a
+  copy of each reference in the arguments. Parameters inside a
+  function are aliases to the actual arguments
+- To follow the principle of least astonishment, it may be useful to
+  only manipulate copies of mutable objects inside functions and classes
+- =del= deletes references and not objects.
+- Objects are garbage collected when there's no remaining references
+  to it (either deleted by =del= or last referencing variable was
+  rebound to another object)
+- Python uses reference counting for garbage collection. Each objects
+  keeps count of references to it. When the count get's to zero,
+  Python calls =__del__= if defined before freeing the allocated memory.
+- Weak references to an object do not increase its reference count.
+  This is useful e.g. for caching, preventing a cache reference from
+  preventing garbage collection.
+- =interning= is an optimization technique used for strings and small
+  integers to avoid duplication of objects that appear frequently.
+  It's behaviour is an implementation detail though
+
+* Functions as first class objects
+- A higher order function is one that takes a function as an argument
+  or returns one as a result.
+- A function's =__doc__= attribute is used to generate help text of
+  an object
+- Best known higher order functions are map, filter, reduce and apply.
+  - In python, =apply(fn, args, kwargs)= was depracated in favour of
+    =fn(*args, **kwargs)=
+- Useful reducing builtins are =sum=, =all=, =any=
+- Best use of anonymous function in python are in the context of
+  higher order function arguments.
+  - In other cases, named functions provide better documentation
+- A class implementing =__call__= is an easy way of creating
+  function-like objects that persist state across calls e.g. decorators
+- Keyword only arguments to functions are named after argument prefixed
+  with =*=
+- position-only arguments are named before a =/= in the parameter list.
+- The =operator= module provides function equivalents of various
+  operators to avoid use of =lambda= trivial expressions instead
+- =operator.itemgetter= uses the =[]= operator, so it supports not only sequences
+  but mappings or any object that implements =__getitem__=
+- Other useful ones include =attrgetter= and =methodcaller=
+- =functools.partial= returns a callable that has the original callable
+  bound to pre-determined values. Useful for modifying a function that
+  takes a number of arguments to an API that provides less arguments.
+* Type Hints in Functions
+- It is good practice to do =from typing import X= to reduce the
+  length of function signatures
+- According to PEP 483, a type is a set of values and a set of
+  functions one can apply to these values
+- More general types have narrower interfaces e.g. =object= <
+  =abc.Sequence= < =abc.MutableSequence=.
+  - However, =Any= is a magic type that sits at the top and bottom of
+    the type heirarchy. It is simultaneously the most general type and
+    the most specialized type.
+- Rules for =consistent-with=:
+  - Given T1 with a subtype T2, T2 is consistent-with T1 (Liskov
+    substitution)
+  - Every type is consistent-with =Any=, you can pass objects of every
+    type to an argument declared as =Any=
+  - Any is consistent with every type: you can pass an object of type
+    Any where an argument of another type is expected
+- Among classes, consistent-with is defined like subtype-of. A
+  subclass is consistent-with all its superclasses
+- There's no class heirarchy between =float=, =int= and =complex=,
+  they all subclass =object=.  However PEP484 declares that =int= is
+  consistent with =float= because it implements all operations
+  supported by =float= and additional ones. Likewise, both are
+  consitent-with =complex=
+- The | operator can be used in place of =Optional=. It also works
+  with =isinstance= e.g. =isinstance(x, str | int)=
+- =Union= is useful with types that are not consistent-with each other.
+  =Union[int, float]= is redudant because =int= is consistent-with =float=
+  so =float= can be used as the type declaration.
+- Classes generated by =typing.NamedTuple= are consistent with =tuple=
+  types encapsulating the same types.  The reverse is not true because
+  named tuples have extra methods
+- In line with Postel's law, it is better to use Abstract types in
+  parameters and concrete types in return values.
+  - =abc.MutableMapping= and =abc.Mapping= for parameters and =dict=
+    for return values
+  - =abc.Sequence= or =abc.Iterable= for parameters and =list= for
+    return values
+- Numerical tower ABCs defined by PEP 3141 is useful for runtime type
+  checking but not used for static type checking. For static type
+  checking, =int=, =float= and =complex= are treated as special cases.
+- =TypeAlias= is the preferred annotation to use for assignments that
+  create custom types.
+- It is common to use =Iterable= for parameters to functions so that
+  it is possible to provide input data as a generator and save on
+  memory. If use of =.len= is required, the =Sequence= is used instead.
+- When declaring a parameterized generic like =Sequence[T]=, =TypeVar=
+  is used to declare variable T. This was done to avoid having to make
+  deep changes to the interpretter to support the generic type notion.
+- We can add extra parameters to further restrict a type created by
+  =TypeVar=.  The restricted type has to be one of the specified types
+- We can specify type that bounds the type created with a
+  =TypeVar=. All types that are consistent-with the bound type will
+  match the created type.
+- Using =typing.Protocol=, we can make duck typing explicit for type
+  checkers. It gives us static duck typing.
+- when using =typing.Callable=, it is not possible to specify type
+  information for optional and keyword argument types. The convention
+  is to replace the parameter list with =...=
+- =Callable[[], int]= is a subtype of =Callable[[], float]=
+  - This is because =int= is a subtype of =float=. =int= supports all
+    operations on =float=
+- =Callable[[int], None]= is however not a subtype of
+  =Callable[[float], None]=, rather its the other way round.
+  - Even though =int= is a subtype of =float=, the reverse is true
+    for parameterized types.
+  - A callable that takes an =int= as a parameter can perform
+    operations that are not supported on =float=.
+  - A callable that takes a =float= as a parameter cannot perform
+    operations that are not supported on =int=.
+- For arbitrary positional or keyword arguments, the type declaration
+  on function parameters is the set of types allowed for each
+  argument.

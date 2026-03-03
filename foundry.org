@@ -43,4 +43,7 @@ forge script script/DeployFundMe.s.sol
 
 # Install dependencies from github
 forge install smartcontractkit/chainlink-brownie-contracts
+
+# Bring up the interactive interpretter
+chisel
 #+end_src
