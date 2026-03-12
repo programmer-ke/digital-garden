@@ -302,7 +302,7 @@ print(l)
   they all subclass =object=.  However PEP484 declares that =int= is
   consistent with =float= because it implements all operations
   supported by =float= and additional ones. Likewise, both are
-  consitent-with =complex=
+  consistent-with =complex=
 - The | operator can be used in place of =Optional=. It also works
   with =isinstance= e.g. =isinstance(x, str | int)=
 - =Union= is useful with types that are not consistent-with each other.
@@ -327,7 +327,7 @@ print(l)
   memory. If use of =.len= is required, the =Sequence= is used instead.
 - When declaring a parameterized generic like =Sequence[T]=, =TypeVar=
   is used to declare variable T. This was done to avoid having to make
-  deep changes to the interpretter to support the generic type notion.
+  deep changes to the interpreter to support the generic type notion.
 - We can add extra parameters to further restrict a type created by
   =TypeVar=.  The restricted type has to be one of the specified types
 - We can specify type that bounds the type created with a
@@ -341,8 +341,8 @@ print(l)
 - =Callable[[], int]= is a subtype of =Callable[[], float]=
   - This is because =int= is a subtype of =float=. =int= supports all
     operations on =float=
-- =Callable[[int], None]= is however not a subtype of
-  =Callable[[float], None]=, rather its the other way round.
+- =Callable[[int], None]= is however a supertype of
+  =Callable[[float], None]=
   - Even though =int= is a subtype of =float=, the reverse is true
     for parameterized types.
   - A callable that takes an =int= as a parameter can perform
@@ -352,3 +352,28 @@ print(l)
 - For arbitrary positional or keyword arguments, the type declaration
   on function parameters is the set of types allowed for each
   argument.
+
+* Decorators and closures
+- A decorator is a callable
+  - It may replace the decorated function with a different one
+  - It is executed when a module is loaded
+- A free variable is one that is not bound to the local scope
+  - In closures, free variables exist when the closure is defined
+    and access is retained when the defining scope is no longer available.
+  - Python uses lexical scoping as opposed to dynamic scoping where
+    free variables exist in the scope where the function is executed.
+- =functool.wraps= copies relevant attributes like __name__ and __doc__
+  from the function being wrapped to the wrapper.
+- Where memory usage is a concern, =functool.lru_cache= can be used in
+  place of =functools.cache=
+- =@singledispatch= decorator wraps a plain function to create an
+  entry point for a generic function with multiple implementations
+  for different argument types.
+- use generic abstract classes like =numbers.Integral= or
+  =typing.Protocol=instead of concrete implementations like =int= to
+  support a wider variety of generic types
+- =singledispatch= for overloading a method in the same class is flawed
+  because too much responsibility is concentrated. Its best use is
+  supporting modular extension for yet unforseen cases.
+- Decorators are best implemented as classes with =__call__=
+

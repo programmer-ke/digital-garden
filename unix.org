@@ -235,6 +235,31 @@ output of the for loop can be redirected/piped.
   arrays, associative arrays
 
 ** Shell Programming
+- A shell program can be used to provide a more intuitive interface
+  over existing commands
+- A case statement can be preferred over an if statement if the =test=
+  command is not a shell builtin because it would be faster.
+- in addition to =for= loops, there exists =while= loops and =until= loops
+- Piping the whole loop to a command will prevent multiple invocations
+  of the command per loop
+- You can loop forever by using =:= as the while loop condition.
+- using curly brackets around a shell variable can allow extra processing e.g.
+  - ${var-thing} # value of var if exists, otherwise thing
+  - {var+thing}  # thing if var is defined, otherwise nothing
+  - {var?message} # if defined, $var, otherwise print message and exit shell
+- =trap sequence-of-commands list-of-signal-numbers= can be used to handle
+  signals like hangup, interrupt, terminate (except kill -9)
+- To exit after handling a signal with =trap=, an explicit =exit=
+  command is added to its sequence of commands
+- =exec= replaces the current process with the named program avoiding
+  the need to start a sub-process.
+- =shift= advances the program arguments by one to the left, so that
+  $2 becomes $1 and so on.
+- =$*= and =$@= expand into arguments passed to command. Blanks in a single
+  argument results in multiple arguments
+  - ="$*"= is a single word composed of all arguments
+  - ="$@"= expands to arguments passed to command. Blanks in a single
+    argument are retained.
 ** Programming with Standard I/O
 ** Unix System Calls
 ** Programs Development
