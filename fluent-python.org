@@ -121,6 +121,13 @@ print(l)
   using a constructor like =set([1, 2, 3])=
   - avoids symbol lookup by using specialized BUILD_SET bytecode and
     skips list creation.
+- To save memory in python, avoid creating instance attributes outside
+  of =__init__=
+  - This is because instances of a class share a common hash table
+    under the hood. Adding a new instance cause a new hash table to be
+    created just for the =__dict__= of that instance.  This
+    optimization has been shown to save 10% to 20% memory.
+   
 
 * Unicode and bytes                  :NFC:NFD:NFKC:NFKD:unicode:bytes:locale:
 - The unicode standard separates the identity of characters from their
@@ -376,4 +383,43 @@ print(l)
   because too much responsibility is concentrated. Its best use is
   supporting modular extension for yet unforseen cases.
 - Decorators are best implemented as classes with =__call__=
+* Design patterns with first-class functions
+- Strategy and Command design patterns can be simplified with first
+  class functions
+- Decorators offer a convenient way of registering strategy functions
+- =__call__= can be used to replace single method classes
 
+* A pythonic object
+- The python data model promotes the use of duck typing for making
+  user defined types behave like built in ones, without the need for
+  inheritance
+- =classmethod= is used most commonly for creating alternative
+  constructors
+- =staticmethod= is used for functions that happen to be sitting in a
+  class body
+- f-strings, builtin =format= and =str.format= delegate the
+  actual formatting to the =__format__(format_spec)= method
+  on the target object
+  - if object has no =__format__=, the method inherited from =object=
+    returns =str(my_object)=
+- =__hash__= and =__eq__= need to be implemented to make an object
+  hashable
+  - attributes can be made read-only using the =property= decorator
+    to prevent modification
+- Classes in applications can be made as simple as possible, however
+  for libraries, it's advisable to make them have pythonic behaviour
+  since it's hard to predict usage.
+- preceding an attribute with a double underscore triggers name
+  mangling as can be observed by inspecting the __dict__ attribute.
+  - This is not for providing security against modification, but just
+    to prevent accidental clobbering.
+  - Some prefer to use a single underscore instead just as a convention.
+- =__slots__= allow one to define attributes that will not be stored
+  in =__dict__= hence using less memory. Extra attributes will be
+  rejected.
+  - Subclasses may require an extra =__slot__= declaration to
+    limit the allowed attributes.
+  - =__weakref__= needs to be added to the =__slot__= declaration
+    if the objects need to be used as targets of weak references.
+- Because class attributes are public, it is common practice to create
+  subclasses just to modify class attributes.
