@@ -234,7 +234,7 @@ output of the for loop can be redirected/piped.
 - Richer filter functionality includes arithmetic, conditionals, control flow,
   arrays, associative arrays
 
-** Shell Programming
+** Shell Programming                                                  :shell:
 - A shell program can be used to provide a more intuitive interface
   over existing commands
 - A case statement can be preferred over an if statement if the =test=
@@ -260,6 +260,9 @@ output of the for loop can be redirected/piped.
   - ="$*"= is a single word composed of all arguments
   - ="$@"= expands to arguments passed to command. Blanks in a single
     argument are retained.
+- The shell demonstrates iterative programming based on re-use of
+  existing programs that cooperate well with each other because of
+  shared conventions on how information is shared and communicated.
 ** Programming with Standard I/O
 ** Unix System Calls
 ** Programs Development

@@ -261,7 +261,7 @@ print(l)
   integers to avoid duplication of objects that appear frequently.
   It's behaviour is an implementation detail though
 
-* Functions as first class objects
+* Functions as first class objects     :functools:partials:functools:partial:
 - A higher order function is one that takes a function as an argument
   or returns one as a result.
 - A function's =__doc__= attribute is used to generate help text of
@@ -286,7 +286,7 @@ print(l)
 - =functools.partial= returns a callable that has the original callable
   bound to pre-determined values. Useful for modifying a function that
   takes a number of arguments to an API that provides less arguments.
-* Type Hints in Functions
+* Type Hints in Functions                                       :typing:mypy:
 - It is good practice to do =from typing import X= to reduce the
   length of function signatures
 - According to PEP 483, a type is a set of values and a set of
@@ -390,6 +390,7 @@ print(l)
 - =__call__= can be used to replace single method classes
 
 * A pythonic object
+
 - The python data model promotes the use of duck typing for making
   user defined types behave like built in ones, without the need for
   inheritance
@@ -423,3 +424,31 @@ print(l)
     if the objects need to be used as targets of weak references.
 - Because class attributes are public, it is common practice to create
   subclasses just to modify class attributes.
+
+* Special methods for sequences
+- Implementing just =__getitem__= and =__len__= makes an object
+  behave as a sequence.
+- =seq[a:b:c]= create an object of =slice(a, b, c)= and hands it
+  to =__getitem__=
+- Use =reprlib.repr= to get a safe representation of large or
+  recursive structures
+- Because of its use in debugging, calling =repr= on an object should
+  never raise an exception. Do your best to produce serviceable output.
+- In the context of OOP, a protocol is an informal interface, defined
+  only in documentation and not in code.
+  - One can get away with only implementing part of a protocol if
+    that's all they need (unless using static duck typing)
+- =slice.indices= gracefully handles missing and out of range
+  values to produce a correct slice for the given length
+- =operator.index= calls =__index__= on number to identify types
+  that can be used as indices
+- Excessive use of =isinstance= is a sign of bad OO design
+- =__getattr__= is called as a fallback if an attribute is missing
+  via normal lookup.
+- Often =__getattr__= and =__setattr__= are implemented together to
+  avoid inconsistent behaviour
+- when using =functools.reduce=, it is good practice to use an
+  initializer incase the sequence is empty. It should be the identity
+  value of the operation, e.g. 0 for +, |, ^ and 1 for *, &
+- =zip= can be used to transpose a matrix represented as nesterd
+  iterables
