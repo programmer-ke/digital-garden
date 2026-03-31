@@ -329,6 +329,8 @@ print(l)
   checking, =int=, =float= and =complex= are treated as special cases.
 - =TypeAlias= is the preferred annotation to use for assignments that
   create custom types.
+- =NoReturn= is a special type for functions that never return
+  e.g. =sys.exit=
 - It is common to use =Iterable= for parameters to functions so that
   it is possible to provide input data as a generator and save on
   memory. If use of =.len= is required, the =Sequence= is used instead.
@@ -452,3 +454,104 @@ print(l)
   value of the operation, e.g. 0 for +, |, ^ and 1 for *, &
 - =zip= can be used to transpose a matrix represented as nesterd
   iterables
+
+* Interfaces, protocols and ABCs
+- Protocols in general provide an informal interface: based on
+  convention and may not be fully implemented. In Python this are
+  known as dynamic interfaces supported by the interpretter itself
+  e.g. iterable objects
+- =typing.Protocol= defines a static interface
+- The philosophy of the Python data model is to cooperate with
+  essential dynamic protocols as much as possible.
+  - The intepreter will compensate for missing dunder methods
+- =collections.abc= makes the basic protocols explicit
+- Following established protocols improves re-usability in the Python
+  ecosystem.
+- Monkey patching can be used to dynamically make code outside your
+  control adapt to certain protocols, at the expense of tight coupling
+- Duck typing can enhance defensive programming by generating run time
+  exceptions early in execution e.g. calling =list= or =iter= on an
+  argument expected to be an iterable
+- Duck typing is more robust and expressive than static typing
+  - =typing.Any= is accepted by all types
+  - complex manipulation can be performed dynamically
+- Goose typing entails subclassing ABCs to confirm that they implement
+  a certain interface and using =isinstance= and =issubclass= checks
+  - Instance and subclass checking with ABCs is acceptable, however
+    with concrete classes, it limits polymorphism
+- A chain of if/elif/else checks with =isinstance= could point to a
+  code smell. Usually, these cases should be handled using
+  polymorphism and dynamic dispatch
+- ABCs in Python encapsulate generic abstractions and most programmers
+  would not need to define custom ones (unless developing frameworks
+  and libraries)
+- Concrete methods in ABCs are implemented in terms of the public
+  interface and have no knowledge of an instance's internals
+- An abstract method in an ABC can have a default implementation.  It
+  should be overidden, and the implementation can be accessed using
+  =super=
+- When =@abstractmethod= is applied in combination with other
+  descriptors, it should be the innermost decorator
+- A class can be registered as a virtual sublcass of an ABC if it
+  implements its interface. Python does no checking to validate this.
+  This allows instance and subclass checks to work with the ABC
+  - This is used to register builtins with =collections.abc= classes.
+- Some ABCs support structural typing using =__subclasshook__= to
+  inspect attributes. Instance and subclass checking will
+  automatically work
+- =@runtime_checkable= can allow dynamic checking of protocol support
+  with =isinstance= and =issubclass=
+  - However, this is limited by the fact that at runtime type
+    hints are ignored.
+- Single method protocols make static duck typing more flexible. More
+  complete protocols can be composed from simpler ones
+  - Each protocol subclass has to include =typing.Protocol= in its
+    direct base classes to signify a new protocol rather than a
+    protocol implementation
+- Naming conventions for protocols:
+  - Clear concepts e.g. Container, Iterator
+  - SupportsX for callable methods e.g. SupportsRead, SupportsInt
+  - HasX for attributes e.g. HasItems, HasFileNo
+- Number ABCs in the =numbers= module are useful for dynamic type
+  checking but not for static type checking
+  - Static type checking defines that for majority of cases =complex=,
+    =float= and =int= work.
+* Inheritance: For better or for worse
+- =super= takes in two arguments, a type parameter and an
+  object_or_type parameter.
+  - It returns a proxy that finds the method with a search path
+    starting from type and binds it to the object_or_type parameter.
+- The code of built-ins is written in C and often does not call
+  methods overriden by user-defined classes.
+  - The solution is to derive from alternatives given in the
+    =collections= module e.g. =UserDict=, =UserString=
+- When a method calls =super=, it is a cooperative method, since it
+  enables cooperative multiple inheritance.
+  - cooperative methods should have compatible signatures, since they
+    could be called in any order
+- interaction of =super= with the MRO is dynamic, so even a method
+  without a superclass can call =super= if it exists within a class
+  heirarchy at run time.
+- Mixins often appear first in the tuple of base classes in the class
+  declaration so that they can properly override functionality
+- Favour composition over inheritance.
+  - composition and delegation can replace mixins.
+- Inheritance of interface creates a subclass, implying an =is-a=
+  relationship. This is best done with only ABCs if possible.
+- Inheritance of implementation to avoid code duplication can be done
+  using mixins.
+  - However, this can be replaced with composition
+- A class intended to define an interface should be an explicit ABC or
+  typing.Protocol sublcass. An ABC should only subclass other ABCs
+- Mixins should never be instatiated, and concrete classes should not
+  inherit only from a mixins
+- Aggregate classes are constructed primarily by inheriting from a
+  mixture of ABCs or mixins and do not add their own behaviour or
+  structure. This can be useful for clients
+- Subclass only classes designed for subclassing as indicated by name
+  or docstring.
+  - The =@typing.final= decorator can be applied to classes or methods
+    not meant to be subclassed/overriden for use with typecheckers and
+    IDEs
+- Avoid subclassing concrete classes. All non-leaf classes should be
+  abstract.

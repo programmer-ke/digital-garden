@@ -264,6 +264,22 @@ output of the for loop can be redirected/piped.
   existing programs that cooperate well with each other because of
   shared conventions on how information is shared and communicated.
 ** Programming with Standard I/O
+- When we've reached the limits of what can be done with the shell, we can consider writing
+  programs in C.
+  - Usually, a first version in shell helps define an interface
+- header files are stored in =/usr/include=
+- When a file is opened in a C program, it is given an internal name,
+  the file pointer, which points to a structure that contains
+  information such as location of a buffer, the current character
+  position in that buffer and the operation, read or right.
+- when a program is started, 3 file pointers defined in <stdio.h> are
+  already defined, the stdin, stderr and stdout. These are constants
+  that cannot be reassigned
+- A file is usually buffered so that it is written in large chunks for efficiency.
+  Calling =fclose= forces it to be written to disk
+- It is often better to write programs that to a basic thing well than
+  add features to existing programs.
+  - Easier to maintain, less buggier and easier to memorize usage.
 ** Unix System Calls
 ** Programs Development
 ** Document Preparation

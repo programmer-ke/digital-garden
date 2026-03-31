@@ -1,6 +1,6 @@
 #+FILETAGS:  :foundry:solidity:
 
-* Basic commands
+* Basic commands                                                 :forge:cast:
 
 #+begin_src bash
 
