@@ -555,3 +555,244 @@ print(l)
     IDEs
 - Avoid subclassing concrete classes. All non-leaf classes should be
   abstract.
+* More on Type Hints
+
+- The =typing.overload= decorator is useful where functions may accept
+  different combinations of inputs, especially where the output type
+  depends on the combination of the input types.
+- The expressiveness of annotations is very limited as compared to
+  that of Python e.g. the builtin =max= can be re-implemented in
+  Python with just a bit more lines of code as it's overloading type
+  declarations have.
+- =TypedDict= only exists for the benefit of type checkers and has no
+  runtime effect e.g. There's no guarantee =json.loads= will return a
+  dictionary matching a TypeDict specification.
+- =typing.cast= can be used to silence spurious type checker warnings
+  or give the type checker a little help in ambiguous cases.
+- At import time, python reads type hints in functions, classes and
+  modules and stores them in the =__annotations__= attribute.
+  - =inspect.get_annotations= or =typing.get_type_hints= can be used
+    to retrieve them
+- Some definitions:
+  - Generic Type :: a type declared using typevars e.g. =abc.Mapping[KT,
+    KV]=
+  - Formal Type parameter :: The type variable used e.g. KT and KV
+  - Parameterized Type :: Type declared with actual types
+    e.g. =abs.Mapping[str, float]=
+  - Actual type parameter :: The type given to parameterized types
+    e.g. =int=, =float=
+- A generic type L is invariant when there's not supertype, subtype
+  relationships between two parameterized types even then there's a
+  relationship between the type parameters e.g. =list[int]= and
+  =list[float]=
+  - e.g. mutable collections in python
+- A generic type L is covariant when L[B] is a subtype of L[A] and B
+  is a subtype of A
+  - e.g. immutable containers in Python
+- In contravariant, the superclass, subclass relationship of generic
+  types is the reverse of the relationship of the actual type
+  parameters.  e.g. write only structures and callables on paramter
+  types.
+- Rules of thumb:
+  - A formal parameter that defines a type for data that comes out of
+    an object can be covariant.
+  - A formal parameter that defines a type for data that goes into an
+    object can be contravariant
+  - A formal parameter that defines a type for data that both goes
+    into and comes out of an object must be invariant.
+  - To err on the safe side, make formal parameters invariant.
+
+* Operator overloading
+- Limitations of operator overloading in Python
+  - meaning of operators for builtin types cannot be changed
+  - new operators cannot be created, only existing ones overloaded
+  - A few operators cannot be overloaded: is, and, or, not
+- When overriding unary operators, create and return a new instance
+  - unary operators include:
+    - =-= implemented by =__neg__=
+    - =+= implemented by =__pos__=
+    - =~= implemented by =__invert__= (bitwise not)
+  - But when the operator is + and the receiver is immutable, =self=
+    can be returned
+- When overriding unary or infix operators, return new objects. Only
+  augmented assignment operators e.g. +=, *= may modify the first
+  operator (if mutable)
+- Dispatch steps for infix special methods:
+  - use the method in the left side operand if it exists and doesn't
+    return =NotImplemented=
+  - use the reverse method in the right side operand if it exists and
+    doesn't return =NotImplemented=
+  - raise a =TypeError= for unsupported operations
+- =NotImplemented= is a special singleton returned by an infix
+  operator special method. It is different from the
+  =NotImplementedError= raised by ABCs
+- When the operation is commutative, the forward method can delegate
+  to the reverse method e.g. =__add__= can delegate to =__radd__=
+- If an infix method raises an exception, the operator dispatch
+  mechanism is aborted. It can be better to catch the exception and
+  return =NotImplemented= so that the interpreter can try calling the
+  reverse operator method.
+- For rich comparison operators, e.g. ==, !=, >= etc the same
+  set of methods are used for forward and reverse operations, with
+  operands swapped e.g.
+  - =a.__eq__(b)= or =b.__eq__(a)=
+  - =a.__gt__(b)= or =b.__lt__(a)=
+- "In the face of ambiguity refuse the temptation to guess"
+  - When it is unclear when a comparison passes or fails, it is best
+    to do the least surprising thing, with may be to fail
+- In many cases we may not need to implement =__ne__= when we have
+  =__eq__= because the fallback behavior inherited from =object= is to
+  negate =__eq__=
+- If augmented assignment operators are not implemented, the default
+  is to the simpler operators if they exist.
+  e.g. if =__iadd__= is not implemented, =__add__= will be used and the
+  left side variable rebound. a += b becomes a = a + b
+  - For immutable objects, in-special methods are unnecessary.
+- The += operator is more liberal than the + operator when it comes to
+  the types of its operands.
+  - For different types the result of + on different types is
+    ambiguous, while the result type for += is the left operand.
+- Operator overloading is one areas where =isinstance= tests are
+  common
+- The =functools.total_ordering= decorator can help with generating
+  rich comparison methods.
+
+* Iterators, Generators and Coroutines
+- Every standard collection in Python is iterable. An iterable is an
+  object that provides an iterator for use in for loops, unpacking etc
+- Whenever Python needs to iterate over an object, it calls the builtin
+  =iter= on it
+  - calls =__iter__= if implemented to obtain an iterator
+  - if =__getitem__= exists instead, it creates an iterator and
+    fetches items from index zero.
+  - Otherwise, it fails with a =TypeError=
+- Goose typing checks that an iterable implements an =__iter__=
+  method, and is less flexible than the duck typing approach
+  - The most flexible way to tell if an object is iterable is to call
+    =__iter__= on it
+- An iterable can be make from a callable by supplying it to =iter=
+  with a sentinel value.
+- Python's standard interface for an Iterator has two methods:
+  - =__next__= returns the next item in the series or raises
+    =StopIteration=
+  - =__iter__= returns self, allowing an iterator to be used where an
+    iterable is expected.
+- Best way to check for an iterator is using =isinstance(x, abc.Iterator)=
+  - it does structural typechecking with =__subclasshook__=
+- Iterators should support  multiple independed traversals. Each call to
+  =iter= should return a different iterator each with its own state.
+- The most compact implementation of an iterator is an =__iter__= that
+  is implemented as a generator (or returns a generator expression).
+- =itertools=, =functools= and some builtins provide generators that
+  can be combined in several ways for custom functionality.
+- =yield from= allows a generator to delegate to a sub generator.
+- Despite similar implementation, generators and coroutines are used
+  for different purposes:
+  - Generators produce data for iteration
+    - Calling =send= on a generator raises an error
+  - Coroutines consume data and produce data not meant for iteration.
+- The body of a coroutine could be an infinite loop. It is garbage collected
+  when no longer referenced, or can be closed explicitly.
+* with and else blocks
+- A context manager object is created from a class with =__enter__=
+  and =__exit__= methods
+  - =__enter__= may return self or any other object to be used in the with block
+  - =__exit__= is called when exiting the block
+    - if it returns a falsy value, any exception raised in the block
+      will be propagated
+- Parenthesis may be used in the with statement to manage multiple
+  context managers in the same block
+- The =@contextmanager= wrapping a generator can be used to create a
+  context manager.
+  - everything before the yield statement will be executed at the
+    beginning of the with block.
+  - the code after yield will run when exiting the block
+  - if an exception is passed to the =__exit__= method, it is thrown,
+    causing it be raised in the yield line
+  - A try .. except .. finally can be used handle exceptions and clean up
+  - if no exception is passed, =next= is called on the wrapped generator
+- generators decorated by =@contextmanager= can be used as decorators
+  themselves
+- The =else= block used with =for=, =while=, =try= can be mentally
+  substituted as 'then'
+  - It runs after a =for= loop if it ran to completion
+  - It runs after a =while= loop if exit condition became falsy (did
+    not break)
+  - It runs after a try block if no exception was raised.
+* Concurrency Models in Python
+- Starting a thread or process is not cheap, so instead of starting
+  one to perform a single computation then exit, often a pool of
+  workers are started to perform multiple computations to armotize the
+  cost
+- Execution units are objects that execute code independent of each
+  other each with its own state and call stack. In python they are,
+  threads, processes and coroutines.
+- Processes communicate via pipes, sockets or memory mapped files, all
+  of which only carry raw bytes
+- A thread as an execution unit within a process:
+  - A process usually has a main thread when it starts. A process can
+    create more threads using OS APIs. Threads operate within the same
+    memory space and enable pre-emptive multitasking under control of
+    the OS scheduler.
+- A coroutine is a function that can suspend itself and resume
+  later. In Python, there is classic coroutines built from generator
+  functions, and native coroutines built using =async def=
+- Coroutines usually run under a single thread under supervision of an
+  event loop.
+- coroutines support cooperative multitasking. Each has to cede
+  control via =yield= or =await= so that another may proceed.
+- Queues allow separate execution units to exchange data and control
+  messages.
+- A lock is an object that execution units can use to synchronize
+  their actions and avoid corrupting data
+- Access to object reference counts and other internal interpreter
+  state is controlled by the Global Intepreter Lock. Only one Python
+  thread can hold the GIL at a time, therefore serializing execution
+  regardless of CPU cores
+- The Python bytecode interpreter pauses the current thread every 5ms
+  by default releasing the GIL.
+  - The OS scheduler can then pick any other threads if available that
+    are waiting for the GIL to proceed.
+- A built in function or extension written in any other language
+  against the C/Python API releases the GIL while running time
+  consuming tasks.
+- Standard library functions that make syscalls release the GIL.
+- Extension that integrate at the Python/C API level can also launch
+  non-Python threads that are not affected by the GIL. They can read
+  and write memory underlying objects that support the buffer protocol
+- I/O functions release the GIL, so network programming is not
+  affected by the GIL
+- Contention of the GIL slows CPU intensive threads, making them
+  slower than single threaded implementations.
+- Best practice for coroutines with multithreading is to let one
+  thread handle the event loop and run all coroutines, while
+  additional threads perform specific tasks.
+- =time.sleep= blocks the calling thread but releases the GIL allowing
+  other threads to run.
+- The  =threading.Event= class is the simplest signalling mechanism
+  for coordinating threads
+- In multiprocessing, the =multiprocessing.Event= object crosses the
+  process boundary. It is implemented with a low-level OS semaphore in
+  C.
+- In multithreading and multiprocessing, the OS scheduler allocates
+  CPU time for preemptive multitasking.
+- In coroutines, an application level event loop manages the queue of
+  executing coroutines with cooperative multitasking.
+- Three methods of running a coroutine:
+  - =asyncio.run(coro())= called from a regular function to drive a
+    coroutine object
+  - =asyncio.create_task(coro())= called from a coroutine to schedule
+    another coroutine that will eventually run
+  - =await coro()= called from a coroutine to cede control to another
+    coroutine, until it returns
+- =time.sleep= in a coroutine will block the entire thread and nothing
+  will run. Use =asyncio.sleep= to pause the current coroutine and
+  allow other coroutines to run
+- It is easier to handle interruptions with coroutines than with
+  threads.
+  - Because of cooperative multitasking with =await=, one can catch
+    the =CanceledError= when a coroutine is cancelled and clean up
+- A common pattern in concurrent programs is having workers loop
+  indefinately while processing tasks from a queue.
+  - A sentinel value i.e. a poison pill is used to terminate the
+    workers.

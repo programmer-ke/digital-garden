@@ -1,11 +1,51 @@
 #+TITLE: Blog Posts
 
+- [[file:unix.org][unix]]
+  #+html: <p class='pubdate'>by krm on Mar 31, 2026 12:46.</p>
+- [[file:fluent-python.org][fluent python]]
+  #+html: <p class='pubdate'>by krm on Mar 30, 2026 12:37.</p>
+- [[file:foundry.org][foundry]]
+  #+html: <p class='pubdate'>by krm on Mar 28, 2026 15:35.</p>
+- [[file:christ-esteem.org][christ esteem]]
+  #+html: <p class='pubdate'>by krm on Feb 26, 2026 04:20.</p>
+- [[file:unicode_normalization.org][unicode normalization]]
+  #+html: <p class='pubdate'>by krm on Feb 18, 2026 06:05.</p>
+- [[file:cosmic-python.org][cosmic python]]
+  #+html: <p class='pubdate'>by krm on Jan 14, 2026 15:43.</p>
+- [[file:nextjs.org][nextjs]]
+  #+html: <p class='pubdate'>by krm on Jan 08, 2026 14:52.</p>
+- [[file:solveit-method.org][solveit method]]
+  #+html: <p class='pubdate'>by krm on Jan 02, 2026 11:58.</p>
+- [[file:chainlink.org][chainlink]]
+  #+html: <p class='pubdate'>by krm on Dec 21, 2025 14:41.</p>
+- [[file:blockchain.org][blockchain]]
+  #+html: <p class='pubdate'>by krm on Dec 14, 2025 08:32.</p>
+- [[file:communion.org][communion]]
+  #+html: <p class='pubdate'>by krm on Dec 06, 2025 09:41.</p>
+- [[file:essentials-christ-centered.org][essentials christ centered]]
+  #+html: <p class='pubdate'>by krm on Nov 26, 2025 07:05.</p>
+- [[file:commits.org][commits]]
+  #+html: <p class='pubdate'>by krm on Nov 06, 2025 13:18.</p>
+- [[file:akash.org][akash]]
+  #+html: <p class='pubdate'>by krm on Oct 20, 2025 16:08.</p>
+- [[file:docker.org][docker]]
+  #+html: <p class='pubdate'>by krm on Sep 04, 2025 16:13.</p>
+- [[file:dsa/word_search.org][word search]]
+  #+html: <p class='pubdate'>by krm on Jul 19, 2025 09:10.</p>
+- [[file:ethereum-app-dev.org][ethereum app dev]]
+  #+html: <p class='pubdate'>by krm on Jul 17, 2025 14:38.</p>
+- [[file:dsa/non_decreasing_array.org][non decreasing array]]
+  #+html: <p class='pubdate'>by krm on Jul 15, 2025 06:11.</p>
+- [[file:the_exodus_way.org][the exodus way]]
+  #+html: <p class='pubdate'>by krm on May 18, 2025 11:06.</p>
 - [[file:dsa/product_or_array.org][product or array]]
   #+html: <p class='pubdate'>by krm on Mar 13, 2025 05:50.</p>
 - [[file:dsa/basic_calculator.org][basic calculator]]
   #+html: <p class='pubdate'>by krm on Mar 13, 2025 04:46.</p>
 - [[file:legal_docs.org][legal docs]]
   #+html: <p class='pubdate'>by krm on Feb 22, 2025 16:58.</p>
+- [[file:css.org][css]]
+  #+html: <p class='pubdate'>by krm on Feb 22, 2025 10:42.</p>
 - [[file:fastai-1.org][fastai 1]]
   #+html: <p class='pubdate'>by krm on Jan 30, 2025 14:59.</p>
 - [[file:fastai-2.org][fastai 2]]
@@ -70,8 +110,6 @@
   #+html: <p class='pubdate'>by krm on Oct 05, 2024 16:00.</p>
 - [[file:design_patterns.org][design patterns]]
   #+html: <p class='pubdate'>by krm on Sep 27, 2024 04:26.</p>
-- [[file:unicode_normalization.org][unicode normalization]]
-  #+html: <p class='pubdate'>by krm on Sep 18, 2024 14:39.</p>
 - [[file:orgmode.org][orgmode]]
   #+html: <p class='pubdate'>by krm on Jul 22, 2024 06:28.</p>
 - [[file:literate_programming.org][literate programming]]
@@ -86,8 +124,6 @@
   #+html: <p class='pubdate'>by krm on Oct 13, 2023 15:15.</p>
 - [[file:fastai-4.org][fastai 4]]
   #+html: <p class='pubdate'>by krm on Sep 27, 2023 16:26.</p>
-- [[file:css.org][css]]
-  #+html: <p class='pubdate'>by krm on Aug 01, 2023 10:00.</p>
 - [[file:solar.org][solar]]
   #+html: <p class='pubdate'>by krm on Jul 30, 2023 09:53.</p>
 - [[file:math.org][math]]
@@ -96,8 +132,6 @@
   #+html: <p class='pubdate'>by krm on Feb 14, 2023 16:14.</p>
 - [[file:javascript-dev.org][javascript dev]]
   #+html: <p class='pubdate'>by krm on Feb 10, 2023 11:38.</p>
-- [[file:ethereum-app-dev.org][ethereum app dev]]
-  #+html: <p class='pubdate'>by krm on Feb 10, 2023 11:35.</p>
 - [[file:emom.org][emom]]
   #+html: <p class='pubdate'>by krm on Jan 28, 2023 10:09.</p>
 - [[file:calculus.org][calculus]]
