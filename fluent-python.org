@@ -796,3 +796,78 @@ print(l)
   indefinately while processing tasks from a queue.
   - A sentinel value i.e. a poison pill is used to terminate the
     workers.
+* Concurrent Executors
+- =ThreadPoolExecutor= and =ProcessPoolExecutor= are context
+  managers. =__exit__= will call =executor.shutdown(wait=True)= which
+  blocks until all threads are done
+- =executor.map= returns a generator that can be iterated to retrieve
+  results of each call (or reraise any exception)
+  - This will be in the order of mapping the calls
+- =concurrent.future.Future= and =asyncio.Future= represent deferred
+  computation that may or may not have completed (Similar to Promise)
+  in JavaScript
+  - Futures should only be created by the concurrency framework, which
+    manages its state. Application code should not do this.
+- Futures have a non-blocking =done= method that signals that the computation is done
+- They have a =add_done_callback= method to provide a callback to be
+  called once done. It is called in the same thread/process that
+  executed the future
+- They have a =result= method that returns the result of the
+  computation or reraises any exceptions encountered.
+  - In =concurrent.futures.Future=, result will block if future is not yet completed
+  - In =asyncio.Future=, the result method is awaited for the result
+- Futures are returned by
+  =executor.submit=. =concurrent.futures.as_completed= takes an
+  iterable of futures and return an iterator that yield as the futures
+  are done. This is different from =executor.map= which returns a
+  generator that yields in mapping order.
+  - The iterator from =executor.map= may block until the next future
+    in the map iterator completes.
+
+* Asynchronous Programming
+
+- =asyncio.as_completed= is generator that yields coroutines that
+  return results on the coroutines passed to it in the order they are
+  completed.
+- =asyncio.run= starts the event loop and returns only when the event loop exits
+- =asyncio.get_running_loop= returns a loop that is already running or
+  raises an error if there's none
+- =asycio.create_task= will schedule a coroutine for concurrent execution.
+  - it returns an =asyncio.Task=, that the client code doesn't need to await on
+- Low level awaitables
+  - An object with an =__await__= method that returns an iterator
+  - Objects written against the Python/C api with a =tp_as_async.am_await= function
+- =await.gather= accepts one or more awaitable arguments and returns a list
+  of their results after they all complete
+- asyncio does not provide an asynchronous filesystem API at this point
+- =await= borrows it's implementation from =yield from=
+- =async with= works with asynchronous context managers which
+  implement =__aenter__= and =__aexit__= as coroutines
+- =asyncio.to_thread= delegates work to a thread pool provided by asyncio
+- =asyncio.Semaphore= has an internal counter that decrements whenever
+  it's =acquire= method is awaited, and increments whenever its
+  =release= method is called
+  - =acquire= blocks whenever the counter is zero and suspends to coroutine.
+  - It is safer to use =asyncio.Semaphore= as a context manager
+- An alternative to =asyncio.to_thread= is =loop.run_in_executor=
+  (e.g. for older Python versions)
+  - The first argument is an optional Executor to use, which could be
+    a process pool executor if required
+  - asyncio itself uses =run_in_executor= under the hood e.g. for
+    socket functionality
+  - Note that =loop.run_in_executor= is uncancellable and can prevent
+    =asyncio.run= from shutting down
+- =async for= works with asynchronous iterables implementing
+  =__aiter__=
+  - =__aiter__= should be a regular function that returns an
+    asynchronous iterator
+- The =@asynccontextmanager= can be used to implement an async context manager
+  - It wraps and async function that yields
+- An asynchronous generator expression can be created using the =async for=
+  consuming an iterable
+- an alternative to =async.gather= is using an asynchronous
+  comprehension where each iterable is awaited.
+  - =async.gather= gives more control over error handling
+- Python's async/await language constructs are not tied to any
+  specific event loop and libraries.
+  - alternative frameworks like curio and trio utilize them

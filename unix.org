@@ -281,5 +281,50 @@ output of the for loop can be redirected/piped.
   add features to existing programs.
   - Easier to maintain, less buggier and easier to memorize usage.
 ** Unix System Calls
+- Low level I/O is mostly through reading and writing files including
+  with peripherals
+- A FILE pointer points to a structure that contains among other
+  things a file descriptor to the file.
+  - the macro =fileno= in stdio.h returns the descriptor
+- When a program is started by the shell, it inherits 3 file
+  descriptors by default
+  - 0 for stdin, 1 for stdout and 2 for stderr
+  - Normally they are attached to the terminal unless redirected by
+    the shell
+- Input and output is done via two system calls =read(2)= and
+  =write(2)=
+  - each take a file descriptor as first argument, an array of bytes
+    (source or dest) as the second argument and number of bytes to be
+    transfered as the 3rd
+- Reading and writing in chunks that match the disk blocksize may be
+  more efficient than character at a time.
+  - block size is defined as parameter BUFSIZ in stdio.h
+- Syscall =open(2)= is used to open files for reading and writing. It
+  returns a file descriptor.
+- Syscall =creat(2)= create a file if it does not exist. If it exists,
+  it will be truncated
+  - It accepts permissions that will be used to create the file if it
+    doesn't exist
+- syscall =unlink(2)= removes a file from the filesystem
+- When syscalls encounter errors, they set the variable =errno= in
+  errno.h
+  - A string representation of the error can be found using
+    =strerror(3)= in string.h
+- Normally reading and writing happens sequentially in files. However,
+  the syscall =lseek(2)= can be used to randomly access a file
+- A directory is a file containing a list of filenames and anindication of
+  where they are located.
+  - A file entry consists of an inode number (index into the inode
+    table) and a filename
+    - found in /usr/include/dirent.h in linux
+- The =stat(2)= and =fstat(2)= syscalls are used information about a
+  file from the inode table
+  - =stat= returns inode info from a filename
+  - =fstat= returns inode information from a file descriptor
+  - the information is saved in a structure =struct stat= from <sys/stat.h>
+- Many programs are not system programs but still use information
+  maintained by the OS. Such information exists in standard header
+  files which the programs include, instead of defining it themselves,
+  to help with portability.
 ** Programs Development
 ** Document Preparation
