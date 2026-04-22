@@ -871,3 +871,99 @@ print(l)
 - Python's async/await language constructs are not tied to any
   specific event loop and libraries.
   - alternative frameworks like curio and trio utilize them
+
+* Dynamic Attributes and Properties
+- =__getattr__= is only called when there's no attribute by that name
+- Implementing =__dir__= supports the =dir()= builtin withch is used
+  for autocompletion in IDEs and Repls
+- =keyword.iskeyword= identifies Python keywords
+- =__init__= in reality is merely an initializer rather than constructor.
+  The =self= object is already created by =__new__=
+- =__new__= is the method that creates the object passed to =__init__=
+- If =__new__= returns an instance of a different class, =__init__=
+  for that class won't be called on it
+- As a class method, the first argument to =__new__= is the class
+  itself, and the rest are the arguments to =__init__=
+- calling =object.__new__(Someclass)= via super from a classes' =__new__= and passing
+  the =__class__= attribute of the created object is =Someclass=
+- Updating a classes =__dict__= with a mapping is a quick ways to
+  create attributes for the class
+- Functionality in python allowing one to easily create an object with
+  attributes from arguments supplied to =__init__= include:
+  - =types.SimpleNamespace=
+  - =argparse.Namespace=
+  - =multiprocessing.managers.Namespace=
+- Inside properties, trying to access an attribute by the same name
+  using the dot notation results in a =RecursionError=. Accessing
+  =self.__dict__= directly bypasses Python's default algorithm and
+  avoids the error.
+- Handmade property caches run the risk or race conditions in a
+  multithreaded program.
+- =functools.cached_property= caches the result of a method in an
+  instance attribute by the same name, preventing recomputation.
+  - =functools.cached_property= only runs on lookups, and when an
+    attribute by the same name doesn't already exist. If it exists, it
+    will be returned. If it doesn't exist or is cleared, the cached
+    property method will run and set it.
+  - stacking =@property= on =@functools.cache= will create a cacheable
+    property that operates independently of the the classes' attributes
+- Custom property setters already exist in =__init__= allowing one
+  create custom validation of attributes
+- The =property= builtin is a class that accepts a getter, setter,
+  deleter and a docstring
+- When using the dot notation for attribute access, the search starts
+  =obj.__class__= to check if there's a matching property, before
+  checking the instance itself.
+- when accessing properties created by property factories, the getters
+  and setters determine their relevant attribute names by reading from
+  their closures
+  - Default lookup is overriden by set properties, allowing them to
+    manage their attributes
+- In a class definition =@some_property.deleter= is used to mark the
+  method used to delete the attribute managed by the property
+  - When not using properties, the lower level =__delattr__= can be
+    used
+- Attributes that affect attribute handling
+  - =obj.__class__= (same as =type(obj)=)
+    - Python looks up special methods such as =__getattr__= only in
+      the object's class
+  - =__dict__=
+    - writeable attributes of an object or class
+  - =__slots__=
+    - A tuple of strings naming allowed attributes. If =__dict__= is
+      not in =__slots__= then instances will not have a =__dict__= of
+      their own, which helps save memory
+- Functions for attribute handling:
+  - =dir()=
+    - lists most attributes of an object. It is intended for interactive
+      use, not to be comprehensive. Output can be customized by =__dict__=
+      If called without arguments, lists name of current scope
+  - =getattr(obj, name[, default])=
+    - Get's attribute defined by =name= from =obj=
+  - =hasattr(obj, name)=
+    - Determines if named attribute exists. Uses =getattr= under the hood
+  - =setattr(obj, name, value)=
+    - Assigns an attribute to obj if it allows it.
+  - =vars(obj)=
+    - returns the value of =obj.__dict__=. If called without an argument,
+      returns the local scope
+- Special methods for attribute handling
+  - Trigged when using the dot notation, getattr, hasattr and setattr,
+    but not when directly accessing the instances =__dict__=. These
+    special methods are not shadowed by instance attributes of the
+    same name
+  - =__delattr__=
+    - called when using the del statement e.g  =del obj.attr=
+  - =__dir__=
+    - Provides a listing of attributes i.e. =dir(obj)= triggers =Class.__dir__(obj)=
+  - =__getattr__=
+    - called when attribute lookup fails
+  - =__getattribute__=
+    - Always called when there's an attribute lookup. Implementations
+      should usually call =super().__getattribute__= to prevent
+      infinite recursion
+ - =__setattr__=
+   - Always called when there's an attempt to set the named attribute.
+- In practice, =__getattribute__= and =__setattr__= are harder to use
+  correctly because they are always called. It is better to use
+  properties or descriptors for these cases.
