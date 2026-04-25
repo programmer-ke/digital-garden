@@ -281,6 +281,7 @@ output of the for loop can be redirected/piped.
   add features to existing programs.
   - Easier to maintain, less buggier and easier to memorize usage.
 ** Unix System Calls
+*** Low level IO
 - Low level I/O is mostly through reading and writing files including
   with peripherals
 - A FILE pointer points to a structure that contains among other
@@ -312,12 +313,13 @@ output of the for loop can be redirected/piped.
     =strerror(3)= in string.h
 - Normally reading and writing happens sequentially in files. However,
   the syscall =lseek(2)= can be used to randomly access a file
+*** inodes
 - A directory is a file containing a list of filenames and anindication of
   where they are located.
   - A file entry consists of an inode number (index into the inode
     table) and a filename
     - found in /usr/include/dirent.h in linux
-- The =stat(2)= and =fstat(2)= syscalls are used information about a
+- The =stat(2)= and =fstat(2)= syscalls are used get information about a
   file from the inode table
   - =stat= returns inode info from a filename
   - =fstat= returns inode information from a file descriptor
@@ -326,5 +328,64 @@ output of the for loop can be redirected/piped.
   maintained by the OS. Such information exists in standard header
   files which the programs include, instead of defining it themselves,
   to help with portability.
+*** Processes  
+- The =system(3)= command from =<stdlib.h>= executes a command in a subshell
+  - It forks then the sub-process execs itself with the shell command
+- The =exec(3)= comes in two variants:
+  - =execlp= for arguments known in advance
+  - =execvp= for arguments now known in advance
+- =exec(3)= overlays the process it is running in with the command to execute
+  until it exits, unless the call to exec fails
+- To regain control of the original process, we need to split the
+  process into two copies and wait for the child to finish executing.
+- =fork(2)= is used to split processes. In the child, the call to
+  fork returns 0, while in the parent , it returns the process_id of
+  the child
+  - Typically, an if block where the return is zero is used to execute the child process
+- =wait(2)= is used by the parent process to wait for state changes in child processes.
+  - whenever any child process exits, it will return its process id.
+- A child process inherits the file descriptors of its parent, i.e. they both are connected
+  to the same files.
+  - Typically, the parent would flush stdout before forking so that
+    it's output comes out before the child's
+- The syscall =dup(2)= duplicates a file descriptor on the lowest
+  unallocated file descriptor number.
+  - It can be used to reallocate file descriptors by calling =close=
+    afterwards on the initial file descriptor
+  - This can be used e.g. for have a child process access the terminal (/dev/tty)
+*** Signals and Interrupts
+- A program needs to deal gracefully with:
+  - program faults e.g. illegal memory references, floating point
+    errors, peculiar instructions
+  - outside world signals e.g. interrupt, quit, hangup (loss of
+    connection), terminate (from kill command)
+- When such an event occurs, a signal is sent to all processes started
+  from the same terminal
+- The default is to terminate the process, unless a signal handler is
+  set
+- the system call =signal(2)= alters the default action
+  - the first argument is the signal to handle
+  - the second argument is the address of a function to handle the
+    signal, or a code to specify whether the signal is ignored or is
+    given the default action (termination)
+  - The return value is the is the previous signal handler for the
+    signal
+- For programs that are started non-interactively (started with &),
+  the shell arranges for them to ignore signals by default
+- A program like a text editor may interpret a signal as a request to
+  stop what it is doing and return to its own command processing loop.
+  - This program may utilize =setjump(3)= to save the state of its
+    stack just before the loop, and a signal handler that calls
+    =longjump(3)= to goto the saved state
+- Programs that are waiting for I/O may handle interrupts by setting
+  an error via =errno=
+  - when execution resumes where it was interrupted, the error can be
+    handled as desired.
+- Since signals are sent to all processes in the terminal, some that
+  start subprocesses programs may opt to ignore interrupts until their
+  subproceses return
+- The system call =alarm(2)= allows one to set the signal =SIGALRM= to
+  be sent to the process after a given number of seconds, e.g. to
+  ensure some work is done within a given amount of time
 ** Programs Development
 ** Document Preparation

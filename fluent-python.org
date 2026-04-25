@@ -967,3 +967,72 @@ print(l)
 - In practice, =__getattribute__= and =__setattr__= are harder to use
   correctly because they are always called. It is better to use
   properties or descriptors for these cases.
+
+* Attribute Descriptors
+- A descriptor is a class that implements a dynamic protocol
+  consisting of the =__get__=, =__set__= and =__delete__= methods.
+  - the =property= class implements the full descriptor protocol
+  - partial implementations are also okay, most only implement
+    =__set__= and =__get__=
+  - It is a protocol-based feature, no subclassing required
+- Descriptors set the attribute in =__dict__= directly. Calling
+  =setattr= would result in infinite recursion
+- =__get__= receives three arguments:
+  - self :: an instance of the descriptor
+  - instance :: in instance of the class who's attributes are being managed
+  - owner :: the class who's instance is being managed
+- When retrieved via the class rather than instance, the =__get__=
+  method receives =None= for the managed instance's value. By
+  convention, the descriptor instance (self) is returned to enable
+  introspection
+- A descriptor instance is created once for each class it is defined
+  on, even if the class has many multiple instances.
+  - any values stored in the descriptor instance will be available to
+    all instances of the class
+- the =__set_name__= attribute is used to automatically assign a
+  =__dict__= storage name for the descriptor matching its defined attribute name,
+  minimizing repetition.
+  - When =__set_name__= is defined, =__get__= is not necessary. The
+    name will automatically be used to retrieve it's value from the
+    managed instance's =__dict__=
+- If a descriptor defines a =__set__=, then it becomes an overriding descriptor.
+  - Managed instances setting a similarly named attribute will have access overriden by the descriptor
+  - the =property= class is a example of an overriding descriptor
+  - If no =__get__= is defined, accessing the attribute in the managed
+    instance will either return an attribute by that name in it's
+    =__dict__= if it exists, or returns the descriptor instance itself
+    if it doesn't exist
+- A descriptor without a =__set__= is a non-overriding descriptor.
+  - setting an managed instance's attribute of the same name shadows
+    the descriptor.
+- Reading of a class attribute can be controlled by the descriptor
+  through its =__get__= method. However setting it cannot be managed
+  by =__set__=, the descriptor is replaced.
+  - To manage setting of attributes, we have to attach descriptors
+    to the class of the class, i.e. it's user defined metaclass
+    - The default metaclass is =type= which cannot be customized
+- User defined function have a =__get__= attribute, so then they
+  are attached to classes, they become descriptors.
+  - When a method is accessed through its class, it return an instance
+    of itself as is convention for descriptors
+  - When a method is accessed from a managed instance, it returns a
+    bound method, i.e.  callable that wraps the function and binds the
+    instance as its first argument.
+    - =__call__= on the returned callable executes the function with
+      the instance as its first argument.
+- Usage tips:
+  - use =property= to keep it simple as it implements the required protocol
+    - The default =__get__= raises =AttributeError= to create read only properties
+  - Read only descriptors require a =__set__=
+  - Validation descriptors need to define a =__set__=
+  - Caching can be done effectively with only =__get__=. The first
+    time, computation is performed then the instances =__dict__= is
+    assigned an attribute of the same name. Subsequent access will
+    retrieved the computed value directly
+    - =functools.cached_property= works in a similar way
+  - Nonespecial methods can be shadowed by instance attributes since
+    they are non-overidding descriptors.
+    - special (magic) methods cannot be overriden because the
+      intepreter looks for them in the class itself.
+- Deletion of managed attributes can be implemented via the
+  =__delete__= method
