@@ -1,0 +1,49 @@
+#+FILETAGS: :debian:sysadmin:
+
+* debian
+
+** package system
+*** Structure of the binary package
+The =.deb= file format is an archive. It can be inspected with
+=ar t foo.deb= and extracted with =ar x foo.deb=
+
+It contains:
+- =debian-binary= : a text file indicating package format version
+- =control.tar.xz= : meta-information like name, version of package,
+  scripts to install, uninstall, dependencies etc
+- =data.tar.xz= : files to be extracted including executables,
+  libraries and documentation
+
+Content of the control file is similar to the output of =apt-cache show <package>=
+
+The =alien= program can create .deb files from =.rpm= packages.
+
+e.g. =fakeroot alien --to-deb phpMyAdmin-5.1.1-2.fc35.noarch.rpm=
+*** Structure of a source package
+A source package can be downloaded for example using apt: =apt source <package>=
+
+Structure of a source package:
+- =.dsc= file which shows author, list of files and their authentication
+- =.orig.tar.gz= source code as provided by original author
+- =.debian.tar.xz= modifications made by the debiain maintainer,
+  including a debian directory with instruction to construct the
+  binary package(s)
+  
+*** dpkg
+
+Used to handle debian packages. It is a system tool as opposed to apt
+which is a user tool that complements it.
+
+Some operations.
+
+#+begin_src bash
+dpkg -i man-db_2.9.4-2_amd64.deb # install
+
+# unpack and configure
+dpkg --unpack man-db_2.9.4-2_amd64.deb
+dpkg --configure man-db
+
+dpkg -r debian-cd  # removal
+#+end_src
+
+
