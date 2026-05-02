@@ -190,7 +190,7 @@ output of the for loop can be redirected/piped.
   a file in parallel
 *** Other filters
 - sort, comm, tr, uniq, dd
-*** sed
+*** sed                                                                 :sed:
 - A streaming version of ed (stream editor) that supports ed's commands
 - A more general grep like tool that performs an action (print, delete, write etc)
   on lines that match certain patterns
@@ -211,7 +211,7 @@ output of the for loop can be redirected/piped.
 - Limitations of sed:
   - limited memory, makes only one pass, no forward references, no
     manipulation of numbers (pure text processor)
-*** awk
+*** awk                                                                 :awk:
 - fixes some of the limitations of =sed=
 - has the same form =awk 'program' filenames..=
 - program can be a sequence of instructions in the following form
@@ -263,7 +263,7 @@ output of the for loop can be redirected/piped.
 - The shell demonstrates iterative programming based on re-use of
   existing programs that cooperate well with each other because of
   shared conventions on how information is shared and communicated.
-** Programming with Standard I/O
+** Programming with Standard I/O                                      :stdio:
 - When we've reached the limits of what can be done with the shell, we can consider writing
   programs in C.
   - Usually, a first version in shell helps define an interface
@@ -280,7 +280,7 @@ output of the for loop can be redirected/piped.
 - It is often better to write programs that to a basic thing well than
   add features to existing programs.
   - Easier to maintain, less buggier and easier to memorize usage.
-** Unix System Calls
+** Unix System Calls                                               :syscalls:
 *** Low level IO
 - Low level I/O is mostly through reading and writing files including
   with peripherals
@@ -318,7 +318,8 @@ output of the for loop can be redirected/piped.
   where they are located.
   - A file entry consists of an inode number (index into the inode
     table) and a filename
-    - found in /usr/include/dirent.h in linux
+    - found in =/usr/include/dirent.h= in linux
+  - managed by functions like =opendir(3)=, =readdir(3)=, =closedir(3)= found in =dirent.h=
 - The =stat(2)= and =fstat(2)= syscalls are used get information about a
   file from the inode table
   - =stat= returns inode info from a filename
@@ -388,4 +389,15 @@ output of the for loop can be redirected/piped.
   be sent to the process after a given number of seconds, e.g. to
   ensure some work is done within a given amount of time
 ** Programs Development
+- =yacc= is a parser generator, converts a BNF grammar into parser that
+  will parse statements in the language. Steps:
+  - grammer is specified
+  - each rule can be augmented with an action in C. This defines the
+    semantics
+  - A lexical analyzer reads input and provides it to the parse as
+    tokens. This is implemented as a user defined function called =yylex=
+  - yacc creates the parser as a function named =yyparse=
+  - yacc then produces a C file that can be compiled normally
+  - On encoutering syntax errors, =yyparse= will call user defined
+    =yyerror=
 ** Document Preparation

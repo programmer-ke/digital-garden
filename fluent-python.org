@@ -1036,3 +1036,72 @@ print(l)
       intepreter looks for them in the class itself.
 - Deletion of managed attributes can be implemented via the
   =__delete__= method
+* Class Metaprogramming
+- Some special attributes foundin classes
+  - =__bases__= :: tuple of base classes of the file
+  - =__qualname__= :: dotted path from the global scope of the module to class definition
+  - =__subclasses__()= :: method that returns immediate subclasses of the class
+  - =mro()= :: returns superclasses in =__mro__=. Can be overriden to
+    customize the method resolution order
+- =type= when invoked with 3 arguments becomes a class factory. Its
+  arguments in order are:
+  - name :: identifier that appears after the =class= keyword
+  - bases :: a tuple of superclasses, or of a single =object=
+  - dict :: mapping of attribute names to values, which include
+    callable that become methods
+- optional keyword arguments may be passed to =type= which are
+  delegated to =__init_subclass__=
+- The =type= class is a metaclass, a class that builds other classes
+- =type= as a type hint indicates any class. It can be narrowed down
+  e.g. =type[tuple]= indicates a class that is a subclass of =tuple=
+- in Python 3.10 and above =inspect.get_annotations= can replace
+  =typing.get_type_hints= for retrieving annotations
+- =__init_subclass__= is called whenever the subclass of the class is defined (at import time)
+- =setattr= triggers =__setattr__=
+- =__slots__= cannot be set using =__init_subclass__= because it is
+  executed after class has been built.
+  - =__slots__= has not effect on a class after it has been built. It
+    only works when supplied to =type.__new__=
+- A class decorator returns a class to replace the decorated class
+  - It can be used instead of =__init_subclass__= to avoid interfering
+    with inheritance or metaclasses
+- At import time, the python intepreter:
+  - parses the source code and validates syntax
+  - compile the bytecode to be executed
+  - executes top-level code of the compiled module
+- Classes are built at import time, so this is when class metaprogramming occurs
+- =object= and =type= have a special relationship, =type= is a
+  subclass of =object= and =object= is an instance of =type=
+- Every class is an instance of =type=, but only metaclasses are
+  subclasses of =type=
+- A Metaclass =__new__= method is called with 4 arguments:
+  - the metaclass itself
+  - the name of the class being built
+  - bases of the class if any
+  - A class dict containing the classes' attributes (including class attributes and methods)
+- These can be modified before passing them up to =type.__new__= and modified further after that.
+- A superclasses' =__init_subclass__= will then be called for the
+  built class (if any), followed any class decorator
+- =__slots__= always needs to be added before calling =type.__new__=
+- Before calling a metaclasses =__new__= methods, Python will call
+  =__prepare__= to get a mapping to hold the namespace of the class,
+  which is then passed as the last argument to the =__new__= method
+- Defining =__repr__= on a metaclass allows customizing the =repr()=
+  of classes
+- When a class uses =__slots__=, it cannot have class attributes and
+  instance attributes of the same name
+  - Descriptors therefore have to use a differently named attribute as the storage name
+- Features designed to reduce the need for metaclasses:
+  - =__set_name__= to automatically set the name of a class descriptor
+  - class decorators to modify classes at build time
+  - =__init_subclass__= to customize class creation in subclasses
+- A class can only have one metaclass. This may be a problem when
+  using multiple inheritance.
+- It is best to treat metaprogramming with metaclasses as an
+  implementation details that is abstracted from end users (clients)
+- Some powerful features of Python that should probably only be used
+  in frameworks and libraries but not production code:
+  - ABCs, operator overloading, function decorators, descriptors,
+    class decorators, class builders.
+    - when a clear need arises, consider whether these could be
+      extracted into a library or framework
