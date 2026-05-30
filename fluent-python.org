@@ -361,7 +361,17 @@ print(l)
 - For arbitrary positional or keyword arguments, the type declaration
   on function parameters is the set of types allowed for each
   argument.
-
+- Function objects can be inspected:
+  - Some attributes
+    - =__doc__= :: the docstring
+    - =__annotations__= :: type annotations
+    - =__code__= :: the code object
+    - =__dict__= :: stores arbitrary attributes attached to functions
+  - =dir= can list more attributes
+  - The =inspect= module can be used to get details about functions in
+    a more useful form
+    - =inspect.signature= can be used to interact with a function's
+      signature
 * Decorators and closures
 - A decorator is a callable
   - It may replace the decorated function with a different one
@@ -815,7 +825,7 @@ print(l)
 - They have a =result= method that returns the result of the
   computation or reraises any exceptions encountered.
   - In =concurrent.futures.Future=, result will block if future is not yet completed
-  - In =asyncio.Future=, the result method is awaited for the result
+  - In =asyncio.Future=, the future is awaited for the result
 - Futures are returned by
   =executor.submit=. =concurrent.futures.as_completed= takes an
   iterable of futures and return an iterator that yield as the futures
@@ -969,7 +979,7 @@ print(l)
   properties or descriptors for these cases.
 
 * Attribute Descriptors
-- A descriptor is a class that implements a dynamic protocol
+- A descriptor is a class that implements a descriptor protocol
   consisting of the =__get__=, =__set__= and =__delete__= methods.
   - the =property= class implements the full descriptor protocol
   - partial implementations are also okay, most only implement
@@ -1036,6 +1046,12 @@ print(l)
       intepreter looks for them in the class itself.
 - Deletion of managed attributes can be implemented via the
   =__delete__= method
+- Every major feature of classes is implemented using descriptors:
+  - instance methods
+  - static methods
+  - class methods
+  - properties
+  - =__slots__=
 * Class Metaprogramming
 - Some special attributes foundin classes
   - =__bases__= :: tuple of base classes of the file
@@ -1105,3 +1121,8 @@ print(l)
     class decorators, class builders.
     - when a clear need arises, consider whether these could be
       extracted into a library or framework
+- 4 main interception points in metaclasses:
+  - =__prepare__= :: returns the dict used for attributes
+  - =__new__= :: before class is created
+  - =__init__= :: after class is created
+  - =__call__= :: during instance creation

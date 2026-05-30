@@ -388,7 +388,7 @@ output of the for loop can be redirected/piped.
 - The system call =alarm(2)= allows one to set the signal =SIGALRM= to
   be sent to the process after a given number of seconds, e.g. to
   ensure some work is done within a given amount of time
-** Programs Development
+** Programs Development                                      :yacc:lex:bison:
 - =yacc= is a parser generator, converts a BNF grammar into parser that
   will parse statements in the language. Steps:
   - grammer is specified
@@ -400,4 +400,9 @@ output of the for loop can be redirected/piped.
   - yacc then produces a C file that can be compiled normally
   - On encoutering syntax errors, =yyparse= will call user defined
     =yyerror=
+- =make= reads a specification of how several components of a program
+  depend on each other and the times at which they were modified to
+  determine the minimum compilation needed for a new version
+- The =%union= declaration in yacc declares that the stack can
+  hold a union of times e.g. a variable name or a value.
 ** Document Preparation

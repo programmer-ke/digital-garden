@@ -3,7 +3,7 @@
 * debian
 
 ** package system
-*** Structure of the binary package
+*** Structure of the binary package                                     :deb:
 The =.deb= file format is an archive. It can be inspected with
 =ar t foo.deb= and extracted with =ar x foo.deb=
 
@@ -23,13 +23,13 @@ e.g. =fakeroot alien --to-deb phpMyAdmin-5.1.1-2.fc35.noarch.rpm=
 A source package can be downloaded for example using apt: =apt source <package>=
 
 Structure of a source package:
-- =.dsc= file which shows author, list of files and their authentication
+- =.dsc= file which shows author, list of files and their authenticity
 - =.orig.tar.gz= source code as provided by original author
 - =.debian.tar.xz= modifications made by the debiain maintainer,
   including a debian directory with instruction to construct the
   binary package(s)
   
-*** dpkg
+*** dpkg                                                               :dpkg:
 
 Used to handle debian packages. It is a system tool as opposed to apt
 which is a user tool that complements it.
@@ -44,6 +44,72 @@ dpkg --unpack man-db_2.9.4-2_amd64.deb
 dpkg --configure man-db
 
 dpkg -r debian-cd  # removal
+
+dpkg --listfiles package # (or -L), which lists the files installed by this package
+
+dpkg --search file # (or -S), which finds the package(s) containing the file
+
+dpkg --contents file.deb # (or -c), which lists the files in the Debian package specified;
+
+dpkg --info file.deb #  (or -I), which displays the headers of this Debian package.
+
 #+end_src
 
 
+dpkg's log file is found at =/var/log/dpkg.log=
+
+** Maintenance and Updates
+
+*** sources.list
+
+- The file =/etc/apt/sources.list= lists package source repositories.
+  - Each line has at least 3 parts separated by spaces. Format is
+    described =sources.list(5)=.
+  - The first field describes the source type:
+    - =deb= :: binary package source
+    - =deb-src= :: source package
+- =apt-cacher= and =apt-catcher-ng= can be used to proxy package
+  sources and cache requests
+- sources for external
+    
+*** aptitude, apt-get, apt
+
+- =apt= and =apt-get= are build on the same library. =apt= is meant
+  for interactive use. =apt-get= 's public interface is well defined
+  and can be used in scripts.
+- =aptitude= provides a gui.
+- If a package is found in multiple distributions, a distribution be specified
+  during installation e.g. =apt install spamassasin/unstable=
+
+- History is tracked in the log file =/var/log/apt/history.log=  
+- Packages installed only through dependencies are marked as auto, and
+  can be automatically removed when the parent package is
+  removed. This can be changed by marking them as manual
+
+- =apt list ?automatic= lists automatic packages
+- =apt list ?garbage= lists packages that can be auto removed
+
+*** apt-cache
+
+- Displays information stored in APT's internal cache, gathered from
+  different sources in =sources.list= during =apt update=
+  - The cache is found at =/var/lib/apt/lists=
+- =apt-cache policy= displays pinning priorities of packages.
+
+*** Checking package authenticity
+
+- Package authenticity info is stored in files called =InRelease= and =Release= which
+  are provided by debian mirrors.
+- They contain a list of debian packages available on the repo along with their hashes and
+  are cryptographically signed.
+- apt needs a set of trusted GPG keys to verify the signatures, it gets them from
+  files in =/etc/apt/trusted.gpg.d= and from the =/etc/apt/trusted.gpg= keyring
+  managed by =apt-key= (deprecated)
+  - 3rd party =.gpg= keys can be added to =/etc/apt/trusted.gpg.d=,
+    however it is not clear which key matches which repository in this
+    case, introducing vulnerabilities in case of malicious mirrors.
+  - It is better to put 3rd party keys in =/usr/share/keyrings= and use the
+    =Signed-By= field in the =sources.list= for 3rd party repositories
+  - =.asc= files are discouraged, convert them to .gpg first (check whether they are armored or not)
+
+*** Upgrading from one stable distribution to the next
