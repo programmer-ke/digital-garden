@@ -1,0 +1,386 @@
+#+PROPERTY: header-args :results output :session *shared*
+
+* Group Anagrams
+
+#+FILETAGS: :arrays:hashing:leetcode:
+
+** Description
+
+https://leetcode.com/problems/group-anagrams/
+
+** Approach
+
+Me:
+
+Anagrams are formed by the same set of letters that can be rearranged
+to create new words.
+
+One way to recognize anagrams is to sort the letters in each word and
+for anagrams, they should match.
+
+What do you think about this approach?
+
+AI:
+
+#+begin_reasoning
+We need to respond as the AI assistant. The user is presenting a problem and their initial thought about using sorting to group anagrams. We should follow the Solve It Method: provide high-level explanations, not code unless asked. Encourage small steps, reflection, and collaboration. The user asked "What do you think about this approach?" So we should give feedback on their idea, maybe suggest a plan, but not the full solution.
+
+We should be concise, supportive, and guiding. The session is in a /shared/ buffer. We can also refer to the constraints.
+
+We'll first acknowledge the idea is good. Then maybe discuss the approach: sorting each string gives a canonical form. Then we can talk about using a hash map to group. But we must avoid giving the whole solution unless asked. The user might want to proceed step by step.
+
+We can ask if they want to implement the sorting part, or discuss possible optimizations? Or we can ask them to define the next small step.
+
+Given the principles: "Default to providing a high level explanations and only provide code examples when explicitly asked". So we'll keep it high-level.
+
+Also: "Do not provide the overall solution unless requested". So we won't write the full function.
+
+Thus, we respond positively, suggest that sorting is a common and effective approach, and then maybe propose to start with a small test case or discuss the data structure (hash map from sorted string to list). But we need to be collaborative: "What would you like to do next? Maybe try sorting one example?" etc.
+#+end_reasoning
+
+Your idea is spot on. Sorting each string gives a canonical key that
+all anagrams share, which makes grouping straightforward.
+
+Me:
+
+So an approach would be to use the canonical key as an index into a
+hashmap with a list of the matching words as values, then iterate
+through the input list populating the hashmap
+
+AI:
+
+#+begin_reasoning
+The user has now articulated the plan: use a hash map where keys are the sorted strings and values are lists of original strings. That's exactly the classic solution. They are moving to design. I should affirm this plan, then perhaps guide them to think about next steps: maybe writing a small test, handling edge cases, or starting implementation. Since they haven't asked for code, I'll keep it high-level. I could ask: "Would you like to implement a small example to verify the logic?" or "What's the first step you'd like to take?" to keep collaboration.
+#+end_reasoning
+
+That’s a clear and effective plan. You have the core pieces:
+- A hash map from sorted string to list.
+- Iterate over input, sort each word, append original to the map.
+- Finally, return the map’s values.
+
+Now, what would you like to do first? Perhaps test this idea with a
+small example manually, or start writing the code step by step?
+
+** Solution
+
+#+begin_src python
+from collections import defaultdict
+
+def group_anagrams(input_list: list[str]) -> list[list[str]]:
+    index = defaultdict(list)
+
+    for word in input_list:
+        key = "".join(sorted(word))
+        index[key].append(word)
+    return [words for words in index.values()]
+
+
+strs = ["eat","tea","tan","ate","nat","bat"]
+empty = [""]
+onlya = ["a"]
+
+print(group_anagrams(strs)) # [["bat"],["nat","tan"],["ate","eat","tea"]]
+
+print(group_anagrams(empty)) # [[""]]
+
+print(group_anagrams(onlya)) # [["a"]]
+
+
+#+end_src
+
+#+RESULTS:
+: [['eat', 'tea', 'ate'], ['tan', 'nat'], ['bat']]
+: [['']]
+: [['a']]
+
+
+** Analysis
+
+*** Time complexity
+
+Given an input list of length n, each word being of length k, the following hold
+
+- For each word, dictionary and list append operations are O(1)
+- The key sorting is klog(k)
+
+Therefore overall time complexity is O(n * klog(k))
+
+Me:
+
+Is this analysis correct?
+
+AI:
+
+Yes, your analysis is correct: O(n * k log k).
+
+A few observations on your implementation:
+
+1. The empty string case: using an integer =0= as key works because
+   it's hashable and distinct, but it might be cleaner to just sort
+   the empty string—=sorted("")= returns an empty list, and
+   ="".join([])= gives =""=, which also works as a key. That way you
+   avoid a special case.
+
+2. The code produces the expected outputs, matching the examples.
+
+*** Space complexity
+
+The dictionary will always hold keys mapping to each input word,
+therefore space complexity is O(n * k), given n words of length k.
+
+Me:
+
+Is this correct?
+
+AI:
+
+
+Yes, that's correct. The dictionary stores each of the n words once
+(as list values) and for each distinct sorted word, a key of length
+k. In the worst case (no anagrams), that's O(n·k) for both keys and
+values, so overall O(n·k). The output list of lists is also O(n·k),
+but that's normally included in the total space used by the algorithm.
+
+Note: Since the keys are sorted versions of the words, they are also
+O(n·k) in total. So your analysis is spot-on.
+
+** Further discussion
+
+Me:
+
+Are there optimizations we can make to improve space/time requirements?
+
+AI:
+
+#+begin_reasoning
+We need to respond as AI. The user asks about optimizations. We should consider possible improvements. The current approach uses sorting each word (O(k log k) per word). Could we avoid sorting? For lowercase letters, we could use character count as key: e.g., a tuple of 26 counts, or a string of counts. That would be O(n * k) time (since we just count characters) and O(n * k) space as well (keys are tuples of length 26). However, comparing two tuples of length 26 might be slightly slower than comparing strings? But it's constant time per comparison in hashing? Actually, hashing a tuple of 26 ints is O(26) per word, which is constant factor, but sorting is O(k log k) which for k up to 100 is small. Might be a trade-off. But for k up to 100, sorting is fine. The main optimization would be using count arrays as keys but it's not a huge improvement.
+
+Another possible optimization: use a custom hash based on prime products? But that's more complex and not needed.
+
+Space: we can't avoid storing words.
+
+We could consider using dictionary comprehension but same.
+
+We might also consider using the input strings themselves as keys if we sort in place? But strings are immutable.
+
+We could discuss the effect of k being small (max 100) so sorting is cheap, and the solution is already efficient.
+
+The user might want to discuss these trade-offs. We'll provide high-level explanation, no code unless asked.
+
+We'll mention the counting approach as an alternative but note that it's similar complexity. Also mention that for this problem's constraints, the sorting approach is standard and sufficient.
+
+We'll ask if they want to explore any of these ideas further.
+
+Given Solve It Method: we should not give full optimized solution unless asked. But they are asking about optimizations, so it's fine to discuss options. Keep collaborative: "Would you like to implement the counting approach for comparison?" etc.
+#+end_reasoning
+
+Good question. For the given constraints (n ≤ 10⁴, k ≤ 100), your
+current solution is already efficient.
+
+*Potential micro‑optimizations:*
+
+1. *Use character counts as key* – Instead of sorting, make a tuple of
+   26 counts for each word. This changes the time per word from O(k
+   log k) to O(k) (plus O(26) to hash and compare the tuple). Since k
+   is small, sorting is fine – but if k were large, this would be a
+   clear win.
+
+2. *Prime product hashing* – Assign a distinct prime to each letter
+   and multiply. This gives a unique integer key in O(k) time,
+   avoiding sorting or tuple creation. However, the product can become
+   enormous (overflow in languages without big integers; Python
+   handles it, but big integers have overhead). Not recommended for
+   this problem.
+
+3. *Reduce memory by not storing both key and word* – You could return
+   the list of values directly, as you already do. No obvious space
+   saving without changing the data structure.
+
+*Trade‑off*: The sorting approach is simple and often fast enough. The
+counting approach avoids =sorted()= but adds 26‑element tuple creation
+– a constant overhead that might offset the benefit for small =k=.
+
+Would you like to try implementing the counting‑based version to
+compare performance, or is there another angle you’d like to explore?
+
+
+#+begin_src python
+from collections import defaultdict
+
+def group_anagrams(input_list: list[str]) -> list[list[str]]:
+    index = defaultdict(list)
+
+    for word in input_list:
+        key = create_key(word)
+        index[key].append(word)
+    return [words for words in index.values()]
+
+def create_key(word: str) -> tuple[str, ...]:
+    key = [0] * 26
+    for letter in word:
+        index = ord(letter) - ord('a')
+        key[index] += 1
+    return tuple(key)
+
+
+strs = ["eat","tea","tan","ate","nat","bat"]
+empty = [""]
+onlya = ["a"]
+
+print(group_anagrams(strs)) # [["bat"],["nat","tan"],["ate","eat","tea"]]
+
+print(group_anagrams(empty)) # [[""]]
+
+print(group_anagrams(onlya)) # [["a"]]
+
+#+end_src
+
+#+RESULTS:
+: [['eat', 'tea', 'ate'], ['tan', 'nat'], ['bat']]
+: [['']]
+: [['a']]
+
+
+Me:
+
+Review this solution
+
+AI:
+
+#+begin_reasoning
+The user implemented the counting-based key approach. They want a review. We should comment on correctness, readability, and any edge cases. The code works. Note: the empty string case: =create_key("")= returns =(0,)*26= which is a valid key, so it groups all empty strings together. That's fine. The output matches expected. 
+
+Potential concerns: The =create_key= function uses a tuple of 26 ints as key. For anagrams, that's fine. But is there any issue with hashing? Tuples are hashable. It's fine.
+
+Readability: Good, separated into functions.
+
+Performance: O(n*k) time, space O(n*k) for the output plus O(26) per key? Actually keys are 26-element tuples; for each distinct key we store one tuple, but each tuple creation is O(26). That's constant factor.
+
+We can suggest maybe an alternative: use =from string import ascii_lowercase= but not necessary.
+
+We can also mention that using =ord(letter) - 97= is fine but using =ord(letter) - ord('a')= is more readable.
+
+Overall, it's a valid solution. We'll give positive feedback and maybe suggest minor improvements.
+
+We'll also note that the constraint says =strs[i]= consists of lowercase English letters, so the 26 array is appropriate.
+
+We can ask if they want to discuss any further refinements or edge cases.
+#+end_reasoning
+
+Your solution is correct and clean. Key points:
+
+- /Correctness/ – All test cases match the expected output.
+- /Edge case empty string/ – =create_key("")= returns a tuple of 26
+  zeros, which groups all empty strings together (as required).
+- /Time complexity/ – O(n·k), as intended.
+- /Space complexity/ – O(n·k) for the dictionary and output, plus
+  O(26) per distinct key (negligible).
+
+/Minor suggestions/ (not required, but could improve readability):
+
+- Use =ord(letter) - ord('a')= instead of the magic number =97=.
+- The =group_anagrams= function could be simplified by inlining
+  =create_key= if you prefer less abstraction, but the current
+  separation is fine.
+- The comment =# [["bat"], ...]= in the =print= statement is a bit
+  misleading because the output order may differ (as you noted "any
+  order" is allowed). It’s fine – just an observation.
+
+Overall, this is a solid, efficient solution. Would you like to
+explore any further variations (e.g., handling non‑lowercase letters,
+or benchmarking against the sorting approach)?
+
+Me:
+
+What class of problems does this one belong to, and what are the
+characteristics of identifying such a problem.
+
+AI:
+
+This problem belongs to the *string manipulation / hashing / grouping*
+category, often called *anagram grouping* or *character frequency
+grouping*.
+
+*Key characteristics to identify this type of problem:*
+
+1. *Grouping based on composition* – The output requires collecting
+   items that share an underlying property (same letters, same
+   frequency of elements, etc.) regardless of order.
+
+2. *Order‑invariant matching* – Two different sequences (words,
+   arrays) need to be recognized as equivalent if they contain the
+   same multiset of elements. This is the classic "anagram" pattern,
+   but it also appears in problems like "group sentences with same
+   word frequency" or "group numbers with same prime factors".
+
+3. *Canonical representation* – The core technique is to transform
+   each input into a *canonical form* (sorted string, frequency tuple,
+   prime product) that is the same for all group members. The
+   canonical form acts as a hash key.
+
+4. *Hash map aggregation* – After deriving the canonical key, you
+   insert the original item into a dictionary under that key. At the
+   end, the dictionary values are the groups.
+
+*Related problem families:*
+
+- *Character counting / frequency analysis* (e.g., valid anagram,
+  palindrome permutation)
+- *Hash map grouping* (e.g., group by first letter, group by length)
+- *String hashing* (e.g., using sorted strings, rolling hash)
+
+*How to spot them:* If you see "group together items that are
+rearrangements of each other", "same letters regardless of order" or
+"items that can be transformed into each other by reordering", you're
+likely looking at a canonical‑form + hash map problem.
+
+Me:
+
+What kind of real world problems are solved with similar approaches?
+
+AI:
+
+
+
+#+begin_reasoning
+ responseThis question asks about real-world applications of the canonical-hash approach. We need to provide examples from various domains: text processing, data deduplication, security, etc. Keep it high-level, no code.
+
+Examples:
+- *Spam detection / email filtering*: Group similar email bodies by word frequency or normalized content to identify bulk messages.
+- *Plagiarism detection*: Convert text to canonical form (e.g., remove punctuation, sort words) and compare documents.
+- *Data deduplication*: Hash files or records based on a canonical representation (e.g., sorted columns) to find duplicates.
+- *Natural language processing*: Find words with same root (stemming) or same set of characters (anagram detection) for text normalization.
+- *Search engines*: Group search queries that are semantically equivalent (e.g., different word order) to improve ranking.
+- *Bioinformatics*: Group DNA sequences that are permutations of the same base pairs (not common, but related to counting patterns).
+- *Database indexing*: Create hash keys based on sorted columns to group records (e.g., grouping customers by name sorted letters).
+- *Security*: Analyze password patterns by sorting characters to find weak passwords that are anagrams of common patterns.
+- *Anagram-based games*: Auto-complete or cheat detection in word games (Scrabble, etc.)
+
+We can also mention that the "canonical form" idea is used in cryptography for hashing before signing, and in file synchronization (e.g., rsync uses rolling hash for chunks).
+
+I'll keep it concise and relevant.
+#+end_reasoning
+
+This approach appears wherever you need to *group items by a
+structure‑independent signature*. Some real‑world examples:
+
+- /Spam clustering/ – Group emails by normalized word frequency or
+  sorted content to detect bulk‑mail campaigns.
+- /Plagiarism detection/ – Convert documents into canonical chunks
+  (e.g., sorted sentences or common n‑grams) and compare.
+- /Data deduplication/ – Hash records using a canonical key (sorted
+  columns, normalized values) to find duplicate rows.
+- /Search engine query normalization/ – Group queries that differ only
+  in word order (e.g., “best pizza NYC” vs “NYC best pizza”) for
+  aggregated analytics.
+- /Fingerprinting in networks/ – Identify packets with same payload
+  after reordering chunks.
+- /Bioinformatics/ – Group genetic sequences that are permutations of
+  each other (though usually not a common problem).
+- /Password analysis/ – Detect weak passwords that are anagrams of
+  common words or predictable patterns.
+- /Anagram‑based games/ – Build word lists by sorted letters for hints
+  or validation.
+
+The core pattern – *transform to a canonical form, then hash* – is a
+reusable tool for many similarity or equivalence‑detection tasks.

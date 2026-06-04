@@ -113,3 +113,34 @@ dpkg's log file is found at =/var/log/dpkg.log=
   - =.asc= files are discouraged, convert them to .gpg first (check whether they are armored or not)
 
 *** Upgrading from one stable distribution to the next
+
+- Read the release notes of the new version
+- Tidy installed packages and only keep important ones
+  - Tools that can help: aptitude, deborphan, debfoster, apt-show-versions, debsums
+- To anticipate any problems, optionally install =apt-listchanges= and
+  =apt-listbugs= to list problems before upgrade process begins
+- Change =/etc/apt/sources.list= to get packages from the new repo.
+- Update the database using =apt update=
+  - In some cases fields in the =Release= and =InRelease= files may
+    have changed. use the =--allow-releaseinfo-change= flag of
+    =apt-get=
+- Do a minimal upgrade with =apt upgrade=
+  - ensure's package management tools have are up to date with bug fixes
+- Do a full upgrade with =apt full upgrade=
+  - Any unreported bugs can be reported using =reportbug=
+- Post upgrade, find any packages that were removed (no package
+  source) using =apt-show-versions | grep "No available version"=
+  - could have been abandoned, or neglected with issues. Remove if not being used
+- Some packages could have been renamed and the old name is retained
+  as an almost empty package. These are known as dummy/transition
+  packages.
+  - They may be identified by tools like aptitude, deboprhan, or
+    debfoster or =dpkg -l | grep ^ii | grep -i -E
+    "(transition|dummy)"=
+  - The new package is pulled in as a dependency of the transitional
+    package, and may be removed if it is purged. A solution is to selectively install/remove e.g.
+    - =apt install package1 package2-=
+    - =apt remove package1+ package2=
+- Configuration cruft can be purged using =apt autoremove --purge=
+- =find= or =locate= can be used to manually remove configuration with
+  leftover suffixes .dpkg-dist, .dpkg-old, .ucf-old.

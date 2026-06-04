@@ -405,4 +405,8 @@ output of the for loop can be redirected/piped.
   determine the minimum compilation needed for a new version
 - The =%union= declaration in yacc declares that the stack can
   hold a union of times e.g. a variable name or a value.
+- =lex= creates lexical analyzers from a specification describing the
+  lexical rules of the language.
+  - Each rule is a regular expression matching a string, and fragment of
+    C to execute when that string is matched.
 ** Document Preparation

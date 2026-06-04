@@ -1,0 +1,219 @@
+#+PROPERTY: header-args :results output :session *shared*
+
+* Product of array except self
+
+#+FILETAGS: :prefix_sum:leetcode:arrays:
+
+** Description
+
+https://leetcode.com/problems/product-of-array-except-self/description/
+
+** Approach
+
+The naive solution would be to multiply all the numbers in the input
+array, then for each position in the output array, divide the overall
+product with the number at that position.
+
+However, division is not allowed.
+
+We notice that if as we traverse forward through the array, at index i,
+0 < i < len(arr),
+we'll have seen all the numbers from index 0 to i, so we can calculate
+the product of arr[0] to arr[i-1].
+
+For each arr[i], we therefore only need the product of
+arr[i+1] to arr[len(arr) - 1] to fulfill the requirements.
+
+We notice a pattern where if we traversed the array in reverse, we
+would be able to access the missing product.
+
+One possible approach is to traverse the array, and for each
+each position arr[i], we store the product of arr[0] to arr[i-1] in
+results array. At the end of the forward traversal we have products
+for all except the first element. And for all except the last element
+we have only a partial product.
+
+We can then traverse the source array in reverse and for each arr[j],
+0 <= j < len(arr) - 1
+we multiply the value in the results array with the product of
+array arr[j+1] to arr[len(arr) - 1]
+
+By doing this all each position in the results array has the product
+of all elements except itself in the source array.
+
+_Me_:
+
+How does this approach sound?
+
+_AI_:
+
+That's a clear and correct understanding of the optimal
+approach. You've correctly identified the key insight: using a forward
+pass to compute prefix products and a backward pass to multiply by
+suffix products, all without division.
+
+A few observations as you implement:
+
+1. *Edge cases matter*: When =nums= contains zeros, the naive division
+   approach fails. Your approach handles zero gracefully since each
+   position's product is computed independently.
+
+2. *Space optimization*: The standard solution uses O(1) extra space
+   (excluding the output array). You can store the prefix products
+   directly in the result array, then traverse backward with a running
+   suffix product.
+
+3. *Initial values*: For the forward pass, =answer[0] = 1= (since
+   there are no elements to the left). For the backward pass, start
+   with a suffix product of 1.
+
+Would you like to implement this step-by-step, starting with the
+forward traversal?
+
+** Solution
+
+#+begin_src python
+
+def product_except_self(nums):
+    results = [1] * len(nums)
+
+    prod = 1
+    for i in range(1, len(nums)):
+        prod *= nums[i - 1]
+        results[i] *= prod
+
+    prod = 1
+    for i in range(len(nums) - 2, -1, -1):
+        prod *= nums[i + 1]
+        results[i] *= prod
+
+    return results
+
+nums = [1,2,3,4]
+# Output: [24,12,8,6]
+print(product_except_self(nums))
+
+nums = [-1,1,0,-3,3]
+print(product_except_self(nums))
+# Output: [0,0,9,0,0]
+
+#+end_src
+
+#+RESULTS:
+: [24, 12, 8, 6]
+: [0, 0, 9, 0, 0]
+
+
+** Analysis
+
+- Time complexity is O(n) because we're traversing the array in two passes
+- Space complexity is O(n) if we include the results array.
+
+_Me_:
+
+Is the time/space analysis correct?
+
+_AI_:
+
+Almost correct. Minor nuance:
+
+- *Time*: O(n) — correct, two passes each O(n) = O(2n) ≈ O(n).
+- *Space*: Usually analyzed as O(1) extra space /if/ the output array
+  doesn't count. Many LeetCode-style problems consider the output
+  array as not counting toward extra space. If we count it, O(n) is
+  correct.
+
+Your implementation is clean and correctly handles the edge case with
+zeros.
+
+One small style note: you reuse the variable name =prod= for both
+loops — fine here since they're independent, but some might prefer
+distinct names for clarity (e.g., =prefix_prod= and
+=suffix_prod=). Not a bug, just a readability consideration.
+
+** Further discussion
+
+_Me_:
+
+Which topic in data structures and algorithms does this belong to?
+
+_AI_:
+
+#+begin_reasoning
+The user is asking which data structures and algorithms topic this problem belongs to. I need to think about the core technique used.
+
+The problem "Product of Array Except Self" typically falls under the category of *prefix sums / prefix products* or *prefix-suffix patterns*. It's a classic example of using two passes (prefix and suffix) to compute something at each position that depends on both left and right parts of the array, without using extra space beyond the output.
+
+It could also be categorized under *array manipulation* or *linear time algorithms*.
+
+Related topics: Prefix sums (generalization), scanning, in-place transformations.
+
+I should give a concise but informative answer.
+#+end_reasoning
+
+This problem is a classic example of the *prefix/suffix pattern* (also
+called *left-right scanning* or *two-pass accumulation*). It's often
+grouped under:
+
+- *Array scanning / linear passes* – because you solve it with two
+  linear traversals.
+- *Prefix sums / cumulative products* – the core technique is
+  computing prefix and suffix products in-place.
+- *In-place algorithms* – if you consider the space optimization
+  (using the output array for intermediate storage).
+
+It's a staple in interview preparation, often listed under "array" or
+"prefix sum" categories on platforms like LeetCode (where it's problem
+#238).
+
+_Me_:
+
+What are some practical applications of similar techniques in the real world?
+
+_AI_:
+
+#+begin_reasoning
+We need to provide practical applications of the prefix/suffix product pattern. The user asks for "similar techniques" - referring to the two-pass prefix-suffix pattern used in product of array except self. This technique is essentially about computing something at each position based on all elements to the left and right, often to avoid O(n^2) time. Real-world examples: image processing (box blur, convolution), financial data (running totals, moving averages), scientific computing (cumulative distributions), data analysis (normalizing data, z-scores), cryptography (accumulative hashes), etc. Give a few concise examples.
+#+end_reasoning
+
+Common practical applications of the prefix/suffix pattern:
+
+1. *Image processing (box blur / integral images)* An integral image
+   (summed-area table) uses a prefix sum over pixel intensities. Once
+   computed, the sum of any rectangular region can be computed in O(1)
+   time, enabling fast blur, feature detection (Viola–Jones), or
+   adaptive thresholding.
+
+2. *Financial / time-series data*
+   - /Moving averages/: A prefix sum over stock prices lets you
+     compute the average over any window in O(1).
+   - /Cumulative returns/: Prefix products are used for compound
+     growth calculations over time periods.
+
+3. *Database query optimization* Precomputing prefix aggregates (sum,
+   count, product) over sorted index ranges accelerates range queries
+   – similar to how databases maintain materialized views or running
+   totals.
+
+4. *Signal processing*
+   - /Convolution/ can be optimized via prefix-sum-like transforms
+     (e.g., the fast Walsh–Hadamard transform).
+   - /Noise reduction/: Prefix sums of squared values help compute
+     local variances efficiently.
+
+5. *Data normalization (z-scores / standardization)* To standardize a
+   dataset, you need mean and standard deviation. Those can be
+   computed from prefix sums and prefix sums of squares in a single
+   linear pass, then applied to each element.
+
+6. *Cryptography / hashing*
+   - /Rolling hash/ (Rabin-Karp string search) uses a prefix product
+     (modulo a prime) over characters to hash any substring in O(1).
+   - /Accumulative HMACs/: Some authentication schemes compute prefix
+     hashes to verify data integrity without rehashing the entire
+     stream.
+
+The core pattern – /compute left aggregate, then right aggregate,
+combine/ – appears whenever you need per-element results that depend
+on all other elements, but you want O(n) instead of O(n²).
+
