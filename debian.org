@@ -144,3 +144,55 @@ dpkg's log file is found at =/var/log/dpkg.log=
 - Configuration cruft can be purged using =apt autoremove --purge=
 - =find= or =locate= can be used to manually remove configuration with
   leftover suffixes .dpkg-dist, .dpkg-old, .ucf-old.
+
+* Keeping system up to date
+
+- Controlled by variables in =/etc/apt/apt.conf.d/10periodic=
+  - =APT::Periodic::Update-Package-Lists= :: frequency in days to
+    refresh packages
+  - =APT::Periodic::Download-Upgradeable-Packages= :: frequency in
+    days of downloading packages
+  - =APT::Periodic::AutocleanInterval=  :: How obsolete packages are
+    removed from =apt-cache=
+  - =APT::Periodic::Unattended-Upgrade= :: When enabled, the
+    =unattended-upgrade= package will be used to automate the upgrade
+    process. This can be configured using
+    =/etc/apt/apt.conf.d/50unattended-upgrades= e.g. only download
+    security updates.
+
+- =apt-cache= allows searching packages by name and description
+- =apt show <package>= allows one to get information about a known package
+- =axi-search= allows additional criteria for searching packages e.g. files contained
+
+* Solving problems and finding information
+
+- Manual pages can be found using the =man= command
+  - provided by the =man-db= package
+  - =man man= gives info on man itself
+  - To get a oneliner on a command, run =whatis <command>=
+  - =apropos <keywords>= can be used to filter manpage summaries
+  - the =man2html= package enables one to view manpages on a web browser
+
+- Some gnu packages are documented more extensively using =info= documents
+  - =info2www= provides a web interface
+
+- Some packages can have documentation stored in READMEs under
+  =/usr/share/doc/<package>=
+
+- Some tips to get information on an unknown package:
+  - Check =/usr/share/doc/package/README.Debian=
+  - use =dpkg -L package= to list files in the package and identify available documentation
+  - use =dpkg -s package= to show metadata
+  - Check if there are examples in =/usr/share/doc/package/examples/=
+    
+- To monitor daemons:
+  - Find log file under =/var/log/*=
+  - rsyslogd is a special daemon that collects logs from other programs.
+    - details are defined in =/etc/rsyslog.conf=
+
+- Ask for help in mailinglists where possible
+
+- Reporting bugs:
+  - use =dpkg -S <file>= to find the package associated with a buggy program.
+  - check the bugtracker for that package if the bug has been reported
+  - send a bug report using the =reportbug= command
