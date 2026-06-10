@@ -1,0 +1,326 @@
+#+TITLE: 3Sum
+#+DATE: <2026-06-08>
+#+FILETAGS: :leetcode:two_pointers:arrays:
+#+PROPERTY: header-args :results output :session *shared*
+
+* 3Sum
+
+** Description
+
+https://leetcode.com/problems/3sum/description/
+
+** Approach
+
+The basic idea is to identify all unique triplets (positionally) and
+get their sum.
+
+To do this, we need 3 pointers into the array starting with the first
+3 elements in the array. We'll need 3 nested loops such that
+for each valid position of the first pointer, we traverse across the
+rest of the array with the second and third pointers and get the sum.
+
+_Me_:
+
+Is this the right idea?
+
+_AI_:
+
+#+begin_reasoning
+We need to respond to the user's question about the approach for
+3Sum. The user described a naive O(n^3) nested loop approach. The user
+asks "Is this the right idea?" We should provide guidance without
+giving full solution, using Socratic method or hints. Since the user
+is following the Solve It Method, we should not give spoilers. We can
+point out that the naive approach works but may be inefficient for
+constraints (n up to 3000). Suggest they think about improving
+efficiency, perhaps using sorting and two-pointer technique to reduce
+to O(n^2). But we should not write code unless asked. Keep response
+concise, hint at better approach.
+#+end_reasoning
+
+Sorting + two pointers can reduce complexity to O(n²). Think about how
+to avoid duplicates and leverage sorted order. Want to explore that?
+
+_Me_:
+
+How can we use two pointers to identify the triplets?
+
+_AI_:
+
+Good question. After sorting the array, fix one element (say nums[i]),
+then use two pointers (left = i+1, right = n-1) to find pairs that sum
+to -nums[i]. Move  pointers inward based on sum comparison. This avoids
+the third nested loop. Want to think about how to handle duplicates?
+
+_Me_:
+
+So using the sum comparison, we can decide which pointer to move inward,
+either left or right?
+
+_AI_:
+
+Exactly. If current sum is too small, move left forward to increase
+it. If too large, move right backward to decrease it. If equal, record
+triplet and move both inward — but be careful to skip over duplicate
+values to avoid duplicate triplets.
+
+_Me_:
+
+And to avoid duplicates, we skip over duplicates each time we advance
+nums[i], the left pointer and the right pointer?
+
+_AI_:
+
+Yes. For the fixed element nums[i], skip if it's the same as the
+previous i (when i > 0). After finding a sum of zero, move left and
+right past any duplicate values before continuing the search. That
+ensures unique triplets.
+
+_Me_:
+
+Is it correct to assume that once the fixed element nums[i] is
+greater than zero, there are no more possible triplets left?
+
+_AI_:
+
+Correct. Since the array is sorted, if nums[i] > 0, then nums[i] + any
+later numbers (which are also >= nums[i]) will always be > 0. So you
+can break the outer loop early.
+
+** Solution
+
+#+begin_src python
+
+def threesum(nums):
+    nums.sort()
+    i = 0
+    triplets = []
+    while i < len(nums) - 2:
+        if nums[i] > 0:
+            break
+        left, right = i+1, len(nums) - 1
+        while left < right:
+            s = nums[i] + nums[left] + nums[right]
+            if s == 0:
+                triplets.append([nums[i], nums[left], nums[right]])
+                left = incr(nums, left, right)
+                right = decr(nums, right, left)
+            elif s > 0:
+                right = decr(nums, right, left)
+            else:
+                left = incr(nums, left, right)
+        i = incr(nums, i, len(nums) - 2)
+    return triplets
+
+def incr(nums, pointer, limit):
+    while pointer < limit:
+        pointer += 1
+        if nums[pointer] != nums[pointer - 1]:
+            break
+    return pointer
+
+def decr(nums, pointer, limit):
+    while pointer > limit:
+        pointer -= 1
+        if nums[pointer] != nums[pointer + 1]:
+            break
+    return pointer
+
+nums = [-1,0,1,2,-1,-4]                                
+print(threesum(nums))    
+# Output: [[-1,-1,2],[-1,0,1]]
+
+nums = [0,1,1]
+print(threesum(nums))
+# Output: []
+
+nums = [0,0,0]
+print(threesum(nums))
+# Output: [[0,0,0]]
+
+
+#+end_src
+
+#+RESULTS:
+: [[-1, -1, 2], [-1, 0, 1]]
+: []
+: [[0, 0, 0]]
+
+
+_Me_:
+
+How does this solution look? Are there any possible edge case bugs
+
+_AI_:
+
+The solution looks solid and handles the examples correctly. A few
+edge/readability notes:
+
+1. *Duplicate skip helpers*: =incr= and =decr= might infinite-loop if
+   =pointer == limit= initially — but your loop condition =left <
+   right= and =i < len(nums) - 2= guards against that. Still, adding a
+   safety check (e.g., =if pointer >= limit: return limit=) is
+   defensive.
+
+2. *Alternative simplification*: Instead of custom helpers, you could
+   use =while left + 1 < right and nums[left] == nums[left+1]: left +=
+   1= then =left += 1= (and symmetric for right). Slightly more
+   standard.
+
+3. *Two-pointer boundary after recording a triplet*: After appending,
+   you increment left and decrement right — but what if after skipping
+   duplicates, left >= right? The outer while condition catches that
+   next iteration.
+
+4. *Empty input / len < 3*: Your code assumes len >= 3. For
+   robustness, you could add =if len(nums) < 3: return []= at the
+   start.
+
+Overall, correct and clean. Want to think about testing with cases
+like =[-2,0,0,2,2]= or all negative numbers?
+
+_Me_: Give me a version illustrating the second point above
+
+_AI_:
+
+#+begin_reasoning
+The user wants a version of the solution that uses a more standard duplicate-skip approach instead of the custom incr/decr helpers. I'll provide a concise code snippet showing the inner loop with inline while loops to skip duplicates.
+#+end_reasoning
+
+Here's a version using inline while loops to skip duplicates after recording a triplet:
+
+#+begin_src python
+def threesum(nums):
+    nums.sort()
+    n = len(nums)
+    triplets = []
+    i = 0
+    while i < n - 2:
+        if nums[i] > 0:
+            break
+        left, right = i + 1, n - 1
+        while left < right:
+            total = nums[i] + nums[left] + nums[right]
+            if total == 0:
+                triplets.append([nums[i], nums[left], nums[right]])
+                left += 1
+                right -= 1
+                # Skip duplicates for left
+                while left < right and nums[left] == nums[left - 1]:
+                    left += 1
+                # Skip duplicates for right
+                while left < right and nums[right] == nums[right + 1]:
+                    right -= 1
+            elif total < 0:
+                left += 1
+            else:
+                right -= 1
+        i += 1
+        # Skip duplicates for i
+        while i < n - 2 and nums[i] == nums[i - 1]:
+            i += 1
+    return triplets
+
+nums = [-1,0,1,2,-1,-4]                                
+print(threesum(nums))    
+#+end_src
+
+#+RESULTS:
+: [[-1, -1, 2], [-1, 0, 1]]
+
+This avoids separate helper functions and keeps duplicate-handling
+inline, which many find more readable. Test with the same examples to
+confirm.
+
+_Me_:
+
+I see, so we really do not need to skip duplicates when advancing only
+the left or right pointers to guarantee unique triplets, and this
+avoids the overhead of calling a function.
+
+** Analysis
+
+*** Time complexity
+- Time complexity is O(n log n) for sorting, then for gathering
+  triplets, O(n * n).
+
+_Me_:
+
+Is this correct?
+
+_AI_:
+
+Almost. The sorting is O(n log n). The two-pointer search for each
+fixed element is O(n), and we do that for each of the n elements in
+the outer loop — so O(n²) overall. The total is O(n log n + n²) =
+O(n²). So yes, O(n²) dominates.
+
+*** Space complexity
+- Space complexity worst case is O(n) for a two-pointer search, so
+  overall O(n * n)
+
+_Me_:
+
+Is this correct?
+
+_AI_:
+
+Not quite. The two-pointer search itself uses O(1) extra space (just a
+few pointers). The O(n) space comes from the sorting step (Python's
+Timsort uses O(n) auxiliary space) and the output list (which can hold
+up to O(n²) triplets in the worst case, e.g., all zeros). So:
+
+- Sorting: O(n) auxiliary space
+- Output: O(n²) in worst case for storing triplets
+- Overall space complexity: O(n²) due to output storage
+
+** Further Discussion
+
+_Me_:
+
+Are there any techniques to optimize the solution?
+
+_AI_:
+
+A few minor optimizations, though O(n²) is optimal for comparison-based
+solutions:
+
+1. /Early break on positive fixed element/ — you already do this.
+2. /Skip duplicate fixed elements/ — you already do this.
+3. /Hash set approach/: For each pair (i, j), store target in a set
+   and check for the third element. Still O(n²) but with more
+   overhead and duplicate handling complexity. Not recommended.
+4. /Two-pointer with pruning/: If nums[i] + nums[left] + nums[left+1] > 0,
+   break inner loop (too large). If nums[i] + nums[right-1] + nums[right] < 0,
+   continue to next i (too small). Saves some iterations but doesn't
+   change asymptotic complexity.
+
+The current solution is already clean and optimal for the constraints
+(n ≤ 3000).
+
+_Me_:
+
+What kind of real world problems are solved with this approach?
+
+_AI_:
+
+#+begin_reasoning
+We need to answer: "What kind of real world problems are solved with this approach?" The approach is the two-pointer technique after sorting, used for 3Sum. Real-world applications: any scenario needing to find combinations of three elements that satisfy a condition, e.g., financial analysis (triples of transactions summing to zero), chemistry (triples of molecules with net zero charge), or recommendation systems (triples of items meeting a sum constraint). Keep concise.
+
+We follow the Solve It Method: no code unless asked, provide high-level explanation.
+#+end_reasoning
+
+The two-pointer + sorting pattern (reduce O(n³) to O(n²)) applies to:
+
+- *Financial auditing*: Find three transactions that net to zero
+  (fraud detection).
+- *Genomics / chemistry*: Identify triplets of molecules or genes
+  whose combined expression sums to a target.
+- *Recommendation systems*: Pick three items whose total price matches
+  a budget.
+- *Scheduling*: Select three time slots whose combined duration fits a
+  window.
+
+Any problem where you need to find /k/ elements satisfying a sum or
+difference condition can often be reduced by sorting + two pointers
+(or more pointers for k > 3).
