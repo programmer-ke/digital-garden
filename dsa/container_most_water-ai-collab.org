@@ -1,0 +1,231 @@
+#+TITLE: Container Most Water
+#+DATE: <2026-06-12>
+#+FILETAGS: :leetcode:two_pointers:arrays:
+#+PROPERTY: header-args :results output :session *shared*
+
+* Container Most Water
+
+** Description
+
+https://neetcode.io/problems/max-water-container/question
+
+** Approach
+
+The naive approach would be to try all possible areas between each
+two subsequent points and find the largest.
+
+This would be an O(n^{2}) time complexity.
+
+To optimize for length, we'd want to pick points that are
+farthest from each other. To optimize for height, we'd want to pick
+the tallest points.
+
+Problem, how do we recognize the tallest points to optimize the height?
+
+_Me_:
+
+What techniques/topics do I keep at the back of my mind in figuring
+out a solution to this problem?
+
+_AI_:
+
+#+begin_reasoning
+We need to answer as an AI assisting the human in the "Solve It Method". The human asks: "What techniques/topics do I keep at the back of my mind in figuring out a solution to this problem?" This is a conceptual question about the container most water problem. The AI should provide hints, not spoilers, using Socratic questioning or high-level hints. The approach adopted is two-pointers. So the AI can suggest thinking about two pointers, moving inward, and the reasoning behind which pointer to move. But not give full solution. Also consider constraints: O(n^2) is too slow, so need linear or O(n log n). Two pointers is classic.
+
+The human might be asking for techniques: two pointers, greedy decision based on the shorter line. So I'll respond with a hint: think about starting at the ends and deciding which line to move inward based on the limiting factor (height). Also mention that area is determined by the shorter line, and moving the longer line doesn't help, so you move the shorter one.
+
+But need to be concise and not verbose. Also use the "shared context" of the file. The human is working in Emacs. So I'll respond in a helpful, concise manner.
+#+end_reasoning
+
+Consider that the area between two lines is limited by the shorter
+one.  Starting with the widest possible container (leftmost and
+rightmost lines), ask: if you move a pointer inward, which move could
+/potentially/ increase the area?
+
+_Me_:
+
+So if I start with pointers at both ends, with area being limited
+by the shorter one, then advancing the shorter side inward could
+potentially increase the area.
+
+But how do we know when to stop?
+
+_AI_:
+
+#+begin_reasoning
+We need to respond to the human's statement and question. The human says: "So if I start with pointers at both ends, with area being limited by the shorter one, then advancing the shorter side inward could potentially increase the area. But how do we know when to stop?"
+
+This is a step in the Solve It Method. The AI should guide the human to think about the loop condition. The pointers will eventually meet when left >= right. At each step, after updating the max area, we move the pointer pointing to the smaller height. The loop stops when pointers cross. That's the answer.
+
+We should continue to use Socratic questioning or hints. The human is asking "how do we know when to stop?" The AI could ask back: when would there be no more possible pairs with greater width? The pointers will have crossed. Also, the area only changes when we move a pointer, and we've considered all possibilities because moving the taller pointer never increases the area, so we only need to consider all shrinkages with the shorter pointer. Eventually we exhaust all pairs.
+
+Provide a concise hint.
+#+end_reasoning
+
+When the two pointers meet, you've considered every possible
+pair that could have a larger area—since moving the taller line never
+helps, you only need to try each line as the shorter side once.
+
+_Me_:
+
+Ok, so we consider all the possible areas until the pointers meet.
+Having done that, we'd have identified the largest area in O(n) time.
+
+So as we advance the pointers, we store the largest area encountered so
+far. Is this right?
+
+_AI_:
+
+#+begin_reasoning
+We need to respond to the human's summary. Human says: "Ok, so we consider all the possible areas until the pointers meet. Having done that, we'd have identified the largest area in O(n) time. So as we advance the pointers, we store the largest area encountered so far. Is this right?" 
+
+Yes, that is correct. The AI should confirm, but also maybe add a small nuance: at each step calculate area = min(height[left], height[right]) * (right - left), update max_area, then move the pointer with smaller height. Continue until left >= right. Finally return max_area. Since the human asked "Is this right?" we can answer affirmatively with a little elaboration.
+
+But we should avoid spoon-feeding code unless asked. Keep in Socratic style. The human seems to have grasped the algorithm. The AI can confirm and maybe ask about edge cases or ask to test with example. 
+
+Let's craft a response.
+#+end_reasoning
+
+Yes, that's right. At each step you compute area using the current
+pointers, update the maximum, and move the pointer with the smaller
+height inward. The loop ends when the pointers cross. Do you see why
+you never need to move the taller pointer inward?
+
+_Me_:
+
+Yes, I see why we don't need to move the taller pointer inward, because
+we're trying to maximize the area by finding the tallest points.
+
+_AI_:
+
+Would you like to write the loop step by step now?
+
+
+** Solution
+
+#+begin_src python
+from typing import List
+
+class Solution:
+    def maxArea(self, height: List[int]) -> int:
+        n = len(height)
+        left, right = 0, n - 1
+        max_area = 0
+        while left < right:
+            min_height = min(height[left], height[right])
+            area = min_height * (right - left)
+            if area > max_area:
+                max_area = area
+            if height[left] > height[right]:
+                right -= 1
+            else:
+                left += 1
+        return max_area
+
+height = [1,8,6,2,5,4,8,3,7]
+print(Solution().maxArea(height))
+# Output: 49
+
+height = [1,1]
+print(Solution().maxArea(height))
+# Output: 1
+
+height = [5,5,5,5]
+print(Solution().maxArea(height))
+
+height = [1,2,3,4,5]
+print(Solution().maxArea(height))
+
+#+end_src
+
+#+RESULTS:
+: 49
+: 1
+: 15
+: 6
+
+
+_Me_:
+
+How does this solution look? If there are any edge-cases unaccounted for, give me
+some hints.
+
+_AI_:
+
+The solution handles the main cases.  To check edge cases, try:
+
+- All heights equal, e.g. =[5,5,5,5]=
+- Strictly increasing, e.g. =[1,2,3,4,5]=
+- Strictly decreasing, e.g. =[5,4,3,2,1]=
+- A zero height, e.g. =[0,10,0]=
+
+Does the algorithm still return the correct maximum in each?
+
+** Analysis
+
+*** Time complexity
+
+- Since we're traversing the array inward from both ends till they meet
+  we need O(n) steps to identify each area. We're doing constant time work
+  to calculate each area, so time complexity is O(n).
+
+*** Space complexity
+
+- We are using a few additional variables to track area and positions
+  as we traverse the array. Space complexity is therefore O(1) constant.
+
+_Me_:
+
+Is this analysis correct?
+
+_AI_:
+
+Yes, correct. One small nuance: the loop runs n steps (left travels
+rightwards, right travels leftwards, each step advances one pointer
+until they meet). So exactly O(n) time, and O(1) extra space.
+  
+
+** Further Discussion
+
+_Me_:
+
+Are there any enhancements or possible optimizations?
+
+_AI_:
+
+Consider early termination: if the current max area is already large
+enough, you might skip some moves, but generally not needed for
+O(n). Another optimization: skip duplicates of the same height when
+moving pointers, since moving to the same height will not increase
+area. For example, if height[left] == height[right], moving either
+pointer is fine, but you can skip consecutive equal heights. But the
+current solution already works and is optimal in terms of asymptotic
+complexity. Would you like to explore any of these?
+
+_Me_:
+
+What are some real world applications of this solution approach?
+
+_AI_:
+
+#+begin_reasoning
+The user is asking for real-world applications of the two-pointer approach used in the container most water problem. We should answer concisely, using hints or examples rather than long explanations. The problem is about maximizing area under constraints; the technique is used in optimization problems where you shrink a window or range based on a limiting factor. Real-world applications could include: maximizing water storage in reservoirs given terrain heights, but more abstractly, any scenario with a constraint that the capacity is limited by the smaller side, like bandwidth allocation or capacity planning. The two-pointer technique is also used in problems like "trapping rain water", "two sum in sorted array", "maximize profit with two transactions", etc. But the human wants real-world applications of this specific approach.
+
+I'll give a concise answer: The two-pointer shrinking window approach is used in many optimization problems, e.g., maximizing area in layout design (like fitting text in columns), network bandwidth allocation where the bottleneck is the smaller link, or even in stock trading where you buy low and sell high but must keep order. Emphasize the principle of identifying the limiting factor and moving inward.
+#+end_reasoning
+
+The two‑pointer shrinking technique appears whenever you have a
+trade‑off between two variables (like width and height) and the
+bottleneck limits the result.  Examples: 
+
+- *Water/fluid systems* – designing pipes or channels where
+  throughput is limited by the narrowest cross‑section.
+
+- *Bandwidth allocation* – given servers with different capacities,
+  find the optimal pair that maximises throughput over a network path.
+
+- *Layout/design* – placing two elements on a line where the usable
+  space depends on the shorter element (e.g., side‑by‑side banners).
+
+In each case, you start with the widest possible configuration and
+discard the side that cannot improve the outcome.

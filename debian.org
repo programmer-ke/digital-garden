@@ -145,7 +145,7 @@ dpkg's log file is found at =/var/log/dpkg.log=
 - =find= or =locate= can be used to manually remove configuration with
   leftover suffixes .dpkg-dist, .dpkg-old, .ucf-old.
 
-* Keeping system up to date
+** Keeping system up to date
 
 - Controlled by variables in =/etc/apt/apt.conf.d/10periodic=
   - =APT::Periodic::Update-Package-Lists= :: frequency in days to
@@ -164,7 +164,7 @@ dpkg's log file is found at =/var/log/dpkg.log=
 - =apt show <package>= allows one to get information about a known package
 - =axi-search= allows additional criteria for searching packages e.g. files contained
 
-* Solving problems and finding information
+** Solving problems and finding information
 
 - Manual pages can be found using the =man= command
   - provided by the =man-db= package
@@ -196,3 +196,22 @@ dpkg's log file is found at =/var/log/dpkg.log=
   - use =dpkg -S <file>= to find the package associated with a buggy program.
   - check the bugtracker for that package if the bug has been reported
   - send a bug report using the =reportbug= command
+
+** Configuring system for another language
+
+- A locale is a group of regional settings: language, alphabetical
+  comparisons, dates, times, monetary sums etc
+- The =locale= command is used to display a summary of current
+  configuration of locale parameters
+- The =locales= package enables proper functioning of localization for various applications.
+- The supported set of languages can be modified with =dpkg-reconfigure locales=
+- List of enabled locales is stored at =/etc/locale.gen=
+- The default selected locale is stored at =/etc/default/locale=
+- The =locales-all= package contains pre-compiled locale data for supported locales
+- =dpkg-reconfigure keyboard-configuration= can be used to set keyboard layout
+  - One can configure a 'compose key' used to enter special characters by entering special combinations.
+    - Combinations are described in:
+      - =/usr/share/X11/locale/en_US.UTF-8/Compose=
+      - =/usr/share/X11/locale/compose.dir=
+- The =convmv= tool can be used to migrate file names to utf-8, which is the current standard
+- The =recode= tool allow automatic recoding of content of simple text files
