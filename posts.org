@@ -1,9 +1,17 @@
 #+TITLE: Blog Posts
 
+- [[file:dsa/container_most_water-ai-collab.org][Container Most Water]]
+  #+html: <p class='pubdate'>by Ken Rch on Jun 12, 2026 00:00.</p>
 - [[file:debian.org][debian]]
-  #+html: <p class='pubdate'>by krm on Jun 04, 2026 15:07.</p>
+  #+html: <p class='pubdate'>by krm on Jun 11, 2026 16:31.</p>
+- [[file:dsa/3sum.org][3Sum]]
+  #+html: <p class='pubdate'>by krm on Jun 08, 2026 00:00.</p>
+- [[file:dsa/valid_palindrome.org][Valid Palindrome]]
+  #+html: <p class='pubdate'>by krm on Jun 06, 2026 00:00.</p>
 - [[file:dsa/prompt.org][prompt]]
-  #+html: <p class='pubdate'>by krm on Jun 04, 2026 04:15.</p>
+  #+html: <p class='pubdate'>by krm on Jun 05, 2026 14:12.</p>
+- [[file:dsa/longest_consecutive_sequence.org][Longest Consecutive Sequence]]
+  #+html: <p class='pubdate'>by krm on Jun 05, 2026 00:00.</p>
 - [[file:dsa/top_k_frequent_elements.org][top k frequent elements]]
   #+html: <p class='pubdate'>by krm on Jun 04, 2026 04:14.</p>
 - [[file:dsa/encode_and_decode_strings.org][encode and decode strings]]

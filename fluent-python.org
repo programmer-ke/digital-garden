@@ -554,7 +554,7 @@ print(l)
 - A class intended to define an interface should be an explicit ABC or
   typing.Protocol sublcass. An ABC should only subclass other ABCs
 - Mixins should never be instatiated, and concrete classes should not
-  inherit only from a mixins
+  inherit only from a mixin
 - Aggregate classes are constructed primarily by inheriting from a
   mixture of ABCs or mixins and do not add their own behaviour or
   structure. This can be useful for clients

@@ -1,0 +1,234 @@
+#+TITLE: Best time to buy and sell stock
+#+DATE: <2026-06-13>
+#+FILETAGS: :leetcode:sliding_window:
+#+PROPERTY: header-args :results output :session *shared*
+
+* Best time to buy and sell stock
+
+** Description
+
+https://leetcode.com/problems/best-time-to-buy-and-sell-stock/description/
+
+** Approach
+
+Brute force would be to check that for each possible buy date, the
+profit from all possible sell dates. This would be an O(n^{2})
+operation.
+
+The sell date always comes after the buy date, and it makes sense to
+sell only when price is higher than buy date.
+
+A possible improved approach:
+
+Start with two pointer into the array, the buy followed by the sell pointer
+pointing to the first two elements.
+
+As long as it is possible to make a profit, record the profit and
+advance the sell pointer.
+
+When we encounter a sell position where we cannot get a profit, i.e.
+the buy points to a price greater than or equal to the selling price,
+advance the buy pointer to the sell pointer position and the sell
+pointer by one. At this point, the buy position is the best possible
+one encountered so far.
+
+Repeat the process until the sell pointer gets to the end of array
+and return the max profit encountered.
+
+Why this works: the buy pointer is always seeking the best
+buying price until the end of the array.
+
+_Me_:
+
+How does this approach sound?
+
+_AI_:
+
+#+begin_reasoning
+We need to respond to the user's question about the approach. The user describes a two-pointer sliding window method where buy and sell are both advanced. The key idea is to track minimum price so far, compute profit, and update max. The user's description: start with buy at index 0, sell at index 1; while sell < n, if prices[sell] > prices[buy] record profit and advance sell; else (when prices[sell] <= prices[buy]) advance buy to sell and sell by one. This is essentially tracking the minimum price and computing profit. However, the described method has a flaw: when prices[sell] > prices[buy] we only advance sell, not resetting buy. That's fine, but the buy pointer might not always be the absolute minimum if it only moves when encountering a lower price. Actually, the method described seems correct: find minimum so far and max profit. But need to check edge cases. The user asks "How does this approach sound?" I should give a concise evaluation, maybe suggest it's correct but can be simplified. Also note that constraints up to 10^5, O(n) is fine. I'll respond with a brief analysis: the approach is essentially tracking the minimum price encountered so far and computing max profit. The two-pointer method is valid but the typical one-pass solution using min_price and max_profit is simpler. Also note that the described method implicitly maintains that buy points to the lowest price seen so far. So it's fine. I'll give a short reply.
+#+end_reasoning
+
+Your approach sounds correct and runs in O(n) time with O(1) space. It
+effectively tracks the lowest price seen so far (the buy pointer) and
+computes profit from each later price. However, note that when
+=prices[sell] <= prices[buy]=, you move the buy pointer to =sell= –
+which works because if the current price is lower, it becomes the new
+best buying day.
+
+That said, the typical single-pass solution uses a variable
+=min_price= instead of a second pointer, which is slightly simpler and
+avoids the manual pointer updates. But both are equivalent.
+
+One subtle point: your method only moves the buy pointer when it
+encounters a price ≤ current buy, so it always points to the global
+minimum encountered so far. That’s the key insight.
+
+Overall, it’s a solid plan. Would you like to implement it step by
+step?
+
+_Me_:
+
+Ok, so instead of having a buy pointer, we can simply record the
+minimum price that allow us to get a profit, and update it once
+we encounter a better minimum price...
+
+** Solution
+
+#+begin_src python
+from typing import List
+
+class Solution:
+    def maxProfit(self, prices: List[int]) -> int:
+        max_profit = 0
+        min_price = prices[0]
+        sell = 1
+        while sell < len(prices):
+            profit = prices[sell] - min_price
+            if profit > 0:
+                if profit > max_profit:
+                    max_profit = profit
+            else:
+                min_price = prices[sell]
+            sell += 1
+        return max_profit
+
+prices = [7]
+print(Solution().maxProfit(prices))
+# Output: 0
+
+prices = [7,1,5,3,6,4]
+print(Solution().maxProfit(prices))
+# Output: 5
+
+prices = [7,6,4,3,1]
+print(Solution().maxProfit(prices))
+# Output: 0
+        
+#+end_src
+
+#+RESULTS:
+: 0
+: 5
+: 0
+
+
+_Me_:
+
+How does this solution look?
+
+_AI_:
+
+The solution looks good. It’s clean, correct, and runs in O(n) time with O(1) space. A few minor observations:
+
+- You handle the edge case of a single-element array correctly (returns 0).
+- The logic is clear: track =min_price= and compute profit for each sell day; when profit is non-positive, update =min_price= because a lower price is found.
+
+One small stylistic improvement: you could simplify the inner condition by using =max_profit = max(max_profit, profit)= instead of the =if= block, but your version is perfectly fine.
+
+Alternatively, the classic one-liner loop is:
+
+#+begin_src python
+for price in prices[1:]:
+    profit = price - min_price
+    max_profit = max(max_profit, profit)
+    min_price = min(min_price, price)
+#+end_src
+
+But yours is just as valid. Well done.
+
+** Analysis
+
+*** Time complexity
+
+- We're traversing the array once, and do constant time work for each
+  sell position, so the time complexity is O(n)
+
+*** Space complexity
+
+- We're only need a few extra variables to track maximum profit and minimum price
+  so the space complexity is O(1)
+
+_Me_:
+
+Is this analysis correct?
+
+_AI_:
+
+Yes, your analysis is correct:
+
+- *Time complexity O(n)*: The while loop iterates through the array
+  exactly once (sell goes from 1 to n-1), and each iteration does
+  constant-time operations.
+- *Space complexity O(1)*: Only two integer variables (=max_profit=,
+  =min_price=) plus the loop counter – no additional data structures
+  that scale with input size.
+
+You’ve covered the essential points. Good work.
+
+** Further Discussion
+
+_Me_:
+
+Are there any possible optimizations or enhancements?
+
+_AI_:
+
+#+begin_reasoning
+The user asks about possible optimizations or enhancements for the stock profit problem. Given the O(n) time and O(1) space, the algorithm is already optimal for a single transaction. But there might be enhancements in terms of readability, generality, or handling edge cases. I can mention: 
+- Using for loop instead of while for readability.
+- Handling empty prices? But constraint says length >=1.
+- For multiple transactions (buy/sell multiple times), that's a different problem.
+- Could be rewritten functionally with reduce, but not necessary.
+- In languages like C++, using std::min/max might be more concise.
+- For very large arrays, the algorithm is already best.
+
+I'll give a concise answer.
+#+end_reasoning
+
+The solution is already optimal in both time and space for a single
+transaction. However, a few enhancements could be considered:
+
+1. *Readability*: Replace the =while= loop with a =for= loop over
+   =prices[1:]= for cleaner code (as shown earlier).
+2. *Edge cases*: Your code handles the minimum array size (1)
+   correctly. If the constraint were different (e.g., empty array),
+   you’d need a guard, but it's not required here.
+3. *Generalization*: For the variant where you can make multiple
+   transactions (buy/sell repeatedly with no cooldown), the algorithm
+   would change to sum all positive differences – but that’s a
+   different problem.
+4. *Memory and performance*: For extremely large inputs (e.g., 10^5),
+   this is already linear – no further optimization needed.
+
+Overall, the current implementation is clean, efficient, and ready to
+use. No major changes are necessary.
+
+_Me_:
+
+What are some other real world applications of this approach?
+
+_AI_:
+
+The "track the minimum so far" pattern is widely useful. Here are a
+few real-world applications:
+
+- *Maximum difference between two array elements* – e.g., find the
+  largest increase in temperature readings, stock prices, or any
+  time-series data.
+- *Best day to buy/sell currency* – same logic applied to forex rates
+  over time.
+- *Minimum cost to travel* – if costs vary by day (e.g., train
+  tickets, plane fares), find the cheapest day to buy and the best day
+  to travel.
+- *Longest increasing subsequence (simplified)* – track the smallest
+  tail value to enable efficient updates (a core idea in patience
+  sorting).
+- *Sliding window minimum/maximum problems* – maintaining a running
+  minimum or maximum over a subarray, often used in signal processing
+  or data stream analysis.
+- *Dynamic programming state tracking* – any DP that requires
+  maintaining a "best price seen so far" (e.g., best time to buy/sell
+  stock with cooldown or transaction fees).
+
+The core concept – keep a running optimum while scanning forward – is
+a fundamental technique in many linear-time algorithms.

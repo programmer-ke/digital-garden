@@ -2,6 +2,7 @@
 #+DATE: <2026-06-12>
 #+FILETAGS: :leetcode:two_pointers:arrays:
 #+PROPERTY: header-args :results output :session *shared*
+#+AUTHOR: Ken Rch
 
 * Container Most Water
 
