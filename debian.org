@@ -1,4 +1,5 @@
 #+FILETAGS: :debian:sysadmin:
+#+TITLE: Debian
 
 * debian
 
@@ -203,15 +204,348 @@ dpkg's log file is found at =/var/log/dpkg.log=
   comparisons, dates, times, monetary sums etc
 - The =locale= command is used to display a summary of current
   configuration of locale parameters
-- The =locales= package enables proper functioning of localization for various applications.
-- The supported set of languages can be modified with =dpkg-reconfigure locales=
+- The =locales= package enables proper functioning of localization for
+  various applications.
+- The supported set of languages can be modified with
+  =dpkg-reconfigure locales=
 - List of enabled locales is stored at =/etc/locale.gen=
 - The default selected locale is stored at =/etc/default/locale=
-- The =locales-all= package contains pre-compiled locale data for supported locales
-- =dpkg-reconfigure keyboard-configuration= can be used to set keyboard layout
-  - One can configure a 'compose key' used to enter special characters by entering special combinations.
+- The =locales-all= package contains pre-compiled locale data for
+  supported locales
+- =dpkg-reconfigure keyboard-configuration= can be used to set
+  keyboard layout
+  - One can configure a 'compose key' used to enter special characters
+    by entering special combinations.
     - Combinations are described in:
       - =/usr/share/X11/locale/en_US.UTF-8/Compose=
       - =/usr/share/X11/locale/compose.dir=
-- The =convmv= tool can be used to migrate file names to utf-8, which is the current standard
-- The =recode= tool allow automatic recoding of content of simple text files
+- The =convmv= tool can be used to migrate file names to utf-8, which
+  is the current standard
+- The =recode= tool allow automatic recoding of content of simple text
+  files
+
+** Configuring the network
+*** Essentials                        :ipv4:ipv6:subnet_mask:network_manager:
+- An IP address is used to identify network interfaces in the local
+  network, or the internet
+- IPv4 addresses are encoded into 32 bit values, often represented as
+  4 dot separated numbers between 0 - 255
+- IPv6 extends the address to 128 bits and are represented as
+  hexadecimal numbers separated by colons (16 bits each)
+- An ipv4 subnet mask defines in its binary mode which section of the IP address
+  corresponds to the network address.
+  - e.g. 255.255.255.0 (24 1s followed by 8 0s) specifies that the first
+    24 bits correspond to the network address.
+- In ipv6 only the number of leading 1s is specified.
+- The network address is an IP address where the machine's number is 0.
+  - The range of a complete ipv4 network is often specified with the syntax a.b.c.d/e
+    where a.b.c.d is the network address, and e is the number of bits corresponding to network
+    part e.g. 192.168.0.0/24
+  - The ipv6 network range is similarly expressed e.g. 2001:db8:13bb:2::/64
+- A router configured as a gateway helps reach beyond the local
+  network to an extended network
+- Two special addresses are reserved in the network, one for the network itself, and
+  the other for broadcast within the network.
+- If =NetworkManager= is installed, it creates appropriate network
+  .ini files in =/etc/NetworkManager/system-connections/=
+  - These can be created manually, optionally through =nm-connections-editor=
+- If =NetworkManager= is not installed, the installer configures
+  =ifupdown= by creating the =/etc/network/interfaces= file
+  - a line starting with auto specifies interfaces to be automatically
+    configured by the =networking= service on boot
+  - additional files can be placed in the =interfaces.d= directory
+
+*** Ethernet Interface
+
+- The IP network can be configured in two ways:
+  - dynamically with dhcp
+    - It requires specifying the DHCP server used in the local network in =/etc/network/interfaces=
+  - The network settings are fixed in the interfaces configuration e.g.
+    #+begin_example
+    auto enp0s31f6
+    iface enp0s31f6 inet static
+      address 192.168.0.3/24
+      broadcast 192.168.0.255
+      network 192.168.0.0
+      gateway 192.168.0.1
+    #+end_example
+- It is possible to associate several interfaces to a single network
+  card, and several also several IP addresses to a single interface
+- Systemd and udev are able to rename interfaces on boot based on
+  rules stored in =/lib/systemd/network/99-default.link=
+
+*** Wireless Interface
+
+- Some situations require installing wireless firmware from the
+  non-free repository, so it has to be enabled in sources.list
+  - the =isenkram= package can help identify the correct package based
+    on hardware manufacturer.
+
+- =ifupdown= can manage wireless interfaces in
+  =/etc/network/interfaces= with help of the wpasupplicant package
+
+*** Point to Point (PPP) through a PSTN (public switched telephone network) modem
+
+- This is configured using the =pppconfig= tool
+
+*** Automatic network configuration
+
+- =NetworkManager= from the =network-manager= package displays all available
+  network configuration allowing one to switch easily from one to the next
+- It saves configuration of all the networks it has already connected
+  to and automatically switches to the best one when connection drops.
+- Installed by default in a Desktop installation.
+
+*** Configuring Hostname and DNS
+
+- A single machine can have several DNS names because it can have
+  more than one network card, and more than one interface per card
+- The canonical name is stored in =/etc/hostname= and is read by the
+  kernel
+  - current kernel value is found at =/rpc/sys/kernel/hostname=
+- The complete name of the machine is however acquired through name
+  resolution, typically from =/etc/hosts=
+- The name resolution mechanism is specified in =/etc/nsswitch.conf=
+  using the =hosts= keyword
+- DNS servers are indicated in =/etc/resolv.conf=, one per line
+  - This file may be managed automatically by other services like
+    NetworkManager or systemd-resolved
+- For a small network not connected to the internet, e.g. less than 5
+  machines, =/etc/hosts= can be used for name resolution
+
+** User and Group Databases
+
+- list of user account info is stored in =/etc/passwd= and hashed
+  passwords at =/etc/shadow=
+  - =/etc/shadow= cannot be read by regular users to prevent
+    dictionary attacks
+  - User account info can be managed by the =usermod= command
+- Groups membership is stored in =/etc/group=
+- =passwd(5)=, =shadow(5)=, =group(5)= man pages describe the files
+  - =vipw= and =vigr= can be used to safely modify these files
+- A user account can be disabled by either expiring it using =usermod=
+  or by setting a non-login command in the shell section of
+  =/etc/passwd=
+- To disable all logins, create the file =/etc/nologin=
+- =groupmod= modifies a groups information, =gpasswd group= changes
+  its password and =gpasswd -r group= deletes it.
+- Different databases for managing user and group info e.g. LDAP can
+  be set in =/etc/nsswitch.conf=
+
+** Creating Accounts
+
+- This is done using the =adduser= command, which can be configured by
+  =/etc/adduser.conf=
+- The user's home directory is populated by content of =/etc/skel=
+- Apart from the automatically created user's default group,
+  additional groups can be specified with =adduser=
+  - this is useful for example to allow users to access external
+    devices represented by files in =/dev=. The file permissions
+    determine who can access the devices
+
+** Shell environment
+
+- For bash, =/etc/bash.bashrc= is used to initialize interactive
+  shells and =/etc/profile= for login shells
+- per user bash =~/.bashrc= is created from the template
+  =/etc/skel/.bashrc=
+- per user =~/.profile= can be used to customize the login shell
+- system wide environment variables can be placed in
+  =/etc/environment= or =/etc/profile.d=
+- locale-related default environment variables are placed in
+  =/etc/default/locale=
+
+** Printer Configuration
+
+- Printing is managed using CUPS, the print server framework using the
+  Internet Printing Protocol (IPP)
+  - CUPS functionality is divided between several cups packages
+- CUPS is based on System V printing system, but a compatibility
+  package =cups-bsd= allows use of commands such as =lpr=, =lpq= and
+  =lprm= from traditional BSD.
+- Modern printers that are AirPrint-capable enable driverless
+  printing, eliminating the need for printer-driver-* packages.
+- The =printer-driver-gutenprint= package provides drivers for a range
+  of printers
+- The printing system is administered through =http://localhost:631=
+  or =system-config-printer=
+- Member of the =lpadmin= group can manage USB and network printers
+
+** Configuring the Bootloader
+
+- The master boot record occupies the first 512 bytes of the first
+  hard disk, and is loaded by the BIOS to hand over control to a
+  program capable of booting the desired OS. In general, a bootloader
+  is installed in the MBR.
+- Management of files in =/dev= is dynamic, the kernel cooperates with
+  =udev=. This is useful for hot-swappable devices
+- The bootloader identifies block device disks and partitions with the
+  prefix =/dev/sd*= disks have different letters identifying them
+  and each partition is identified by a number.
+  e.g. =/dev/sdb3= is the 3rd partition in the second disk
+- The msdos partition table format can only support a maximum of 4
+  partitions. On of them has be be created as an extended partition
+  that contains other secondary partitions. These could be numbered
+  from 5 onwards e.g. /dev/sda5, /dev/sda6 ...
+- The msdos partition table only allows disks upto 2TB in size
+- The new partition table format GPT (GUID partition table) allows
+  creation of upto 128 partitions and disk sizes of upto 8ZiB
+  - each partition is identified by a globally unique identifier (GUID)
+- Disks can be identified by various ways under the directory
+  =/dev/disk/=
+- GRUB 2 (Grand unified bootloader) is modern bootloader in debian
+- It is installed in the MBR of the first disk by doing =grub-install
+  /dev/sda=
+- Generated grub config is stored at =/boot/grub/grub.cfg=
+- changing kernel parameters can be done by modifying
+  =/etc/default/grub=
+- Adding entries to the menu can be done by creating
+  =/boot/grub/custom.cfg= or editing =/etc/grub.d/40_custom=
+- Additional grub packages allow it to work with both BIOS and UEFI
+  systems
+
+** Timezone
+
+- =dpkg-reconfigure tzdata= allows setting timezone in an interactive manner
+  - the configuration is stored in =/etc/timezone=
+  - =/etc/localtime= becomes a symbolic link to coresponding file in
+    =/usr/share/zoneinfo=
+  - The env var =TZ= can be used to temporarily modify timezone
+- The kernel has its own software clock which is generally more accurate
+  than the hardware (CMOS) clock.
+- The software clock is reset each time the computer reboots by
+  from the hardware clock, then adjusted from time servers if available.
+- This then updates the hardware clock when the system shuts down.
+  - It is adviseable to keep the hardware clock in universal time rather
+    than local time when it comes to daylight saving calculations
+
+** Time synchronization
+
+- work stations are rebooted frequently so time synchronization from
+  time servers at boot is enough
+- servers are long running so it is recommended to configure a local
+  time server in the network to synchronize time in the network. The
+  local time server itself synchronizes with the public time servers.
+  - The pool =pool.ntp.org= is a public pool that load balances time
+    requests
+
+** Miscellaneous configuration                         :dkms:mount:logrotate:
+
+- Files are rotated by the =logrotate= program with directives from
+  =/etc/logrotate.conf= and =/etc/logrotate.d/=
+  - logrotation is scheduled daily using =cron=
+
+- The =sudo= command is used to share administrative rights.
+  - members added to the =sudo= group are able to use the command for elevated priviledges
+  - administrators use the command =visudo= to safely edit =/etc/sudoers= and configure
+    users' permissions
+    - alternatively, rules may be placed in =/etc/sudoers.d=
+
+- The =mount= and =umount= commands are used to mount and unmount
+  devices into the filesystem
+  - Some removable systems are mounted automatically especially when
+    using desktop environments
+  - =mount= without arguments lists mounted filesystems (also readable
+    from =/proc/mounts=)
+  - =/etc/fstab= lists all possible mounts that happen on boot or
+    manually for removable devices
+  - details can be found in mount(8) manual and fstab(5)
+
+- The =locate= command cna find location of a file when only part of the name is known
+  - It queries a database updated daily by the =updatedb= command.
+
+
+** Kernel Installation
+
+- The debian kernel image =vmlinux-version=, configuration
+=config-version= and symbols table =System.map-version= are installed
+in =/boot=
+
+- The kernel modules are installed in =/lib/modules/version=
+
+- Modules maintained outside the linux kernel tree need to be compiled
+  against the specific linux kernel version.
+  - The Dynamic Kernel Module Support (DKMS) framework can be used to automate this.
+  
+** Unix Services
+
+*** System boot
+
+- On systems with BIOS, the BIOS initializes the controllers and
+  hardware, detects discs then looks up the Master Boot Record of the
+  first disc and loads the code stored there. It is this code that
+  executes the bootloader.
+
+- On systems with UEFI, the UEFI searches the filesystem storage for
+  the the GUID that marks it as the EFI System Partition
+  (C12A7328-F81F-11D2-BA4B-00A0C93EC93B), where boot loaders, boot
+  managers, UEFI shell etc exist. It then launches the desired
+  bootloader
+  - If secure boot is enabled, it will verify the authenticity of the
+    EFI binaries there by signature.
+- Once the bootloader loads, it either loads a chained bootloader or
+  the kernel.
+- The kernel searches for and mounts the partition containing the root
+  filesystem then executes the first program =init=
+- Frequently, the initial root filesystem and init are located in a
+  virtual filesystem that only exists in RAM (=initramfs= or
+  =initrd=), which will perform the minimum necessary to load the real
+  filesystem e.g. load driver hard drive modules, opening encrypted
+  partitions, activating LVM volumes etc
+
+*** Init systems
+
+**** Systemd                                                        :systemd:
+
+- In systemd systems, =init= is symlinked to =/lib/systemd/systemd=
+- =systemd= initializes the system keeping a global view of the system
+  while honouring the requirements of each component.
+- Its configuration consists of unit files stored in
+  =/lib/systemd/system/= and =/etc/systemd/system/=
+  - Two major flavours =.service= and =.target= unit files
+
+- A =.service= file describes a process managed by systemd
+  - =[Unit]= contains generic info about the service
+  - =[Service]= contains declarations related to service execution
+  - =[Install]= contains info about which targets to install the service
+
+- A =.target= describes a system state where a set of services is known
+  to be active (roughly similar to runlevels)
+  - Dependencies of a tartet are listed either within the target file,
+    or as symlinks in directories named similar to the target.
+
+- The unit files are managed using various systemd utitilies including:
+  - =systemctl=
+    - without arguments, lists all known unit files
+    - =systemctl status= gives the status of all the running services
+    - =systemctl status <service>= gives status of a specific service
+    - can be used to start, stop, reload, enable/disable/check if service is enabled
+  - =journalctl=
+    - without arguments logs all messages since system start
+    - =journalctl -f= tails messages
+    - =journalctl -u <service>= shows messages logged by a single service
+- Other systemd features include:
+  - socket activation (start a service when a socket connection is attempted)
+  - timers (has cron-like features)
+  - network (describes network interfaces, see systemd.network(5)) 
+
+**** System V init                                                 :sysvinit:
+
+- The system v init system executes the =/etc/init.d/rcS= script which executes
+  all programs in =/etc/rcS.d/=
+  - These do basic setup like configuring the keyboard, networking,
+    loading kernel drivers, filesystem integrity, mounting partitions
+    etc
+- It then executes =/etc/init.d/rc X=, where X is the runlevel which
+  starts services listed in =/etc/rcX.d
+  - There are 4 different default runlevels:
+    - 0 :: used temporary
+    - 1 :: single user mode (only basic services) for maintenance/troubleshooting
+    - 2 :: normal operation
+    - 6 :: similar to 0, which during the shutdown phase that precedes a reboot.
+  - =insserv= is used to manage dependencies between boot scripts
+  - In each run level, scripts starting with S are services to be
+    started, and those starting with K are services to be stopped.
+- After executing the necessary runlevels, =init= starts the virtual
+  consoles with =getty=, and displays a login prompt.
+  - Accessible by typing combinations ctrl + alt + f1 through to f6

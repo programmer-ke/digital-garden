@@ -304,3 +304,73 @@ Two primary types:
 
 Analysis platform [[https://l2beat.com/scaling/summary][L2BEAT]] tracks L2s progress in maturing from Stage 0
 to Stage 2.
+
+* Upgradeable Smart Contracts
+
+Two factors that affect upgradeablility:
+
+ - Logic :: contract's code in solidity. Once deployed, it is immutable
+ - State :: storage slots for data. The contract logic reads and modifies the state.
+
+** 3 methods of managing contract changes
+
+*** 1. Parameterization
+
+This is pre-planned configuration where the contract parameters can be
+modified by authorized users.
+
+It is simple to implement, but is of limited scope, requires foresight
+and risks centralization.
+
+*** 2. Social Migration
+
+Instead of modifying an existing contract, the dev team deploys a
+completely new contract and encourages the community to migrate to it
+e.g. Aave, Uniswap
+
+It maintains true immutability and allows maximum architectural
+flexibility, but has a high coordination cost and fragments liquidity
+
+*** 3. The proxy pattern                         :delegatecall:proxy_pattern:
+
+It divides logic and state to make logic easier to upgrade.
+
+Users interact with a proxy contract, which stores all the sate, and
+the proxy contract delegates calls to the implementation contract,
+which is upgradeable (uses =delegatecall=).
+
+To upgrade the implementation contract, the developers deploy it
+and updates the address in the proxy contract.
+
+**** Security considerations
+
+- Storage clashes :: Solidity assigns storage variables to slots in
+  order of their declaration. If the implementation contract changes
+  the order of types of variables, it can lead to corrupt data
+  manipulation
+- Function selector clashes :: If a function selector in the proxy
+  contract matches with a different one in the implementation
+  contract, when a user submits a call to with that selector, the
+  proxy contract function is executed instead.  This could be an admin
+  function not intended for end users, leading priviledge escalation.
+
+**** Common proxy patterns :tranparent_proxy_pattern:uups:eip1822:diamond_proxy_pattern:eip2535:
+
+- Transparent proxy pattern :: routes calls based on the message
+  sender to avoid function selector clashes. Call functions in the
+  proxy contract if sender is an admin, otherwise delegate calls to
+  the implementation contract.
+- UUPS (Universal Upgradeable Proxy Standard EIP-1822) :: Moves the
+  upgrade logic from the proxy contract to the implementation
+  contract. This makes the proxy contract easier to deploy and more
+  universal, and prevents selector clashes because the solidity
+  compiler detects them in the implementation contract
+- Diamond proxy pattern (EIP-2535) :: A moduler pattern where the
+  proxy contract delegates to multiple implementation contracts
+  (facets). It allows for granular updates and helps work around
+  contract size limits for complex contracts.
+
+Note: Upgradeable smart contracts introduce complexity and new attack
+surfaces. They should be used as a means to and end where the contract
+is immutable, allowing critical bug fixes and improvements, where the
+eventual goal is to relinquish control.
