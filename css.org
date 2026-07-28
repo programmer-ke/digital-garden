@@ -1,10 +1,204 @@
 #+FILETAGS: :css:styling:html:
 
-* Avoiding the specificity hell                               :classless_css:
+* Avoiding the specificity hell                               :specifity:
+
+- Fundamental specifity rule: =tag < class < id=
+  
 
 - Use mostly tags in your CSS with full (or mostly complete) DOM paths for the selectors.
 - Use .class for different variants or states of those tags.
-- Use .id for one time localized changes for a single view.
+- Use #id for one time localized changes for a single view.
 
-** Classless Frameworks
+* Classless Frameworks                                        :classless_css:
+
 - mvp.css
+
+* Common selectors
+
+- =tag= -- This is what you've already seen when you just use a basic
+  tag name like p or h1.
+- =.class= -- This selects any tag that has this class attribute. If
+  you have <h1 class="title"> then the selector for that is .title.
+- =#id= -- Same as class but for id attributes. If you have <p
+  id="main-text"> then the selector is #main-text.
+- =tag.class= or =tag#id= -- You can combine the tag, class, and id
+  selectors to make them even more specific.
+- =parent child= -- This is what we did at the beginning of the lesson
+  and says "any tag named child inside parent".
+- =tag1,tag2= -- Applies the rule to all tag1 or tag2 elements.
+- =div + p= -- Applies the rule to any p tag that is after a div tag.
+- =[attribute="something"]= -- Applies the rule to anything with this
+  attribute set to "something".
+- =tag1 > tag2= -- Applies rule to immediate descendants =tag2= of
+  =tag1=
+
+* Common properties
+
+- =color= -- changes the font color.
+- =background= -- configures the background.
+- =border= -- configures the border of an element.
+- =display= -- changes how the element is placed with other elements.
+- =opacity= -- makes it more or less transparent.
+- =font= -- determines the font style, face, and other typography
+  aspects.
+- =margin= -- the space between elements' boxes.
+- =padding= -- the space inside elements' boxes.
+- =position= -- how the element is positioned relative to others.
+- =width= -- the horizontal width of the element in various
+  measurements.
+- =height= -- the vertical height of the element.
+
+* the border trick
+
+When styling an element, the following makes it easier to get
+visual feedback. Consider it the 'print statement' for CSS.
+
+#+begin_src css
+el {
+    border: 1px solid hotpink;
+}
+#+end_src
+
+Using 'hotpink' makes it easier to search and remove later.
+
+* The display property
+
+- Sticking to =display:block=, =display:flex= and =display:grid= for most
+  things helps avoid the complexity that comes with the myriad of options
+
+
+* Units of Measure
+
+** Absolute
+
+- =cm=, =mm=, =in= -- centimeters, millimeters, and inches
+- =px= -- pixels
+- =pt= -- points, which is based on 1/72nd of an inch
+- =pc= -- picas 1/6th of an inch
+
+Most useful is to stick to pixels where exact sizes are known/expected  
+
+** Relative
+
+=em= -- font-size of the element.
+=ex= -- the x-height of the current font.
+=ch= -- the width of the "0" (zero).
+=rem= -- the font-size of the root element.
+=vw= -- 1% of the width of the viewport. 
+=vh= -- 1% of the height of the viewport.
+=vmin= -- 1% of the viewport's smaller dimension. 
+=vmax= -- 1% of the vieport's larger dimension.
+=%= --- % of the parent element's dimension.
+
+For most things, =em= and =rem= will suffice.
+
+* Layering trick
+
+- Create each element as siblings in a parent tag
+- set parent tag to =position: relative=
+- Set children tags to =position: absolute= and =top: 0=
+- If out of order, use =z-index= to specify correct order
+
+* Colour and contrast
+
+- Design contrast in monochrome first before adding colour, otherwise
+  colours can distract from proper design
+
+- Painters use a scale from 1 to 9 (pure black to pure white)
+  - Contrast is determined by substracting the lower code from the
+    higher code
+  - The lower the contrast between a subject and its background, the
+    less distinguishable.
+- The scale can be adjusted to CSS using the hue, saturation, luminace
+  (hsl) code. Hue and saturation are set to 0 and luminance between 1
+  and 100%
+
+Assiging them to variables:
+
+#+begin_src css
+:root {
+  /* light values */
+  --value9: hsl(0, 0%, 100%);
+  --value8: hsl(0, 0%, 99%);
+  --value7: hsl(0, 0%, 90%);
+  --value6: hsl(0, 0%, 85%);
+  --value5: hsl(0, 0%, 80%);
+
+  /* dark values */
+  --value4: hsl(0, 0%, 44%);
+  --value3: hsl(0, 0%, 33%);
+  --value2: hsl(0, 0%, 22%);
+  --value1: hsl(0, 0%, 11%);
+  --value0: hsl(0, 0%, 1%);
+}  
+#+end_src
+
+Typically, 5 values are used to start with:
+- 9, 7, 5, 3, 1
+
+- A smart phone's grayscale feature can be used to inspect existing
+  websites with color masked so as reveal contrast between elements
+
+* Variables                                                   :css_variables:
+
+#+begin_src css
+// specify variables in root pseudo-selector or element selector
+:root {
+    --debug-border: 1px solid hotpink;
+}
+
+// Utilize them in elements
+login-button {
+    border: var(--debug-border);
+}
+#+end_src
+
+Process:
+
+- Assign direct simple css to element
+- Once done, find repeated css styles e.g. colors, sizes and extract
+  them to variables
+- Use the variables to tweak overall design
+
+Over time, you develop your own re-usable design language.
+
+* Flexbox
+
+Allows you to override the default browser html rendering (from top to bottom) within
+a given container.
+
+You can specify the direction of the layout: horizontal (forward or
+reverse) and vertical (forward and reverse)
+
+You can also specify how its children will be shifted around,
+stretched or squeezed.
+
+* Grids
+
+Grids allow you to override the default browswer layout in a 2D manner
+i.e. you can specify both how rows and columns are laid out.
+
+* A Front-end development process
+
+** Principles
+
+- At each stage, deal with one or two things to avoid getting overwhelmed with details
+- Everything roughly works at each step
+- Avoid details until necessary
+- Make mistakes easy to identify and fix
+
+** Process
+
+Roughly, start from the outside-in
+
+1) Big block layouts of the page (somewhere between 3 - 7)
+2) Fill each block with fake content e.g. images, text and others to
+   refine positioning and proportions
+3) Turn the lights on - colour schemes, fonts, images, and real text
+
+*** How to refine the result
+
+- Check whether things line up
+- Check that all fonts are consistent
+- Look at the page with peripheral vision and see what jumps out
+- Evaluate contrast and make sure there's good value distance

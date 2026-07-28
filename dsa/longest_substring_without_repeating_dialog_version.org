@@ -356,9 +356,6 @@ What areas of data structure and algorithms does this problem involve?
 
 _AI_:
 
-#+begin_reasoning
-We need to list the areas: sliding window, two pointers, hash table/set, array (for character mapping), string traversal, and optimization of space/time. Possibly also the concept of in-place updates. Also relates to substring problems, and the technique of using indices to track boundaries. Should be concise.
-#+end_reasoning
 
 This problem primarily covers:
 

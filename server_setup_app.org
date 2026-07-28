@@ -1,0 +1,212 @@
+* Server setup for a simple app
+
+#+FILETAGS: :debian:app_server:piku:
+
+- **Server OS**: Debian (instead of Ubuntu). The stack is essentially
+  identical; only minor differences exist in package versions and
+  preferring `apt` packages for tools like Certbot.
+
+- **Process management**: systemd is used to run and supervise
+  Gunicorn. A systemd service (and optionally a socket unit) starts
+  Gunicorn on boot, restarts it on failure, and provides standard
+  `systemctl` / `journalctl` management. Environment variables are
+  loaded via `EnvironmentFile=`.
+
+- **Secrets handling**: Secrets are stored in two places:
+  - **GitHub Secrets** (repository or environment secrets) as the
+    source of truth for automated updates.
+  - **On the server** in a restricted file
+    (e.g. `/etc/gunicorn/myproject.env` with mode `600`), which
+    systemd loads into the Gunicorn process.
+
+- **CI/CD**: GitHub Actions is used for deployment. On push to the
+  main branch (after tests), the workflow SSHs into the server,
+  writes/updates the secrets file from GitHub Secrets, pulls the
+  latest code, installs dependencies, runs migrations and
+  `collectstatic`, then restarts the Gunicorn systemd service.
+
+** Steps
+
+/ Steps to achieve the decided setup
+
+1. Prepare the Debian server
+- Update the system: =sudo apt update && sudo apt upgrade -y=
+- Install required packages:
+  #+BEGIN_SRC bash
+  sudo apt install -y python3-venv python3-dev libpq-dev \ postgresql
+    postgresql-contrib nginx curl git ufw
+  #+END_SRC
+- Create a non-root deploy user:
+  #+BEGIN_SRC bash
+  sudo adduser deploy sudo usermod -aG www-data deploy
+  #+END_SRC
+- Configure firewall (=ufw allow OpenSSH=, =ufw allow 'Nginx Full'=,
+  =ufw enable=)
+- Set up PostgreSQL database and user for the Django project
+
+2. Deploy the Django project on the server
+- As the =deploy= user, clone the repository
+- Create and activate a virtualenv
+- Install dependencies (=pip install -r requirements.txt=)
+- Configure Django production settings (read secrets from environment)
+- Run migrations and =collectstatic=
+- Test Gunicorn manually
+
+3. Create the secrets file on the server
+- Create a restricted env file, e.g. =/etc/gunicorn/myproject.env=
+- Set ownership and permissions:
+  #+BEGIN_SRC bash
+  sudo chown root:root /etc/gunicorn/myproject.env sudo chmod 600
+  /etc/gunicorn/myproject.env
+  #+END_SRC
+- Put initial secrets in it (or leave empty until the first GitHub
+  Actions run)
+
+4. Configure systemd for Gunicorn
+- Create =/etc/systemd/system/gunicorn.service= (and optionally a
+  =.socket= unit)
+- Point =EnvironmentFile= to the secrets file
+- Point =ExecStart= to the venv’s =gunicorn=
+- Enable and start the service:
+  #+BEGIN_SRC bash
+  sudo systemctl daemon-reload sudo systemctl enable --now gunicorn
+  #+END_SRC
+
+5. Configure Nginx
+- Create a server block that proxies to the Gunicorn Unix socket
+- Serve static and media files
+- Enable the site and reload Nginx
+- Obtain TLS certificate with Certbot (=apt install certbot
+  python3-certbot-nginx=)
+
+6. Prepare SSH access for GitHub Actions
+- Generate an Ed25519 key pair for deployment
+- Add the public key to =/home/deploy/.ssh/authorized_keys=
+- Give the deploy user passwordless sudo for the restart command only:
+  #+BEGIN_SRC bash
+  deploy ALL=(ALL) NOPASSWD: /bin/systemctl restart gunicorn
+  #+END_SRC
+
+7. Configure GitHub Secrets
+In the repository (Settings → Secrets and variables → Actions), add:
+- =SSH_HOST=
+- =SSH_USER= (=deploy=)
+- =SSH_PRIVATE_KEY=
+- =DJANGO_SECRET_KEY=
+- =DATABASE_URL=
+- Any other sensitive variables
+
+(Optionally use a GitHub Environment named =production= for extra
+protection.)
+
+8. Create the GitHub Actions workflow
+- Add =.github/workflows/deploy.yml=
+- On push to =main= (and optionally after tests):
+  - SSH into the server
+  - Write/update the secrets file from GitHub Secrets (atomically,
+    with correct permissions)
+  - =git pull=
+  - Activate venv, =pip install -r requirements.txt=
+  - =python manage.py migrate --noinput=
+  - =python manage.py collectstatic --noinput=
+  - =sudo systemctl restart gunicorn=
+
+9. (Recommended) Create a server-side deploy script
+- Put the pull / install / migrate / collectstatic / restart commands
+  in =/home/deploy/deploy.sh=
+- Make the GitHub Action simply call that script after updating the
+  secrets file
+
+10. Verify the full flow
+- Push a change to =main=
+- Confirm the workflow succeeds
+- Check that the secrets file was updated, the service restarted, and
+  the site is serving the new code
+- Confirm secrets are not visible in logs and the env file has mode
+  =600=
+
+These steps implement the decisions: Debian server, systemd-managed
+Gunicorn, secrets living in both GitHub Secrets and a protected server
+file, and GitHub Actions responsible for updating secrets and
+redeploying.
+
+** Alternatives
+
+*** Self hosted
+
+- piku
+
+*** hosted
+
+- Digital ocean app platform
+- render, railway, fly.io etc..
+
+** Moving to multiple app servers
+
+The core Django + Gunicorn + systemd setup on each machine stays
+almost the same. The main new requirements are /shared state/ and
+/traffic distribution/.
+
+*** 1. Shared database (already mostly done)
+- Both application servers must point to the /same/ PostgreSQL
+  instance.
+- Move PostgreSQL to its own server (or keep it on one of the
+  machines) if it isn't already separate.
+- No change to the Django =DATABASES= setting other than the host.
+
+*** 2. Identical secrets and configuration
+- Both servers must use the /exact same/ =SECRET_KEY= and other
+  secrets.
+- Update the GitHub Actions workflow so it deploys (and writes the
+  secrets file) to /both/ servers.
+
+*** 3. Shared media files (most important new requirement)
+User-uploaded files (=MEDIA_ROOT=) must be accessible from both
+servers. Minimum options:
+- Object storage (S3, Cloudflare R2, MinIO, etc.) – recommended
+- Network filesystem (NFS) mounted on both servers
+
+Without this, uploads appear on only one server.
+
+*** 4. Sessions and cache
+- /Sessions/: Database sessions or cookie-based (signed) sessions work
+  with no changes. Avoid file-based or local-memory sessions.
+- /Cache/: Switch from local-memory cache to a shared Redis or
+  Memcached instance if you use caching.
+
+*** 5. Load balancing
+You need something that distributes traffic to both Gunicorn
+instances:
+- Cloud load balancer (simplest if you are on a cloud provider)
+- A dedicated Nginx/HAProxy server in front of the two app servers
+- Or Nginx on each app server + DNS round-robin (least robust)
+
+*** 6. Static files
+- Easiest minimum: run =collectstatic= on both servers (works fine).
+- Better: serve static files from object storage/CDN so both servers
+  stay identical.
+
+*** 7. CI/CD changes
+- The GitHub Actions deploy job must run the update/restart steps on
+  /both/ application servers (sequential or parallel SSH steps).
+- Keep the same secrets-writing logic for each server.
+
+*** What stays the same
+- systemd unit for Gunicorn on each server
+- Gunicorn configuration
+- Virtualenv and project layout
+- Nginx configuration /on the app servers/ (if you keep a local Nginx)
+- Most of the Django settings
+
+*** Absolute minimum checklist
+1. Shared PostgreSQL
+2. Same secrets/=SECRET_KEY= on both servers
+3. Shared media storage
+4. Load balancer in front of the two app servers
+5. Deploy workflow updated to target both servers
+6. Sessions/cache that work across machines (usually already true)
+
+Everything else (dedicated Redis, CDN for static files, zero-downtime
+deploys, health checks, etc.) can be added later.
+
+
