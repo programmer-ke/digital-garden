@@ -1,0 +1,233 @@
+#+TITLE: Minimum Window Substring
+#+DATE: <2026-07-31 Fri 15:49>
+#+FILETAGS: :leetcode:dsa:sliding_window:
+#+PROPERTY: header-args :results output :session *shared*
+
+* Minimum Window Substring
+
+** Description
+
+https://leetcode.com/problems/minimum-window-substring/description/
+
+** Approach
+
+The brute force approach involves checking whether all possible
+substrings in s contain all the characters in t and return the
+shortest such substring found.
+
+We get all possible substrings by scanning to the end of s for every
+possible starting position in s.
+
+For comparisons, we have frequency maps of characters in t and
+characters in s. For a valid substring, each character frequency in t
+is greater than of equal to the corresponding frequency in s.
+
+An improved solution would be to use a sliding window approach. We'll
+traverse along the string with the right pointer of the window. Each
+time, we check whether we have a valid substring from left to right.
+If we do, we shrink the window from left until we have an invalid
+substring. The result will the the shortest such substring found.
+
+For comparisons between t and s, we'll use frequency maps for each
+as earlier suggested.
+
+_Me_:
+
+What do you think of this approach?
+
+_AI_:
+
+The approach is solid. Your plan follows the *optimal sliding window*
+strategy for this problem. Key points:
+
+- *Sliding window with two pointers* is indeed the =O(n)= solution.
+- *Frequency maps* let you track character requirements.
+- *Shrink from left when valid* to minimize window length.
+
+** Solution
+
+#+begin_src python
+class Solution:
+    def minWindow(self, s: str, t: str) -> str:
+        if not t:
+            return ""
+
+        count_t = {}
+        for c in t:
+            count_t[c] = count_t.get(c, 0) + 1
+
+        count_s = {}
+        min_length = float('inf')
+        min_l, min_r = -1, -1
+
+        l = 0
+
+        for r in range(len(s)):
+            c = s[r]
+            count_s[c] = count_s.get(c, 0) + 1
+
+            while self.valid_substring(count_t, count_s):
+                curr_length = r - l + 1
+
+                if curr_length < min_length:
+                    min_length = curr_length
+                    min_l, min_r = l, r
+
+                # shrink
+                count_s[s[l]] -= 1
+                l += 1
+        return s[min_l:min_r + 1] if min_length != float('inf') else ""
+
+    def valid_substring(self, count_t, count_s):
+        for c in count_t:
+            if c not in count_s or count_t[c] > count_s[c]:
+                return False
+        return True
+        
+
+s = "OUZODYXAZV"; t = "XYZ"
+print(Solution().minWindow(s, t))  # YXAZ
+
+s = "xyz"; t = "xyz"
+print(Solution().minWindow(s, t))  # xyz
+
+s = "x"; t = "xy"
+print(Solution().minWindow(s, t))  # ""
+#+end_src
+
+#+RESULTS:
+: YXAZ
+: xyz
+
+** Analysis
+
+*** Time complexity
+
+We traverse each item in s at most twice and for each comparison
+to determine valid substring, we do constant time work (at most 52)
+
+Time complexity is therefore O(m + n), where m and n are sizes of t
+and s.
+
+*** Space complexity
+
+We use frequency counts for mappings for s and t, however the total
+set of possible characters is constant.
+
+Space complexity is therefore O(1).
+
+_Me_:
+
+Is this analysis correct
+
+_AI_:
+
+
+Yes, your analysis is correct.
+
+- /Time:/ Building =count_t= takes O(m). The sliding window processes
+  each character of /s/ at most twice (right pointer adds, left
+  pointer removes). The =valid_substring= check scans at most 52 keys
+  each time it's called, and it's called O(n) times total. Hence O(m +
+  n).
+- /Space:/ Frequency maps hold at most 52 keys, so O(1).
+
+The constant factor from scanning the alphabet is fine given the
+problem constraints.
+
+** Further Discussion
+
+_Me_:
+
+Are there any possible optimizations?
+
+_AI_:
+
+Yes, a few:
+
+1. /Early exit/: If =len(t) > len(s)=, return "" immediately.
+
+2. /Initial check/: Instead of checking the entire alphabet each time
+   in =valid_substring=, track the /number of satisfied characters/
+   (a "need" count). Decrement when a required character reaches
+   sufficient frequency, increment when it falls below. Then your
+   validity check becomes O(1) — just check if =need == 0=.
+
+   This avoids looping over the alphabet every iteration.
+
+3. /Avoid storing full =count_s=*: Since we only care about characters
+   in =t=, we can ignore characters not in =t= entirely — no need to
+   add them to the map. Saves a few map operations.
+
+#+begin_src python
+class Solution:
+    def minWindow(self, s: str, t: str) -> str:
+        if not t or len(t) > len(s):
+            return ""
+
+        count_t = {}
+        for c in t:
+            count_t[c] = count_t.get(c, 0) + 1
+
+        count_s = {}
+        min_length = float('inf')
+        min_l, min_r = -1, -1
+
+        l = 0
+        need = len(count_t)
+
+        for r in range(len(s)):
+            c = s[r]
+            count_s[c] = count_s.get(c, 0) + 1
+
+            if c in count_t and count_t[c] == count_s[c]:
+                need -= 1
+
+            while need == 0:
+                curr_length = r - l + 1
+
+                if curr_length < min_length:
+                    min_length = curr_length
+                    min_l, min_r = l, r
+
+                # shrink
+                c = s[l]
+                count_s[c] -= 1
+                l += 1
+
+                if c in count_t and count_t[c] > count_s[c]:
+                    need += 1
+                
+        return s[min_l:min_r + 1] if min_length != float('inf') else ""
+
+s = "OUZODYXAZV"; t = "XYZ"
+print(Solution().minWindow(s, t))  # YXAZ
+
+s = "xyz"; t = "xyz"
+print(Solution().minWindow(s, t))  # xyz
+
+s = "x"; t = "xy"
+print(Solution().minWindow(s, t))  # ""
+#+end_src
+
+#+RESULTS:
+: YXAZ
+: xyz
+
+_Me_:
+
+What are some applications of this kind of solution?
+
+_AI_:
+
+Common real-world applications of sliding window / substring pattern
+matching:
+
+- /Text search/: Finding the smallest snippet containing all query
+  terms (like search result summaries)
+- /DNA sequence analysis/: Finding the shortest subsequence containing
+  all required genetic markers
+- /Network traffic analysis/: Detecting minimal packet sequences
+  containing all signature patterns
+- /Compiler optimization/: Finding minimal code regions containing all
+  required variable declarations

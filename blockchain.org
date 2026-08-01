@@ -335,12 +335,12 @@ flexibility, but has a high coordination cost and fragments liquidity
 
 It divides logic and state to make logic easier to upgrade.
 
-Users interact with a proxy contract, which stores all the sate, and
+Users interact with a proxy contract, which stores all the state, and
 the proxy contract delegates calls to the implementation contract,
 which is upgradeable (uses =delegatecall=).
 
 To upgrade the implementation contract, the developers deploy it
-and updates the address in the proxy contract.
+and update the address in the proxy contract.
 
 **** Security considerations
 
