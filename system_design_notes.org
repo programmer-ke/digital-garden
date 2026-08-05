@@ -1,0 +1,346 @@
+#+FILETAGS: :system_design:interviews:
+
+* System design notes
+
+** One Possible progression
+ 1. make app servers stateless (e.g. not storing files/sessions)
+ 2. horizontally scale app servers
+ 3. DB optimizations
+    - Read/write replicas
+    - Join in code instead of SQL
+    - Use NoSQL
+ 4. Cache DB Data
+    - Cache invalidation is a concern
+ 5. Asynchronism
+    - Pre-compute responses and cache them
+    - Process user requests in the background and let them await completion
+
+** Tradeoffs                                                      :tradeoffs:
+
+*** Performance and Scalability                     :performance:scalability:
+ - performance :: how fast the system is to a user, or in completing a
+   job
+ - scalability :: how possible it is to improve performance by adding
+   more resources
+
+A performance problem is when the system is perceived as slow for a
+single user/job.
+
+A scalability problem is when adding users or jobs to a system
+decreases overall performance.
+
+*** Latency and throughput                               :latency:throughput:
+
+ - latency :: how long it takes to complete a single task
+ - throughtput :: how many tasks can be completed within a unit of time
+
+Generally, aim for maximum throughput within an acceptable latency.
+
+*** Availability and Consistency                   :availability:consistency:
+
+ - availability :: the proportion of user requests that receive responses
+ - consistency :: a user's read request receives the latest write
+
+**** CAP theorem
+
+Tradeoff between consistency and availability in the presence of
+network partitioning.
+
+ - AP :: Availability and partition tolerance. The
+   system is optimized for responding to requests (with possibly stale
+   data)
+ - CP :: Consistency and partition tolerance. The
+   system is guaranteed to either return the most up-to-date data or
+   error out.
+
+**** Consistency patterns                                       :consistency:
+
+ - weak consistency :: After a write subsequent systems may or may not
+   see it. A best effort approach e.g. video streaming, voice call
+ - eventual consistency :: A write will eventually be available for
+   reads, updated asynchronously e.g. sending email
+ - strong consistency :: A write is immediately available for reads,
+   updated synchrously e.g. editing a file, an ACID database.
+
+**** Availability patterns                                     :availability:
+
+ - failover :: availability of a node to answer requests
+   - active-active :: multiple nodes sharing the load. Typically
+     behind loadbalancer
+   - passive-active :: one node handles requests and backup node
+     replicates writes. when active node fails (no heartbeat), backup
+     node takes over
+
+ - replication :: distributing writes to all available nodes
+   - master-master :: read and writes go to all nodes, which sync
+     between themselves to achieve consistency.
+   - master-slave :: read and writes go to master whereas slave only
+     handle reads. Writes propagated from master to slaves. If master
+     fails, only reads can be supported until new master is appointed.
+
+***** Availability in parallel vs in sequence
+
+Overall availability decreases when two systems with < 100 % availability
+are in sequence:
+
+Availability (Total) = Availability (Foo) * Availability (Bar)
+
+e.g. 0.999 * 0.999 = 0.998001
+
+Overall availability increases when 2 systems with < 100%
+availability are in parallel
+    
+Availability (Total) = 1 - (1 - Availability (Foo)) * (1 - Availability (Bar))
+
+e.g. 1 - (1 - 0.999) * (1 - 0.999) = 0.999999
+
+In probability terms:
+
+*In sequence (series):* Systems are dependent — both must work.
+Probability that both work = product of individual probabilities.
+Since probabilities are ≤ 1, the product is ≤ each individual — total
+availability drops.
+
+*In parallel (redundancy):* Systems are independent — system fails
+only if /all/ fail.  Probability that at least one works = 1 −
+probability all fail.  Since the failure probability (1 −
+availability) is small, the product of failures is even smaller —
+total availability rises.
+
+** Core Design Challenges
+
+- Too many concurrent users:
+  - Solved by replicating assets
+    - computing logic is replicated behind a load balancer
+    - data is replicated by having multiple replicas
+
+- Too much data to move around (no longer possible to hold it in one machine)
+  - shard data by logic groups
+
+- System response is too slow
+  - Read response time can be improved by having replicas
+  - Write response time can be improved by introducing asynchrony
+    - Respond to user as soon as the job is submitted to background processing queue
+
+- Inconsistent (outdated) states
+  - Design around eventual consistency where this is tolerable
+
+** Estimating Load                               :back_of_envelope_estimates:
+
+- Put numbers on the problem e.g.
+  - daily active users
+  - write actions / user / day
+  - reads per write
+  - peak to average factor
+  - stored bytes / write
+  - data retention duration
+
+- Daily actions divided by 86400 seconds gives average rate. Multiply
+by peak factor for burst you must survive
+- Reads dwarf writes, so caching and replica's help the read path
+
+** Decomposition                                              :microservices:
+
+- Break down requirements into microservices (around consistency boundaries)
+
+** Caching Reads                                                    :caching:
+
+The core insight is a simple inverse relationship: *Database load =
+Total requests × (1 − hit rate)*
+
+- At 90% hit rate, 10% of requests reach the database.
+- At 99% hit rate, only 1% reach the database — a *10× reduction* in
+  DB load for just 9 extra percentage points.
+- At 99.9%, it’s 0.1% — another 10× reduction.
+
+Because the miss rate is the complement of the hit rate, each
+additional “9” in the hit rate cuts the database traffic by an order
+of magnitude. Improving from 98% to 99% is far more impactful than
+going from 50% to 60%, even though both are a 1% increase. The last
+few percent can make the difference between a database that is
+overwhelmed and one that is barely touched.
+
+** Buffering writes
+
+To keep disk I/O within manageable levels, consider using a message
+queue to buffer write requests.
+
+** Separating reads and writes
+
+Different systems tend to either be read-heavy e.g. social media or
+write-heavy e.g. iot
+
+Strategies:
+
+- Replication with leader-follower architecture. Writes directed to
+  leader, and followers are read replicas
+- Using CQRS to segregate requests that update state with requests
+  that query it. State changes are asynchronously propagated to query
+  side.
+
+** Contention and concurrency
+
+- Optimistic locking :: Increment record version on updates. Assumes
+  conflicts are rare prioritizes throughput
+- Pessimistic locking :: Lock up front, prioritizing certainty over
+  throughput
+
+** Sagas and Multi-step workflows
+
+Span several services and there's no single transaction across them.
+
+The saga runs each step atomically and when one fails, runs the previous
+steps in reverse to compensate for the failure (not a rollback).
+
+e.g. charge payment is compensated by refund payment
+
+Each step and compensation must be idempotent.
+
+** Main Components
+
+*** Microservices
+
+Problem: Scaling, reliability and coordination requirements outgrow
+single monolith.
+
+Each service runs in its own process with its own database
+communicating together through APIs (REST or gRPC)
+
+Services are registered on a registry like Consul or Eureka, which
+helps with service discovery.
+
+*** Relational Databases
+
+Problem: Need for ACID transactions
+
+*** NoSQL Databases
+
+Problem: Schema varies by record and schema changes frequently with
+  complex nested relationships.
+
+**** Types
+
+- key-value stores :: work like hashmaps e.g. memcache, redis
+- Document databases :: store JSON like documents each self-contained
+  with nested fields e.g. MongoDB
+- Column-family store :: Organize data by column instead of row
+  e.g. Cassandra for time-series data
+- Graph databases :: Store nodes and edges, modeling
+  relationships. Useful for social media/recommendation engines.
+
+NoSQL databases sacrifice ACID guarantees for AP (availability with
+partition tolerance) and eventual consistency.
+
+*** Object Storage
+
+Problem: Need to store many binary files of varying sizes in a way
+that can be easily identified, replicated and versioned.
+
+*** Cache
+
+Problem: Repeated read requests increasing database load and slowing
+down user requests.
+
+**** Caching strategies
+
+- cache-aside :: on a cache miss, load data from DB then update cache
+- write-through :: Updates are written to cache and DB simultaneously
+- write-behind :: writes written to cache first, then asynchronously to DB
+
+  
+*** Content delivery networks (CDNs)
+
+Problem: Long roundtrip to fetch static resources and bandwidth
+limitations during peak traffic hours
+
+CDNs cache static content on edge servers distributed globally,
+reducing latency through geographic proximity.
+
+
+*** Message queues
+
+Problem: Traffic spikes causes contention of resources and
+congestion. Failures lead to requests being dropped.
+
+Message Queues allow buffering of requests for more predicable
+processing and retries on failure.
+
+**** Types
+
+- Standard Queues :: producers submit requests and consumers process
+  them. On successful, processing, they are acknowledged. On failure,
+  they are put back in the queue. This ensures =at-least-once=
+  delivery
+- Dead letter Queues :: handle poison messages (fail processing
+  multiple times) for manual inspection
+- FIFO :: Guarantee message order as opposed to standard queues with
+  out of order processing
+
+Examples:
+
+- RabbitMQ for complex routing
+- Apache Kafka for event sourcing (replaying events) and streaming
+- AWS SQS
+
+*** API Gateway
+
+Problem: Client needs to connect to several backend services each with
+different authentication and ratelimiting schemes.
+
+The API gateway enforces cross-cutting concerns across multiple services:
+
+- authentication
+- rate limiting
+- caching
+
+It also aggregates requests e.g. loading the home page requires
+getting data from multiple services and load balancing.
+
+Examples: AWS API gateway, Kong, NGINX plus
+
+
+** Problem Decomposition
+
+*** Verbs -> Use Cases
+
+Verbs reveal operations, map them to CRUD operations.
+
+Extract around 5 use-cases
+
+*** Nouns -> Entities and ownership
+
+Nouns reveal data models. List entities and their relationships.
+
+Ownership determines write authority and establishes consistency
+boundaries.
+
+*** Adjectives -> constraints and add-ons
+
+Adjectives reveal non-functional requirements that require
+architectural decisions.
+
+Examples:
+
+- instant/realtime -> push notifications, web sockets, caching,
+  precomputation
+- reliable -> retries, idempotency, DLQs, write-ahead logs
+- highly-available -> replication, stateless services, health checks
+- auditable/secure -> encryption, access control, audit logs
+- scalable -> partitioning, read replica's, message queues, horizontal
+  scaling
+
+*** API design
+
+Define endpoints and request/response bodies e.g. using REST
+
+*** High-level Design
+
+- Start with the basic data flow supporting the use-cases
+- Apply constraints identified in step 2, justifying each one at a time
+
+*** Deep Dives
+
+Here, the focus is on specific challenges or edge-cases. Tweak the
+design further based on the suggested scenarios
+
+

@@ -1,0 +1,224 @@
+#+TITLE: Find Minimum in Rotated Sorted Array
+#+DATE: <2026-08-03 Mon 05:01>
+#+FILETAGS: :dsa:leetcode:array:binary_search:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Find Minimum in Rotated Sorted Array
+
+** Description
+
+https://neetcode.io/problems/find-minimum-in-rotated-sorted-array/question
+
+** Approach
+
+For any array segment that is sorted, its minimum is on the left.
+
+To detect rotation, element on the left will be larger than the
+element on the right, and the minimum is within the segment.
+
+Starting with the full array, if left > right, divide into two
+segments.  If the left segment is sorted, recursively search for the
+minimum element in the right segment.
+
+If the left segment is not sorted, recursively search for the minimum
+there.
+
+
+_Me_:
+
+How does this sound?
+
+_AI_:
+
+Your approach is sound. It correctly uses the fact that the minimum is
+the only element where the left neighbor is larger (or the first
+element if no rotation). Binary search by comparing the mid with the
+leftmost/rightmost works.
+
+A few points to consider as you proceed:
+- Edge case: =n = 1= (no rotation, left == right). Your method should
+  handle this implicitly.
+- Recursive vs iterative? Both are fine, but iterative avoids stack
+  overhead.
+- The condition "if left > right" defines a rotated segment; otherwise
+  the segment is sorted and min is at left.
+
+
+** Solution
+
+#+begin_src python
+from typing import List
+
+class Solution:
+    def findMin(self, nums: List[int]) -> int:
+        l, r = 0, len(nums) - 1
+        while l <= r:
+            if nums[l] <= nums[r]:
+                # segment is sorted
+                minimum = nums[l]
+                break
+            m = (l + r) // 2
+            if nums[l] <= nums[m]:
+                # left segment sorted, search minimun in right
+                l = m + 1
+            else:
+                # minimum is in left segment
+                r = m
+        return minimum
+        
+
+nums = [3,4,5,1,2]
+print(Solution().findMin(nums))
+# Output: 1
+
+nums = [4,5,6,7,0,1,2]
+print(Solution().findMin(nums))
+# Output: 0
+
+nums = [11,13,15,17]
+print(Solution().findMin(nums))
+# Output: 11
+
+nums = [3, 1]
+print(Solution().findMin(nums))
+# output: 1
+#+end_src
+
+#+RESULTS:
+: 1
+: 0
+: 11
+: 1
+
+** Analysis
+
+*** Time complexity
+
+Each search divides the array by two, so the time complexity is O(log n).
+
+*** Space complexity
+
+Additional constant space is only used for state tracking variables so
+space complexity is O(1)
+
+_Me_:
+
+Is this correct
+
+_AI_:
+
+Yes, your solution and analysis are correct. The binary search
+implementation handles rotations and edge cases (single element, two
+elements, no rotation) properly. Time complexity is O(log n), space
+O(1).
+
+** Further Discussion
+
+_Me_:
+
+Are there any possible optimizations?
+
+_AI_:
+
+The current solution is already optimal in *asymptotic time
+complexity* (O(log n)) and *space* (O(1)). No algorithm can guarantee
+finding the minimum faster than logarithmic time in a rotated sorted
+array of unique elements.
+
+For *micro-optimizations* (minor constant factor improvements), you
+could:
+- Avoid the =if nums[l] <= nums[r]= check inside the loop each
+  iteration; it only triggers when the segment is sorted, but the else
+  branch handles the rotated case. You could restructure to reduce
+  branches, but readability may suffer.
+- Use =m = l + (r - l) // 2= instead of =(l + r) // 2= to avoid
+  integer overflow (irrelevant in Python but good practice).
+- The early exit for =n == 1= is already handled.
+
+None of these change the fundamental complexity. The solution is solid
+as is.
+
+#+begin_src python
+
+class Solution:
+    def findMin(self, nums: List[int]) -> int:
+        l, r = 0, len(nums) - 1
+        while l < r:
+            m = (l + r) // 2
+            if nums[m] <= nums[r]:
+                # minimum is either m or in the left segment
+                r = m
+            else:
+                # minimum is in the right segment
+                l = m + 1
+        # l == r == mimimum
+        return nums[l]
+
+nums = [3,4,5,1,2]
+print(Solution().findMin(nums))
+# Output: 1
+
+nums = [4,5,6,7,0,1,2]
+print(Solution().findMin(nums))
+# Output: 0
+
+nums = [11,13,15,17]
+print(Solution().findMin(nums))
+# Output: 11
+
+nums = [3, 1]
+print(Solution().findMin(nums))
+# output: 1
+
+#+end_src
+
+#+RESULTS:
+: 1
+: 0
+: 11
+: 1
+
+_Me_:
+
+Added the above with the intuition that:
+
+If we compare the midpoint with right, if it is sorted, the minimum
+is either the midpoint or in the left.
+
+Otherwise, the minimum is in the right segment. We do this iteratively
+until we locate the minimum.
+
+_Me_:
+
+What are some real world applications of this approach?
+
+_AI_:
+
+The /"find minimum in rotated sorted array"/ approach is a specific
+instance of a more general technique: *binary search on a rotated
+or partially sorted space*.
+
+Real-world applications include:
+
+- *Version control / build systems* – Finding the first commit that
+  introduced a bug (bisecting). The "rotation" is a break in the sorted
+  timeline of working vs. broken commits.
+
+- *Database index maintenance* – Locating the point where an
+  auto-increment ID or timestamp sequence was reset or wrapped around
+  (e.g., in rotating logs or circular buffers).
+
+- *Network routing / failover* – In a ring topology, finding the
+  "live" node after a rotation of roles (e.g., leader election in
+  distributed consensus where ordering is rotated).
+
+- *Circular buffer reads* – Determining the oldest valid data
+  element when the write pointer has wrapped.
+
+- *Robotics / sensor calibration* – Finding the minimum angle in a
+  rotated alignment sequence where readings are sorted but offset by a
+  physical rotation.
+
+The key insight—comparing mid with right to decide which half to
+discard—applies anywhere you have a *sorted but rotated sequence*
+and need O(log n) location of the transition point or extremum.

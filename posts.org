@@ -1,14 +1,24 @@
 #+TITLE: Blog Posts
 
+- [[file:dsa/minimum_in_rotated_sorted_array.org][Find Minimum in Rotated Sorted Array]]
+  #+html: <p class='pubdate'>by krm on Aug 03, 2026 05:01</p>
+- [[file:system_design_notes.org][system design notes]]
+  #+html: <p class='pubdate'>by krm on Aug 01, 2026 09:07</p>
+- [[file:dsa/minimum_window_substring_dialog.org][Minimum Window Substring]]
+  #+html: <p class='pubdate'>by krm on Jul 31, 2026 15:49</p>
+- [[file:blockchain.org][blockchain]]
+  #+html: <p class='pubdate'>by krm on Jul 30, 2026 04:07</p>
+- [[file:server_setup_app.org][server setup app]]
+  #+html: <p class='pubdate'>by krm on Jul 23, 2026 12:25</p>
+- [[file:html.org][html]]
+  #+html: <p class='pubdate'>by krm on Jul 15, 2026 15:32</p>
+- [[file:dsa/longest_repeating_character_replacement.org][Longest Repeating Character Replacement]]
+  #+html: <p class='pubdate'>by krm on Jul 13, 2026 10:28</p>
 - [[file:css.org][css]]
   #+html: <p class='pubdate'>by krm on Jul 11, 2026 14:30</p>
-- [[file:html.org][html]]
-  #+html: <p class='pubdate'>by krm on Jul 06, 2026 16:10</p>
 - [[file:ecdsa.org][ecdsa]]
   #+html: <p class='pubdate'>by krm on Jul 04, 2026 16:22</p>
 - [[file:foundry.org][foundry]]
-  #+html: <p class='pubdate'>by krm on Jul 04, 2026 16:22</p>
-- [[file:blockchain.org][blockchain]]
   #+html: <p class='pubdate'>by krm on Jul 04, 2026 16:22</p>
 - [[file:debian.org][Debian]]
   #+html: <p class='pubdate'>by krm on Jul 04, 2026 16:22</p>

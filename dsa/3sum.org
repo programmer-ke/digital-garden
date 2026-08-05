@@ -25,18 +25,6 @@ Is this the right idea?
 
 _AI_:
 
-#+begin_reasoning
-We need to respond to the user's question about the approach for
-3Sum. The user described a naive O(n^3) nested loop approach. The user
-asks "Is this the right idea?" We should provide guidance without
-giving full solution, using Socratic method or hints. Since the user
-is following the Solve It Method, we should not give spoilers. We can
-point out that the naive approach works but may be inefficient for
-constraints (n up to 3000). Suggest they think about improving
-efficiency, perhaps using sorting and two-pointer technique to reduce
-to O(n^2). But we should not write code unless asked. Keep response
-concise, hint at better approach.
-#+end_reasoning
 
 Sorting + two pointers can reduce complexity to O(n²). Think about how
 to avoid duplicates and leverage sorted order. Want to explore that?
@@ -183,10 +171,6 @@ _Me_: Give me a version illustrating the second point above
 
 _AI_:
 
-#+begin_reasoning
-The user wants a version of the solution that uses a more standard duplicate-skip approach instead of the custom incr/decr helpers. I'll provide a concise code snippet showing the inner loop with inline while loops to skip duplicates.
-#+end_reasoning
-
 Here's a version using inline while loops to skip duplicates after recording a triplet:
 
 #+begin_src python
@@ -304,11 +288,6 @@ What kind of real world problems are solved with this approach?
 
 _AI_:
 
-#+begin_reasoning
-We need to answer: "What kind of real world problems are solved with this approach?" The approach is the two-pointer technique after sorting, used for 3Sum. Real-world applications: any scenario needing to find combinations of three elements that satisfy a condition, e.g., financial analysis (triples of transactions summing to zero), chemistry (triples of molecules with net zero charge), or recommendation systems (triples of items meeting a sum constraint). Keep concise.
-
-We follow the Solve It Method: no code unless asked, provide high-level explanation.
-#+end_reasoning
 
 The two-pointer + sorting pattern (reduce O(n³) to O(n²)) applies to:
 

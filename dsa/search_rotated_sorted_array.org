@@ -1,0 +1,117 @@
+#+TITLE: Search in Rotated Sorted Array
+#+DATE: <2026-08-05 Wed 03:45>
+#+FILETAGS: :leetcode:dsa:binary_search:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Search in Rotated Sorted Array
+
+** Description
+
+https://leetcode.com/problems/search-in-rotated-sorted-array
+
+** Approach
+
+Each time we divide the array by two, it will have at least 1 sorted
+subarray. If the number to search is in the sorted subarray, we
+perform a binary search on that subarray, otherwise iteratively
+search for the relevant sorted subarray in the other half.
+
+We do this until we find the target, otherwise return -1.
+
+_Me_:
+
+How does this solution sound?
+
+_AI_:
+ 
+Sounds right. That’s the standard O(log n) approach.
+
+Key point: after dividing, at least one half is fully sorted. Check
+which half is sorted, then see if =target= falls inside that half’s
+range. If yes, search there; if not, search the other half.
+
+One thing to think through: how do you reliably identify the sorted
+half using only the endpoints and middle?
+
+** Solution
+
+#+begin_src python
+from typing import List
+
+
+class Solution:
+    def search(self, nums: List[int], target: int) -> int:
+
+        l, r = 0, len(nums) - 1
+
+        while l <= r:
+            m = (l + r) // 2
+            if nums[m] == target: return m
+            
+            if nums[l] <= nums[m]:
+                # left side is sorted
+                if nums[l] <= target <= nums[m]:
+                    r = m
+                else:
+                    l = m + 1
+            else:
+                # right side is sorted
+                if nums[m+1] <= target <= nums[l]:
+                    l = m + 1
+                else:
+                    r = m
+        return -1
+
+
+nums = [3,4,5,6,1,2]; target = 1
+print(Solution().search(nums, target))
+
+# Output: 4
+
+
+nums = [3,5,6,0,1,2]; target = 4
+print(Solution().search(nums, target))
+# Output: -1
+        
+#+end_src
+
+#+RESULTS:
+: 4
+: -1
+
+** Analysis
+
+*** Time complexity
+
+O(log n)
+
+*** Space complexity
+
+O(1)
+
+** Further Discussion
+
+_Me_:
+
+What are real world applications of this?
+
+_AI_:
+
+Real-world uses are mostly in systems where sorted data is stored in a
+/circular/ or /wrap-around/ structure:
+
+- *Circular buffers / ring buffers*: e.g., telemetry or log data that
+  overwrites oldest entries; the underlying array stays sorted but the
+  logical "start" shifts.
+- *Time-series with rollover*: timestamps that reset (like a 24-hour
+  clock or weekly schedule) — searching for a specific event still
+  works on a rotated time axis.
+- *Pagination with wraparound*: e.g., sorted lists displayed starting
+  from an arbitrary page offset.
+- *Distributed databases*: sometimes sorted partitions are merged and
+  rotated during rebalancing; knowing how to search them directly
+  avoids rebuilding.
+
+That said, it’s mostly a /binary search pattern/ problem — it trains
+you to reason about partially ordered arrays, which is useful in
+designing more complex search algorithms.
