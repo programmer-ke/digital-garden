@@ -1,0 +1,192 @@
+#+TITLE: Reverse a Linked List
+#+DATE: <2026-08-06 Thu 02:59>
+#+FILETAGS: :leetcode:dsa:linked_list:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Reverse a Linked List
+
+** Description
+
+https://leetcode.com/problems/reverse-linked-list/description/
+
+** Approach
+
+We'll iterate through the list reversing the pointers. To prevent
+losing track of references, we'll use 3 pointers: current, previous
+and temp.
+
+** Solution
+
+#+begin_src python
+from typing import Optional
+# Definition for singly-linked list.
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+
+
+class Solution:
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        prev = None
+        curr = head
+
+        while curr:
+            temp = curr.next
+            curr.next = prev
+            prev = curr
+            curr = temp
+
+        return prev
+    
+
+vals = [0,1,2,3]
+head = None
+for v in reversed(vals):
+    n = ListNode(v, head)
+    head = n
+    
+new_head = Solution().reverseList(head)
+
+curr = new_head
+
+while curr:
+    print(curr.val)
+    curr = curr.next
+#+end_src
+
+#+RESULTS:
+: 3
+: 2
+: 1
+: 0
+
+** Analysis
+
+*** Time Complexity
+
+O(n)
+
+*** Space comlexity
+
+O(1)
+
+** Further Discussion
+
+_Me_:
+
+Are there any possible optimizations?
+
+_AI_:
+
+The iterative solution is already optimal: O(n) time and O(1)
+space. No asymptotic improvement exists because you must visit every
+node and rewire each pointer.
+
+If you’re thinking about trade-offs, recursion would be shorter but
+uses O(n) stack space. Micro-optimizations are possible (e.g.,
+avoiding temp by swapping), but they don’t change complexity.
+
+What dimension are you aiming to optimize—clarity, memory, or
+constant-factor speed?
+
+_Me_:
+
+Give me a hint on how we implement the recursive version.
+
+_AI_:
+
+Hint: Suppose you recursively reverse the tail starting at
+=head.next=. That call returns the new head of that reversed
+tail. Now, what does =head.next.next= refer to, and what should it
+become? Also, what should =head.next= eventually point to?
+
+_Me_:
+
+Give me another hint
+
+_AI_:
+
+Another hint: After the recursive call, you need to link the /last/
+node of the reversed tail back to the current head. That last node is
+actually the node that originally followed the head — i.e.,
+=head.next= (which now points to the end). What does =head.next= refer
+to /after/ the recursive call returns? Think about how to use that
+reference to rewire without needing a separate pointer to the tail.
+
+#+begin_src python
+from typing import Optional
+# Definition for singly-linked list.
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+
+
+class Solution:
+    def reverseList(self, head: Optional[ListNode]) -> Optional[ListNode]:
+        if not head:
+            return None
+
+        new_head = head
+        if head.next:
+            new_head = self.reverseList(head.next)
+            # head.next is now the tail of the new list
+            # link it back to old head
+            head.next.next = head
+            head.next = None
+        return new_head
+
+vals = [0,1,2,3]
+head = None
+for v in reversed(vals):
+    n = ListNode(v, head)
+    head = n
+    
+new_head = Solution().reverseList(head)
+
+curr = new_head
+
+while curr:
+    print(curr.val)
+    curr = curr.next
+#+end_src
+
+#+RESULTS:
+: 3
+: 2
+: 1
+: 0
+
+Space complexity is now O(n)
+
+_Me_:
+
+What are some real world applications?
+
+_AI_:
+
+Reversing a linked list itself is rarely a standalone feature, but it
+appears as a building block in several real-world systems:
+
+- *Undo/redo* – Operations stored as a list; reversing lets you replay
+  or traverse actions in opposite order.
+- *Browser history / navigation* – Back and forward buttons traverse a
+  linked history; reversing helps move in the opposite direction.
+- *Playlists / media queues* – "Play in reverse" or shuffle/reverse
+  order for music or slideshows.
+- *Palindrome checks* – Reverse the second half of a list to compare
+  with the first half (e.g., validating palindromic strings or DNA
+  sequences).
+- *Arithmetic on big numbers* – Numbers stored as linked lists (digit
+  by digit) are reversed to align least-significant digits for
+  addition/multiplication.
+- *Functional programming* – Immutable lists are often built by
+  prepending; reversing is a core operation for transformations.
+
+The deeper value is the pointer-rewiring pattern itself, which shows
+up in more complex list manipulations (reversing sublists, reordering,
+cycle detection).
+

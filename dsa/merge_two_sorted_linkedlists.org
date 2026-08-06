@@ -1,0 +1,158 @@
+#+TITLE: Merge 2 Sorted Linkedlists
+#+DATE: <2026-08-06 Thu 05:14>
+#+FILETAGS: :leetcode:dsa:linked_lists:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Merge 2 Sorted Linkedlists
+
+https://neetcode.io/problems/merge-two-sorted-linked-lists/question
+
+** Approach
+
+Starting with the smallest value of the next unexhausted list, iterate
+through picking the smallest, until all lists are exhausted
+
+** Solution
+
+#+begin_src python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+class Solution:
+    def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+
+        if not (list1 or list2):
+            return None
+
+        if list1 and not list2:
+            head = list1
+            list1 = list1.next
+      
+        elif list2 and not list1:
+            head = list2
+            list2 = list2.next
+
+        else:
+            if list1.val < list2.val:
+                head = list1
+                list1 = list1.next
+            else:
+                head = list2
+                list2 = list2.next
+        
+        current = head
+
+        while list1 or list2:
+            if list1 and not list2:
+                current.next = list1
+                list1 = list1.next
+            elif list2 and not list1:
+                current.next = list2
+                list2 = list2.next
+            else:
+                if list1.val < list2.val:
+                    current.next = list1
+                    list1 = list1.next
+                else:
+                    current.next = list2
+                    list2 = list2.next
+            current = current.next
+        return head
+#+end_src
+
+** Analysis
+
+*** Time complexity
+
+O(n + m) where n and m are the lengths of the two lists
+
+*** Space complexity
+
+O(1), constant space used for additional variables
+
+_Me_:
+
+Is this correct?
+
+_AI_:
+
+Yes, it’s correct.
+
+It:
+
+- Handles empty input lists.
+- Picks the smaller head first.
+- Iterates through both lists until exhausted.
+- Preserves the existing nodes, so space is O(1).
+
+One simplification: once one list is empty, you could link the entire
+remaining list and =break= instead of stepping through it one node at
+a time. Not necessary, but cleaner:
+
+#+begin_src python
+if not list1:
+    current.next = list2
+    break
+if not list2:
+    current.next = list1
+    break
+#+end_src
+
+As written, it’s still functionally correct.
+
+** Further Discussion
+
+_Me_:
+
+Is there a way to simplify this code?
+
+_AI_:
+
+Yes. Two main redundancies stand out:
+
+1. *Head selection* — you duplicate the comparison logic for the first
+   node. A dummy head node would let you treat the first node exactly
+   like the rest, eliminating that initial =if/elif/else= block.
+
+2. *Exhausted list handling* — when one list runs out, you step
+   through the remaining nodes one at a time. You can instead link the
+   entire remaining list directly and break.
+
+Can you see how a dummy node would let you write a single loop that
+handles both the head and the rest uniformly?
+
+
+_Me_:
+
+Ok, taking those into account, this is what I came up with
+
+#+begin_src python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+class Solution:
+    def mergeTwoLists(self, list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+
+        sentinel = ListNode()
+        current = sentinel
+
+        while list1 and list2:
+            if list1.val <= list2.val:
+                current.next = list1
+                list1 = list1.next
+            else:
+                current.next = list2
+                list2 = list2.next
+            current = current.next
+        
+        current.next = list1 or list2
+
+        return sentinel.next
+        
+#+end_src
