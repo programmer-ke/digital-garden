@@ -115,7 +115,7 @@ total availability rises.
     - data is replicated by having multiple replicas
 
 - Too much data to move around (no longer possible to hold it in one machine)
-  - shard data by logic groups
+  - shard data by logical groups
 
 - System response is too slow
   - Read response time can be improved by having replicas
@@ -137,7 +137,7 @@ total availability rises.
 
 - Daily actions divided by 86400 seconds gives average rate. Multiply
 by peak factor for burst you must survive
-- Reads dwarf writes, so caching and replica's help the read path
+- Reads dwarf writes, so caching and replicas help the read path
 
 ** Decomposition                                              :microservices:
 
@@ -181,7 +181,7 @@ Strategies:
 ** Contention and concurrency
 
 - Optimistic locking :: Increment record version on updates. Assumes
-  conflicts are rare prioritizes throughput
+  conflicts are rare and prioritizes throughput
 - Pessimistic locking :: Lock up front, prioritizing certainty over
   throughput
 
@@ -300,6 +300,12 @@ Examples: AWS API gateway, Kong, NGINX plus
 
 
 ** Problem Decomposition
+
+*** Extract functional and non-functional requirements
+
+**** Do back of the envelope calculations
+- This can help tease out non-functional requirements e.g. DAU, reads
+  per sec, writes per sec
 
 *** Verbs -> Use Cases
 

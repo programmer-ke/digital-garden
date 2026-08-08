@@ -1,0 +1,17 @@
+* Design an online Judge
+
+** Problem Statement
+
+Design an online judge like LeetCode: a user submits source code for a
+coding problem, the system runs it against a set of hidden test cases
+under strict limits, and returns a verdict — Accepted, Wrong Answer,
+Time Limit Exceeded, and so on.
+
+In scope: submitting code and receiving a graded verdict, running
+submissions against hidden tests under resource limits, and a contest
+mode with a live leaderboard during a synchronized flood of
+submissions. Out of scope: the in-browser code editor, problem
+authoring and curation, discussion forums, and the exact
+contest-rating algorithm.
+
+

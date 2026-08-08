@@ -1,0 +1,217 @@
+#+TITLE: Reorder Linked List
+#+DATE: <2026-08-08 Sat 08:31>
+#+FILETAGS: :leetcode:dsa:linked_list:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Reorder Linked List
+
+** Description
+
+https://leetcode.com/problems/reorder-list/description/
+
+** Approach
+
+The naive solution is to create an array that holds each node in the
+list in order.
+
+Then starting with two pointers on both ends:
+
+- Let the left pointer point to the right on, then advance it
+- Let the right pointer point to the left one then decrement it
+
+Do this until the pointers meet
+
+This will have an O(n) time complexity and O(n) space complexity.
+
+An improved approach is to find the middle of the list, then
+reverse the second half of the list.
+
+Then starting from the left and right nodes:
+
+- Let the left  node link to the right one then advance it
+- Let the right node link to the left one then advance it
+
+Do this until the pointers meet.
+
+_Me_:
+
+How does this approach sound?
+
+_AI_:
+
+The improved approach is solid—standard technique. Both have O(n)
+time, but the improved uses O(1) space. Correctness: ensure you handle
+odd/even length and when to stop (e.g., after merging, the last node
+should point to null).
+
+Sound good. What edge cases might trip you up? /(Hint: think about
+where the second half ends and how to properly terminate the merge.)
+
+** Solution
+
+#+begin_src python
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+class Solution:
+    def reorderList(self, head: Optional[ListNode]) -> None:
+
+        slow, fast = head, head.next
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+
+        # slow is at m (odd) or m-1 (even)
+        nxt = slow.next
+
+        while nxt:
+            prev = slow
+            slow = nxt
+            nxt = slow.next
+            slow.next = prev
+
+        # merge the two lists
+        right = slow
+        left = head
+        
+        while right is not left:
+            tmp = left.next
+            left.next = right
+            left = tmp
+            if left is not right:
+                tmp = right.next
+                right.next = left
+                right = tmp
+
+        left.next = None
+#+end_src
+
+** Analysis
+
+*** Time complexity
+
+O(n)
+
+*** Space complexity
+
+O(1)
+
+_Me_:
+
+Review this solution
+
+_AI_:
+
+The solution is correct and achieves O(n) time / O(1) space. However,
+the reversal step is subtle and potentially fragile.
+
+Notice that during reversal, you never set =slow.next = None= before
+starting. This leaves a temporary cycle (e.g., =3 -> 4 -> 3=). The
+merge loop happens to break this cycle correctly because of the =while
+right is not left= condition and the final =left.next = None=.
+
+*Question*: Did you intentionally rely on that cycle being cleaned up
+by the merge? How would the code behave if the merge condition or the
+final cleanup were slightly different?
+
+A more standard approach is to explicitly split the list at the middle
+(=slow.next = None=), reverse the second half, then merge. Would that
+make the logic easier to verify and maintain?
+
+#+begin_src python
+
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+class Solution:
+    def reorderList(self, head: Optional[ListNode]) -> None:
+
+        slow, fast = head, head.next
+        while fast and fast.next:
+            slow = slow.next
+            fast = fast.next.next
+
+        # slow is at m (odd) or m-1 (even)
+        nxt = slow.next
+
+        # split the halves
+        slow.next = None
+        prev = None
+
+        while nxt:
+            tmp = nxt.next
+            nxt.next = prev
+            prev = nxt
+            nxt = tmp
+
+        # merge the two lists
+        right = prev
+        left = head
+        
+        while right:
+            tmp = left.next
+            left.next = right
+            left = tmp  # advance left
+            tmp = right.next
+            right.next = left
+            right = tmp # advance right
+#+end_src
+
+_Me_:
+
+How about this one?
+
+_AI_:
+
+This version is correct and much cleaner. Explicitly splitting
+(=slow.next = None=) avoids the temporary cycle from before, and the
+reversal is standard.
+
+Key observations:
+- The middle split works for both odd/even lengths (first half is
+  equal or one longer).
+- Because the second half is never longer, =while right:= safely
+  consumes both lists; when =right= becomes =None=, the merge is
+  complete.
+- Handles edge cases n=1, n=2 correctly.
+
+Time O(n), space O(1). Good to go.
+
+** Further Discussion
+
+_Me_:
+
+Is there another solution?
+
+_AI_:
+
+Another variant: find middle, push second half nodes onto a stack,
+then pop and interleave with first half. Also O(n) space.
+
+But since the in-place split+reverse+merge is already optimal in time
+and space, these are mainly useful for readability or if you want to
+practice different techniques.
+
+_Me_:
+
+What are some real world applications of similar algorithms?
+
+_AI_:
+
+Similar patterns appear in:
+
+- *Playlists/queues*: interleaving recent items with older ones (e.g., shuffle algorithms).
+- *Undo/redo stacks*: merging two histories or reversing a segment.
+- *Network packet processing*: reordering fragments or scheduling bursts.
+- *Memory allocators / GC*: traversing and rearranging free lists.
+- *Text editors*: manipulating undo buffers / line lists.
+
+The core techniques—fast/slow pointers, in-place reversal, and
+two-pointer merging—are widely used for list/segment manipulation in
+systems code.

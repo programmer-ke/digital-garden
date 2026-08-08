@@ -5,7 +5,9 @@
 - Fundamental specifity rule: =tag < class < id=
   
 
-- Use mostly tags in your CSS with full (or mostly complete) DOM paths for the selectors.
+- Use semantic html tags (built-in and custom) for html elements as
+ much as possible instead of generic divs with classes
+  - note: custom tags are inline by default. Set style to block/inline block as necessary
 - Use .class for different variants or states of those tags.
 - Use #id for one time localized changes for a single view.
 
