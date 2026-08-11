@@ -1,3 +1,5 @@
+#+FILETAGS: :system_design:online_judge:
+
 * Design an online Judge
 
 ** Problem Statement
@@ -14,4 +16,280 @@ submissions. Out of scope: the in-browser code editor, problem
 authoring and curation, discussion forums, and the exact
 contest-rating algorithm.
 
+*** Clarifying Questions
 
+Which languages?
+
+- Assume a fixed set of popular languages, adding a language means
+  adding a new sandbox image
+
+Is submitted code trusted?
+
+- No, should be treated as hostile
+
+What are the verdicts returned?
+
+Accepted, Wrong Answer, Time Limit Exceeded, Memory Limit Exceeded,
+Runtime Error, and Compile Error.
+
+How fast must results come back?
+
+- Seconds in steady state. During contests, still seconds but with
+  with a fairness and latency budget under heavy load
+
+What sizes the system?
+
+- Submissions per second at contest peak and how many concurrent
+  sandboxed executions running concurrently.
+
+** Requirements
+
+*** Functional
+
+- Submit a solution and receive a verdict once it has run against hidden
+  testcases.
+
+- Run submitted code against hidden test cases under time and memory
+  limits. Verdict names the first failure encountered, or Accepted if
+  all pass.
+
+- Support contest mode, a fixed problem set and time window, with
+  accepted submissions updating a leaderboard.  
+
+*** Non-functional  
+  
+- Isolation and security :: Untrusted code must never access
+  unauthorized data or systems
+- Stability under abuse :: Resource hogs e.g. fork bombs, memory hogs must be
+  contained and killed without affecting other workloads
+- Fair, timely verdicts :: Verdict within seconds under a contest spike, no single
+  user is starved
+- Scale for contest spike :: The worker fleet can be auto-scaled for a synchronized
+  contest start, and for daily average use.
+
+**** Back of the envelope calculations
+
+Roughly 5 millions submissions a day in normal use gives approx
+5000000 / 800000 = 60 submissions/sec
+
+At contest peak, approx 100,000 contestants each giving 10 submissions.
+That is 1000,000 submissions. With 40% arriving in the first 10 minutes,
+that's around 400,000 submissions across 600 seconds i.e. approx 600 / s.
+
+That is 10x steady state use.
+
+Each submission runs for approx 3 seconds so at peak rate, around
+600 * 3 approx 2000 sandboxes per sec
+
+If one worker runs 8 sandboxes, that comes to about 250 workers at peak.
+
+This compares to about 25 needed during steady state.
+
+This means we size the system using the contest start.
+
+
+** Design
+
+*** API Design
+
+**** Use case 1: Submitting a testcase and receiving a verdict
+
+POST /problems/{id}/submissions
+
+Request body:
+
+{language, source code}
+
+Response Body
+
+202 Accepted {submission id, status: queued}
+
+**** Use case 2: Get the verdict after executing testcases
+
+GET /submissions/{id}/
+
+Response body
+
+{status, verdict?, failed test?, runtime_ms?, memory_kb?}
+
+- Status of submission (still running/stopped/completed), final verdict,
+  failed test if any, space/time characteristics
+
+**** Use case 3: View Leaderboard
+
+GET /contests/{id}/leaderboard
+
+Response body:
+
+[{rank, user, score}]
+
+*** Data Model
+
+- Problem:
+  - id
+  - title
+  - statement
+  - time limit
+  - memory limit
+
+- TestCase
+  - id
+  - problem_id
+  - expected_output_url
+  - input_url
+
+- Submission
+  - id
+  - user_id
+  - problem_id
+  - language
+  - source_code
+  - verdict
+  - runtime
+  - memory
+  - timestamp
+
+- Leaderboard
+  - contest_id
+  - user_id
+  - score
+
+*** High level Design
+
+**** First cut
+
+Simplest thing that works, one server running user submitted code
+
+User -> App Server
+
+Problems:
+
+- submissions running in process, workloads compete for resources
+- No fairness control
+- Denial of service to users
+- Leaderboard viewers cannot see a timely leaderboard because of resource contraints  
+
+**** Fix one: Isolate execution sandbox
+
+Move code execution off the app server into isolated sandbox worker.
+
+App server only accepts code and doesn't execute it
+
+**** Fix two: submission queue and worker pool
+
+App server drops a job onto a queue and returns 202 accepted.
+
+Pool of sandboxed workers pull jobs off queue and executes them,
+updating their status and verdict.
+
+User learns verdict by polling submission status.
+
+Queue absorbs contest burst and worker throughput scales independently
+of API tier.
+
+**** Fix three: autoscaling and fair dispatch for spike
+
+Worker pool autoscales on queue backlog.
+
+Per user concurrency cap and round robin dispatch across users to
+prevent single user from monopolizing resources.
+
+Since sandbox startup is slow at cold-start, keep a warm pool on standby
+ahead of scheduled contest.
+
+**** Fix four: Separate read route for the leaderboard
+
+Workers update submission status and verdict back to the datastore.
+
+Leaderboard is queried independently. To make leaderboard view timely,
+the score can be pre-computed.
+
+** Deep Dives
+
+*** Secure sandbox execution
+
+Untrusted code problems:
+- Reading unauthorized data e.g. hidden testcases
+- Exfiltrating data over the network
+- Exhausting machine resources e.g cpu hogging, memory ballooning,
+  fork bomb
+- Escaping the sandbox using an exploit
+
+**** Isolation levels:
+
+- Namespaces, cgroups and seccomp:
+  - A container packages this model
+  - cheap and fast but share host kernel
+  - Can be exploited by kernel exploits  
+
+- gVisor's user-space kernel traps guest system calls services them
+  itself - a stronger boundary
+
+- A micro-vm e.g. firecracker gives each guest a hardware-virtualized
+  boundary - the strongest isolation
+
+There are tradeoffs to make between startup cost and isolation
+boundary strength. gVisor and micro-vms are the right defaults where
+guarantee matters.
+
+Defence in depth:
+
+- unpriviledged Namespaces/cgroups/seccomp with no network access inside,
+- micro vm/gVisor boundary inside,
+- Fresh execution worker (only this run's data)
+
+A single layer's failure lands code in outside layer - not the host
+
+Startup cost is a tension. The strongest freshest sandbox per run is
+also the slowest to start. This can be fixed by having a warm pool
+of pre-initialized sandboxes, reset between runs.
+
+Metrics to monitor:
+
+- CPU, memory usage per run, kill reason counts, seccomp violation
+  counts, network egress attempts.
+
+**** Execution queue and worker autoscaling
+
+The queue absorbs the burst and workers drain it at their own pace.
+Verdict may only arrive later instead of the system falling over
+
+Signal to auto-scale on is backlog age - the oldest queued submission
+is the clearest signal of how fast the queue is being drained. Minimising
+it means submissions are being processed in a timely manner.
+
+Fairness under contention - strict fifo allows a user to monopolize
+resources.
+
+Fixes:
+ - per user concurrency cap
+ - submission rate limit
+ - round robin dispatch across users
+
+Delivery from the queue is at least once. A rerun should produce the
+same result making runs idempotent. Verdict writes are first-write
+wins so duplicate writes become no-ops (guarded by submission id).
+
+A submission that repeatedly crashes workers could be a poison payload
+and is sent to a dead letter box for further inspection.
+
+**** Contest leaderboard at scale
+
+Assuming there are tenst of thousands of views per second on the
+leaderboard during a contest, we need to optimize each read request.
+
+- Naive solution :: Full recompute of the leaderboard on every
+  read. Scanning all submissions and ranking them costs O(S log S),
+  where S is the total no. of submissions.
+- Fix: Cache recomputed result :: Cache the leaderboard with a TTL
+  (redis or memcached). Invalidated on write or after ttl
+  expires. Cost is O(S log S) per recompute, but O(1) for a cache hit.
+- Incremental Sorted Set (write-through cache) :: Replace cached full
+  scan with in memory sorted set. On each submission, atomically update
+  only that contestant's score. Reads are O(log N + K) for the top-K with
+  N contestants, and writes are O(log N).
+- Add read replicas of the sorted set :: Writes go the the primary and
+  reads to the replicas. The replica's can be cached with a short TTL.
+  Moves the read load off the primary with the trade off of minor
+  staleness.
+  

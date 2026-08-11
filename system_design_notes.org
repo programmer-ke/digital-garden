@@ -2,7 +2,7 @@
 
 * System design notes
 
-** One Possible progression
+** Typical Progression
  1. make app servers stateless (e.g. not storing files/sessions)
  2. horizontally scale app servers
  3. DB optimizations
@@ -285,7 +285,7 @@ Examples:
 *** API Gateway
 
 Problem: Client needs to connect to several backend services each with
-different authentication and ratelimiting schemes.
+different authentication and rate-limiting schemes.
 
 The API gateway enforces cross-cutting concerns across multiple services:
 
@@ -303,7 +303,7 @@ Examples: AWS API gateway, Kong, NGINX plus
 
 *** Extract functional and non-functional requirements
 
-**** Do back of the envelope calculations
+**** Back of the envelope calculations
 - This can help tease out non-functional requirements e.g. DAU, reads
   per sec, writes per sec
 
@@ -311,7 +311,7 @@ Examples: AWS API gateway, Kong, NGINX plus
 
 Verbs reveal operations, map them to CRUD operations.
 
-Extract around 5 use-cases
+Extract approx 5 use-cases
 
 *** Nouns -> Entities and ownership
 
