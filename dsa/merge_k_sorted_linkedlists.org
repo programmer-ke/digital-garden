@@ -1,0 +1,203 @@
+#+TITLE: Merge K Sorted Linked Lists
+#+DATE: <2026-08-12 Wed 05:48>
+#+FILETAGS: :leetcode:dsa:linked_list:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Merge K Sorted Linked Lists
+
+** Description
+
+https://leetcode.com/problems/merge-k-sorted-lists/description/
+
+** Approach
+
+One approach is to iterate through each linked list and add its value
+to an array, sort the array, then create a new linked list from the
+result.
+
+This will have O(n log n) time complexity and O(n) space complexity.
+
+Another approach is to create a new linked list and at each step,
+add the next lowest element from list of lists (advancing the selected
+list).
+
+This will have O(n * k) time complexity where k is the number of input
+lists.
+
+To improve on the previous approach, instead of iterating through k
+lists at each step looking for the next lowest element, we can use
+a min heap to determine the next best candidate to be added to the
+final list.
+
+Heapify all the k candidates, then retrieve the minimum one and
+add back the next candidate from the selected list.
+
+** Solution
+
+#+begin_src python
+import heapq
+# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+
+
+class HeapElement:
+    def __init__(self, node):
+        self.node = node
+
+    def __lt__(self, other):
+        return self.node.val < other.node.val
+
+class Solution:
+    def mergeKLists(self, lists: List[Optional[ListNode]]) -> Optional[ListNode]:
+
+        min_heap = []
+
+        for candidate in lists:
+            if candidate:
+                heapq.heappush(min_heap, HeapElement(candidate))
+
+        
+        sentinel = ListNode()
+        curr = sentinel
+
+        while min_heap:
+            minimum = heapq.heappop(min_heap)
+            curr.next = minimum.node
+            curr = curr.next
+            if minimum.node.next:
+                heapq.heappush(min_heap, HeapElement(minimum.node.next))
+
+        return sentinel.next
+#+end_src
+
+** Analysis
+
+*** Time Complexity
+
+We're building up a list of n nodes and at each step, we're
+finding the next candidate from the heap using log k steps.
+
+Overall time complexity is O(n log k)
+
+*** Space complexity
+
+We're using a heap of size k to determine the next candidate.
+
+Overall space complexity is O(k).
+
+_Me_:
+
+Is this correct?
+
+_AI_:
+
+
+Yes, the solution is correct.
+
+- It uses a min-heap to track the current smallest node from each
+  list.
+- Pops the minimum, appends it, and pushes the next node from that
+  list.
+- Handles empty lists and empty input (returns =None=).
+- Time complexity: O(n log k), space: O(k) — both as stated.
+
+One minor note: =HeapElement.__lt__= only compares =val=, so ties are
+broken arbitrarily, which is fine. The code relies on =heapq= and
+=List=/=Optional= from =typing=, but those are standard.
+
+** Further Discussion
+
+_Me_:
+
+Are there any possible optimizations?
+
+_AI_:
+
+Your heap solution is already asymptotically optimal: O(n log k).
+Possible tweaks:
+
+- *Avoid the custom =HeapElement= class* — use tuples like =(node.val,
+  i, node)= to let Python compare natively. Slightly faster, less
+  code.
+- *Use divide-and-conquer pairwise merging* — repeatedly merge pairs
+  of lists. Time is still O(n log k), but space drops to O(1) (if you
+  relink nodes in place) and it avoids heap overhead. Often simpler.
+- *Small edge-case shortcuts* — if =k == 0= return =None=, if =k == 1=
+  return the single list. Minor, but avoids heap setup.
+
+Nothing here changes the big-O; it’s about constant factors and
+clarity.  Want to explore the divide-and-conquer version?
+
+_Me_:
+
+Show me the divide and conquer pairwise merging approach
+
+_AI_:
+
+Yes. Pairwise merging: merge lists in pairs, then repeat until one list remains.
+
+- Each merge is the standard two-list merge (O(m+n)).
+- Each node gets merged O(log k) times → O(n log k).
+- No heap; only pointer rewiring → O(1) extra space.
+
+#+begin_src python
+def mergeTwoLists(l1, l2):
+    sentinel = ListNode()
+    curr = sentinel
+
+    while l1 and l2:
+        if l1.val <= l2.val:
+            curr.next = l1
+            l1 = l1.next
+        else:
+            curr.next = l2
+            l2 = l2.next
+        curr = curr.next
+
+    curr.next = l1 or l2
+    return sentinel.next
+
+def mergeKLists(lists):
+    if not lists:
+        return None
+
+    while len(lists) > 1:
+        merged = []
+        for i in range(0, len(lists), 2):
+            l1 = lists[i]
+            l2 = lists[i + 1] if i + 1 < len(lists) else None
+            merged.append(mergeTwoLists(l1, l2))
+        lists = merged
+
+    return lists[0]
+#+end_src
+
+This reuses the original nodes, so it’s in-place in terms of node objects.
+
+_Me_:
+
+What kind of real world problems are solved with this approach?
+
+_AI_:
+
+Real-world uses:
+
+- *External sorting* — merge multiple sorted chunks (from disk) into
+  one sorted file. Classic when data exceeds RAM.
+- *Database merge joins* — merging sorted result sets from multiple
+  indexes or shards.
+- *Log aggregation* — merging timestamp-sorted logs from multiple
+  services into a single chronological stream.
+- *Recommendation feeds* — merging ranked lists (e.g., from different
+  algorithms) into one ranked output.
+- *K-way merge in MapReduce* — combining sorted outputs from mappers
+  into a single reducer input.
+- *Priority queues in event simulators* — merging multiple sorted
+  event streams.
+
+The heap variant is especially useful when you need the next smallest
+item incrementally (e.g., streaming), while pairwise merging is great
+for batch processing with minimal memory.
