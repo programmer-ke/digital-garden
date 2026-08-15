@@ -1,0 +1,103 @@
+#+TITLE: Same Binary Tree
+#+DATE: <2026-08-14 Fri 09:33>
+#+FILETAGS: :leetcode:dsa:binary_tree:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Same Binary Tree
+
+** Description
+
+Given the roots of two binary trees p and q, return true if the trees
+are equivalent, otherwise return false.
+
+Two binary trees are considered equivalent if they share the exact
+same structure and the nodes have the same values.
+
+Example 1:
+
+Input: p = [1,2,3], q = [1,2,3]
+
+Output: true
+
+Example 3:
+
+Input: p = [1,2,3], q = [1,3,2]
+
+Output: false
+
+
+** Approach
+
+We can use all of BFS, iterative DFS and recursive DFS to check whether
+the tree structure and values match
+
+** Analysis
+
+Recursive DFS
+
+#+begin_src python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:
+        if p is not None and q is not None:
+            return (
+                self.isSameTree(p.left, q.left)
+                and self.isSameTree(p.right, q.right)
+                and p.val == q.val
+            )
+        return p == q
+#+end_src
+
+BFS:
+
+#+begin_src python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def isSameTree(self, p: Optional[TreeNode], q: Optional[TreeNode]) -> bool:
+        q1 = deque([p])
+        q2 = deque([q])
+
+        while q1 and q2:
+            p = q1.popleft()
+            q = q2.popleft()
+
+            if not p and not q:
+                continue
+            if not p or not q or not p.val == q.val:
+                return False
+            q1.append(p.left)
+            q1.append(p.right)
+            q2.append(q.left)
+            q2.append(q.right)
+        return True
+#+end_src
+
+** Further Discussion
+
+_Me_:
+
+Any other possible optimizations?
+
+_AI_:
+
+
+The current solutions are already optimal in time — you must visit
+each node once, so O(n) is required. Space can be improved: BFS uses
+O(n) queue space in the worst case (full tree), while a recursive DFS
+uses O(h) stack space (where h is tree height). For better space
+efficiency, you could use an iterative DFS with an explicit stack, but
+that's not a significant gain for typical inputs. Also, early
+termination already happens when a mismatch is found, so no extra
+optimization is needed. If you wanted to micro-optimize, you could
+combine checks like =if p is None or q is None or p.val != q.val= to
+avoid extra branches, but the logic remains the same.

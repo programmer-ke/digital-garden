@@ -249,7 +249,7 @@ Metrics to monitor:
 - CPU, memory usage per run, kill reason counts, seccomp violation
   counts, network egress attempts.
 
-**** Execution queue and worker autoscaling
+*** Execution queue and worker autoscaling
 
 The queue absorbs the burst and workers drain it at their own pace.
 Verdict may only arrive later instead of the system falling over
@@ -273,9 +273,9 @@ wins so duplicate writes become no-ops (guarded by submission id).
 A submission that repeatedly crashes workers could be a poison payload
 and is sent to a dead letter box for further inspection.
 
-**** Contest leaderboard at scale
+*** Contest leaderboard at scale
 
-Assuming there are tenst of thousands of views per second on the
+Assuming there are tens of thousands of views per second on the
 leaderboard during a contest, we need to optimize each read request.
 
 - Naive solution :: Full recompute of the leaderboard on every
@@ -292,4 +292,3 @@ leaderboard during a contest, we need to optimize each read request.
   reads to the replicas. The replica's can be cached with a short TTL.
   Moves the read load off the primary with the trade off of minor
   staleness.
-  

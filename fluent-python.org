@@ -1052,7 +1052,7 @@ print(l)
   - class methods
   - properties
   - =__slots__=
-* Class Metaprogramming
+* Class Metaprogramming                                                :type:
 - Some special attributes foundin classes
   - =__bases__= :: tuple of base classes of the file
   - =__qualname__= :: dotted path from the global scope of the module to class definition

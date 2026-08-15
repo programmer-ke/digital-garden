@@ -1,0 +1,235 @@
+#+TITLE: Maximum Depth of Binary Tree
+#+DATE: <2026-08-14 Fri 10:43>
+#+FILETAGS: :leetcode:dsa:binary_tree:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Maximum Depth of Binary Tree
+
+** Description
+
+Given the root of a binary tree, return its depth.
+
+The depth of a binary tree is defined as the number of nodes along the
+longest path from the root node down to the farthest leaf node.
+
+Example 1:
+
+Input: root = [1,2,3,null,null,4]
+
+Output: 3
+
+Example 2:
+
+Input: root = []
+
+Output: 0 Constraints:
+
+0 <= The number of nodes in the tree <= 100.  -100 <= Node.val <= 100
+
+** Approach
+
+A possible approach is to do a BFS traversal of the tree, while tracking
+the level of each node. We do this by incrementing the level every time
+we add a child node into the queue.
+
+We return the highest such level encountered.
+
+_Me_:
+
+How does this sound?
+
+_AI_:
+
+That approach is solid — BFS naturally visits levels in order, so you
+can track depth as you go. One thing to consider: are you planning to
+increment depth per node or per level? In BFS, processing
+level-by-level (by queue size) often makes this cleaner. How would you
+modify your plan to account for that?
+
+_Me_:
+
+My plan is to add the height of each node along with the node to the
+queue. How does that sound?
+
+_AI_:
+
+That works well. Storing each node's depth as a tuple in the queue is a clean approach. 
+
+** Solution
+
+#+begin_src python
+from collections import deque
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+class Solution:
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        queue = deque()
+        max_depth = 0
+        if root:
+            queue.append((1, root))
+
+        while queue:
+            level, node = queue.popleft()
+            max_depth = max(level, max_depth)
+            if node.left:
+                queue.append((level + 1, node.left))
+            if node.right:
+                queue.append((level + 1, node.right))
+        return max_depth
+#+end_src
+
+_Me_:
+
+What are some other approaches? It should be possible to do a DFS
+approach too, both iteratively and recursively.
+
+_AI_:
+
+Both DFS approaches work:
+
+- *Recursive DFS*: Recurse on left and right children, return
+  =max(left_depth, right_depth) + 1=. Base case: null node → 0. This
+  is concise and natural.
+
+- *Iterative DFS*: Use a stack of =(node, depth)= pairs, similar to
+  your BFS but with a stack instead of a queue. Pop, update max, then
+  push children with depth+1. Order doesn't matter for depth.
+
+#+begin_src python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+class Solution:
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        if root is None:
+            return 0
+        return max(self.maxDepth(root.left), self.maxDepth(root.right)) + 1
+
+#+end_src
+
+** Analysis
+
+*** Time complexity
+
+For all approaches, time complexity is O(n) because we visit each node once
+
+*** Space complexity
+
+**** BFS
+
+Worst case is a balanced tree, with a space complexity of O(n)
+
+Last level holds approx n/2 nodes
+
+**** DFS
+
+Worst case is skewed tree so space complexity will be O(n)
+
+_Me_:
+
+Is this correct?
+
+_AI_:
+
+For space:
+- BFS: worst-case O(n) (balanced tree, last level holds ~n/2 nodes).
+- DFS (recursive or iterative): worst-case O(n) (skewed tree height =
+  n). For balanced trees it's O(log n).
+
+One nuance: for DFS, the space is proportional to tree /height/, not
+number of nodes. Worst-case = O(n) only for skewed trees;
+average/balanced = O(log n).
+
+_Me_:
+
+What does the iterative DFS worst case space complexity tree look like?
+
+_AI_:
+
+Worst case is a /deep, narrow tree/ — e.g., a long chain ("spine")
+where each node also has one extra leaf child. As you descend the
+spine, each sibling gets pushed onto the stack, so stack grows with
+height → O(n).
+
+A pure chain (only one child per node) keeps the stack ≈1, so it’s not
+the worst case.
+
+** Further Discussion
+
+_Me_:
+
+We can increment height level by level using the following approach:
+
+#+begin_src python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+class Solution:
+    def maxDepth(self, root: Optional[TreeNode]) -> int:
+        queue = deque()
+        height = 0
+        if root:
+            queue.append(root)
+        while queue:
+            for _ in range(len(queue)):
+                node = queue.popleft()
+                if node.left:
+                    queue.append(node.left)
+                if node.right:
+                    queue.append(node.right)
+            height += 1
+        return height
+#+end_src
+
+Are there any other approaches?
+
+_AI_:
+
+Great — that level-by-level BFS is a clean classic. Other approaches:
+
+1. *Recursive DFS* (already shown): =return 1 +
+   max(maxDepth(root.left), maxDepth(root.right))= for non-null.
+2. *Iterative DFS* using a stack of =(node, depth)= pairs, updating
+   max on each pop.
+3. *Morris traversal* (though overkill for depth, it's an O(1) space
+   alternative in theory).
+
+All are O(n) time; space as discussed. BFS is often preferred when you
+need level info; DFS is simpler for depth.
+
+
+_Me_:
+
+What are some real world applications for this kind of algorithm?
+
+_AI_:
+
+Real-world uses:
+
+- *Balanced BST checks*: depth helps ensure tree balance (e.g.,
+  AVL/Red-Black invariants) for efficient search.
+- *Decision/expression trees*: depth relates to worst-case evaluation
+  time or number of nested conditions.
+- *Filesystem/directory traversal*: measuring nesting depth to detect
+  overly deep structures.
+- *Game trees*: depth (plies) determines how far ahead a minimax
+  search can look.
+- *AST parsing*: maximum nesting depth can inform recursion limits in
+  compilers.
+
+All basically ask: "how long is the longest path from root to leaf?" —
+a structural metric, often for performance or safety limits.
+

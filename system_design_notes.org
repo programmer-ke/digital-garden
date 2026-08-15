@@ -301,6 +301,8 @@ Examples: AWS API gateway, Kong, NGINX plus
 
 ** Problem Decomposition
 
+*** Problem statement and clarifying question
+
 *** Extract functional and non-functional requirements
 
 **** Back of the envelope calculations
@@ -313,17 +315,15 @@ Verbs reveal operations, map them to CRUD operations.
 
 Extract approx 5 use-cases
 
-*** Nouns -> Entities and ownership
-
-Nouns reveal data models. List entities and their relationships.
-
-Ownership determines write authority and establishes consistency
-boundaries.
-
 *** Adjectives -> constraints and add-ons
 
 Adjectives reveal non-functional requirements that require
-architectural decisions.
+architectural decisions. These affect factors such as:
+
+- Availability e.g. 99.9% uptime
+- Latency  e.g. a few milliseconds
+- Durability e.g. replicated and partitioned
+- Security e.g. Preserve confidentiality, integrity and availability
 
 Examples:
 
@@ -335,9 +335,19 @@ Examples:
 - scalable -> partitioning, read replica's, message queues, horizontal
   scaling
 
+
+*** Nouns -> Entities and ownership
+
+Nouns reveal data models. List entities and their relationships.
+
+Ownership determines write authority and establishes consistency
+boundaries.
+
+
 *** API design
 
-Define endpoints and request/response bodies e.g. using REST
+Define endpoints and request/response bodies e.g. using REST matching
+the functional requirements/use cases
 
 *** High-level Design
 

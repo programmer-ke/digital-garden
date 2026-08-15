@@ -1,0 +1,581 @@
+#+FILETAGS: :system_design:online_judge:
+
+* Design a url shortener
+
+** Problem statement
+
+A URL Shortener is a service that takes a long URL and generates a
+shorter, unique alias that redirects users to the original URL.
+
+This alias is often a fixed-length string of characters. The system
+should be able to handle millions of URLs, allowing users to create,
+store, and retrieve shortened URLs efficiently. Each shortened URL
+needs to be unique and persistent. Additionally, the service should be
+able to handle high traffic, with shortened URLs redirecting to the
+original links in near real-time. In some cases, the service may
+include analytics to track link usage, such as click counts and user
+locations.
+
+*** Clarifying questions
+
+_Me_:
+
+What are a few clarifying questions we can ask?
+
+_AI_:
+
+Here are some clarifying questions to refine the design:
+
+1. *Scale*: How many new URLs per day? What’s the read-to-write ratio
+   (e.g., 100:1)? Expected peak QPS?
+2. *Persistence*: Do shortened URLs need to live forever, or should
+   they expire (e.g., after 30 days)?
+3. *Custom aliases*: Should users be able to pick their own custom
+   alias, or only auto-generated ones?
+4. *Analytics*: Are click counts and user locations required? If so,
+   how granular (real-time vs. daily aggregates)?
+5. *Availability*: What availability target (e.g., 99.9%)? Is eventual
+   consistency acceptable for redirects?
+6. *Security*: Do we need rate limiting, abuse prevention (e.g.,
+   malware detection), or user authentication?
+7. *Updating/Deletion*: Can users edit or delete their shortened URLs
+   after creation?
+8. *Character set*: Is the alias case-sensitive? Any length
+   constraints (e.g., 7–8 characters for readability)?
+
+_Me_:
+
+Some answers:
+
+- 100M Daily Active users
+- Read/Write ratio of 100/1
+- Data retention for 5 years
+- 1 M write requests per day  
+
+** Requirements  
+
+*** Functional Requirements
+
+1) The service should take a long URL and generate a shorter unique
+   alias that maps to it
+2) Given the shortened URL, the system should redirect to the original
+   URL
+3) Each time a URL is accessed, some metadata is tracked
+   e.g. location, frequency of access
+
+_Me_:
+
+These are some functional requirements I can tease out using verbs from the problem
+statement. What do you think
+
+_AI_:
+
+Your three functional requirements are well extracted — they map
+directly to the verbs in the problem statement:
+
+1. /"generate"/ → create short alias ✓
+2. /"redirects"/ → retrieve original URL ✓
+3. /"track link usage"/ → analytics metadata ✓
+
+Two suggestions to tighten them:
+
+- *Requirement 3*: The problem statement says "in some cases, the
+  service /may/ include analytics." Mark this as optional/phase 2 so
+  the core redirect path stays uncluttered. Given the 100:1 read/write
+  ratio, analytics logging belongs on the write side (async, not
+  blocking).
+
+- *Missing constraint*: The statement explicitly says each URL must be
+  /"unique and persistent."/ That's a hard requirement — fold it into
+  requirement 1: /"generate a shorter unique alias that maps to it,
+  guaranteed unique and persistent for the retention period (5
+  years)."/
+
+Everything else (update/delete, custom aliases, auth) wasn't confirmed
+in your answers, so leaving them out is the right call — you can
+mention them as open questions in a follow-up.
+
+_Me_:
+
+Confirmed to be out of scope:
+
+- Authentication and authorization
+- Expiration or deletion of URLs by users
+- Advanced analytics beyond click counts
+
+*** Back of the envelope calculations
+
+- 100 M DAU means about 1 M users doing write operations
+- 1 M writes per day with a read:write ratio of 100:1, means 100 M
+  reads / day
+- 1 M writes per day comes to approx 15 writes / second at steady
+  state
+- 100 M reads per day comes to about 1500 reads per second at steady
+  state
+- Assuming each write is about 500 bytes, we store about 500 megabytes
+  per day
+  - This comes to about 500 * 365 = approx 180 000 MB = 180 GB per
+    year
+  - This comes to 180 GB * 5 = 1 TB over 5 years
+
+_Me_:
+
+What do you think about these calculations?
+
+_AI_:
+
+The calculations are directionally correct, but there are a few
+refinements:
+
+*Arithmetic check*
+
+- 1M writes/day ÷ 86,400 s ≈ *12 writes/s* (you said ~15)
+- 100M reads/day ÷ 86,400 s ≈ *1,160 reads/s* (you said ~1,500)
+
+Both are fine as rough approximations — the order of magnitude matters
+more.
+
+*Storage check*
+
+- 500 MB/day × 365 = 182.5 GB/year ≈ *0.9 TB over 5 years*, not quite
+  1 TB.
+
+So: peak writes ~12/s, peak reads ~1,200/s, total ~1 TB. This is a
+*modest load* — a few app servers behind a load balancer plus a
+replicated database (or read replicas) handle it comfortably.
+
+*Missing: peak factor*
+
+Steady-state averages hide traffic bursts. Multiply by a
+peak-to-average factor (often 5–10×) depending on timezone and product
+behavior:
+
+- Peak writes: ~60–120/s
+- Peak reads: ~6,000–12,000/s
+
+*Two optional considerations*
+
+1. /Index overhead/: Actual DB storage is 1–2× the raw data due to
+   indexes on the short code and original URL.
+2. /Click-count storage/: If you store per-click analytics (timestamp,
+   location) rather than just counts, that dwarfs the URL data — but
+   you've scoped analytics to click counts, so the 1 TB estimate is
+   fine for the core mapping table.
+
+*** Non-Functional Requirements
+
+1. Each generated URL should be unique with a minimal chance of
+   collision
+2. The system should be highly available to manage reading and writing
+   of millions or URLs per day
+3. The generated URL should be available to the user within a short
+   amount of time, within a few milliseconds
+4. The system should be highly durable - generated urls should be
+   persisted and available even across restarts for upto 5 years
+5. The system should be scalable enough to handle ~1200 reads per
+   second and ~12 writes / second
+6. Redirecting to the original link should be low latency, in the
+   order of milliseconds
+
+_Me_:
+
+What do you think about the non-functional requirements?
+
+_AI_:
+
+Your NFRs are a good start, but a few need sharpening:
+
+- /Uniqueness (1)*: Define the collision probability target (e.g., < 1
+  in 10^9) and the alias length (e.g., 7–8 base62 chars). "Minimal
+  chance" is vague.
+- /Availability (2)*: Overlaps with scalability (5). Specify a target
+  like 99.9% uptime and whether it's for reads, writes, or both.
+- /Latency (3)*: Ambiguous — is this the /write/ latency (time to
+  return the short URL) or the /redirect/ latency? You already have
+  redirect latency (6), so 3 likely means write path. Clarify.
+- /Durability (4)*: Good, but consider replication factor (e.g., 3
+  copies across AZs) to achieve 5-year persistence.
+- /Scalability (5)*: Matches your estimates, but note these are
+  steady-state averages. Add a peak factor (e.g., 5×) to be safe.
+- /Redirect (6)*: Good — this drives the caching and read-replica
+  decisions.
+
+Overall: the load is modest, so the critical NFRs are uniqueness,
+durability, and redirect latency. Availability/scalability are easily
+met with standard patterns. The main tension is ensuring the write
+path doesn't block the read path (use async analytics, idempotent
+alias generation).
+
+** Design
+
+*** Data Model
+
+A one-to-one mapping between URL mapping and URL stats models
+
+**** URL Mapping
+
+- short url (pk)
+- original url
+- created at timestamp
+
+**** URL stats
+
+- short url (pk)
+- click count  
+- last access at timestamp  
+
+_Me_:
+
+what do you think about the data model
+
+_AI_:
+
+
+Your two-table split is reasonable — it separates the core lookup
+data from the analytics data, keeping the mapping table lean and
+cacheable.
+
+However, there's a critical issue you'd hit with this design as-is:
+
+/Write amplification on the stats table/
+
+Every redirect would increment =click_count= on the =url_stats= row.
+That means your database receives ~1,200 writes/s (one per read), not
+~12/s. This contradicts your write estimate and makes the DB a
+bottleneck.
+
+/Solutions:/
+
+1. /Don't increment synchronously./ Log clicks to a message queue
+   (Kafka, SQS) and have a consumer batch-update =url_stats= every few
+   seconds. The mapping table stays read-only during redirects, and
+   stats become eventually consistent (fine for click counts). This
+   keeps the write path at ~12/s + batch updates.
+2. /Or, drop the separate stats table/ for now and store =click_count=
+   and =last_accessed_at= in the mapping table. You can still update
+   them via the same async pipeline. But splitting them out is cleaner
+   because stats data is less critical and can be stored separately
+   (e.g., in a column store) without affecting redirect latency.
+
+/Other observations:/
+
+- Primary key on =short_url= is correct — lookups will be by short code.
+- If you also need to deduplicate the same original URL, add a unique
+  index on =original_url=. But if not, skip it (adds write overhead).
+- =created_at= is good. Add =expires_at= if URLs can expire — but you
+  confirmed no expiration, so fine.
+- "Frequency of access" in your functional requirements is vague.
+  =click_count= and =last_access_at= don't capture frequency trends.
+  If that's truly needed, you'd need a time-series table, but you've
+  scoped analytics to click counts, so this is acceptable.
+
+Overall: the mapping is clean. Just decouple the stats update from the
+redirect path.
+
+*** API Endpoints
+
+**** Use Case 1: Submit long URL and get back URL alias
+
+POST /api/urls
+
+Request Body:
+
+{long url}
+
+Response Body:
+
+201, {short url}
+
+**** Use Case 2: Submit the short URL and get back the long URL
+
+GET /api/urls/{short url}
+
+Response Body
+
+{long url}
+
+**** Use Case 3: Update short URL access counts each time it is accessed
+
+This can be done using an asynchronous service
+
+_Me_:
+
+What do you think about this endpoint design?
+
+_AI_:
+
+
+*Redirect vs. API retrieval*
+- =GET /api/urls/{short}= returns JSON with the long URL — that's
+  fine for API consumers.
+- But a browser hitting =https://short.ly/abc123= expects an *HTTP
+  redirect* (301/302 with =Location= header), not JSON.
+- *Suggestion:* Keep =GET /api/urls/{short}= for programmatic
+  lookup, and add =GET /{short}= (or =GET /r/{short}=) that issues
+  a redirect. This is the standard pattern.
+
+
+Alternatively, you could merge the redirect and lookup into one
+endpoint using content negotiation (e.g., =Accept: application/json=
+vs =text/html=), but that complicates clients. The separate =GET
+/{short}= is simpler and matches how real shorteners work.
+
+*** High level design
+
+**** Naive solution
+
+Single backend service serving user read/write requests
+
+Client -> Backend Service -> Database
+
+Problem:
+
+- URL reads outweigh writes by a factor of 10, we might want to
+  scale reads independently of writes for increased availability
+- Each read request increments URL access count, 10x our write requirements   
+
+**** Phase 1: Separate Analytics from shortening and redirection
+
+Introduce a separate analytics service that batches url access counts
+to the database.
+
+Use an in memory database to track url access counts and periodically
+update the URL analytics table.
+
+Client -> Backend service -> Database
+
+Backend service -> analytics batching service -> In memory Cache
+(Redis)
+
+In memory cache (periodic flush) -> Database
+
+Benefits:
+
+- Reduced write requests per second
+
+Problem:
+
+- Reads are 10x writes, for increased availability we want to scale
+  reads separately from writes. Currently, the backend service is
+  overwhelmed by both read and write requests
+
+**** Phase 2: Separate shortening and redirection services
+
+The shortening service writes to the primary database
+
+
+Client -> shortening service -> Database
+
+Client -> redirection service -> Database
+  
+Redirection service -> analytics batching service -> In memory Cache
+(Redis)
+
+In memory cache (periodic flush) -> Database
+
+Problem:
+
+- A URL mapping doesn't change. We can cache frequently accessed
+  short urls and take the load of the database, which now deals mostly
+  with writes from the shortenign service
+
+**** Phase 3: redirection service reads from cache
+
+Client -> shortening service -> Database
+
+Client -> redirection service -> Redirection Cache (Redis)
+
+Redirection Cache (cache miss) -> Database
+  
+Redirection service -> analytics batching service -> Analytics Cache
+(Redis)
+
+Analytics cache (periodic flush) -> Database
+
+Now, frequently accessed short urls and are cached in memory and
+the database is only accessed on a cache miss.
+
+_Me_:
+
+How does this approach for the high level design look?
+
+_AI_:
+
+Your phased approach is excellent — it correctly identifies the core
+scaling and operational problems in a logical order, and it leverages
+the key fact that /URL mappings are immutable/, which makes caching
+almost trivially safe.
+
+Here’s a breakdown of what works, followed by a few critical missing
+components to make it production-ready.
+
+*What works well:*
+
+- *Phase 1 (Analytics batching)*: Right call. Incrementing a counter
+  in the DB on every redirect turns 12 writes/s into ~1200
+  writes/s. Batching this asynchronously decouples the hot path from
+  the analytics sink.
+- *Phase 2 (Service separation)*: Splitting reads and writes aligns
+  perfectly with your 100:1 R/W ratio. They have different scaling
+  profiles and failure modes.
+- *Phase 3 (Caching)*: Since mappings are immutable, cache
+  invalidation is a non-issue. You just need an LRU/TTL eviction
+  policy for memory optimization. Reading from a fast cache satisfies
+  the millisecond latency NFR.
+
+*Critical missing pieces to address:*
+
+1. *Unique Alias Generation (The Write Path)*: You didn't specify
+   /how/ the shortening service generates unique aliases. This is the
+   classic bottleneck.
+   - *Bad*: Check the DB for randomness (collisions, race conditions).
+   - *Good*: Use a distributed ID generator (e.g., Twitter Snowflake)
+     or a global sequence/range of pre-generated keys. Encode the
+     numeric ID into Base62 (e.g., =0-9=, =a-z=, =A-Z=) to get a 7-8
+     character URL.
+   - This ensures the shortening service is stateless and handles high
+     write concurrency safely.
+
+2. *Load Balancer / Entry Point*: The client doesn't hit the services
+   directly. You need a *Load Balancer (LB)* in front of both the
+   shortening and redirection services. This is implicit but should be
+   drawn in your diagram. An *API Gateway* could also sit here for
+   rate limiting (even if auth is out of scope, rate limiting for
+   abuse prevention is often necessary).
+
+3. *Database Read Replicas*: While the Redis cache handles hot reads,
+   cache misses still hit the DB. Given a 100:1 read-to-write ratio, a
+   *primary (for writes) + read replicas (for cache-miss reads)* setup
+   is a natural Phase 4. It prevents the primary DB from being
+   overwhelmed during a cache cold-start or a Redis outage.
+
+4. *Security/Abuse Prevention (Potential Phase 5)*: Since you
+   confirmed auth is out of scope, a simple *rate limiter* (e.g.,
+   IP-based) on the shortening endpoint is highly recommended to
+   prevent spam and resource exhaustion. This can live in the API
+   Gateway.
+
+*Suggested "Phase 4" to complete the picture:*
+- Client → LB → Redirection Service → Redis Cache → (on miss) → Read
+  Replica
+- Client → LB → Shortening Service → (generates unique ID) → Primary
+  DB
+- Shortening Service → Primary DB → Replicates → Read Replicas
+- Redirection Service → Async Analytics Queue → Analytics Cache →
+  Batch Flush → Analytics Table
+
+*Verdict*: Your architectural thinking is spot-on. It efficiently
+ solves the latency, availability, and storage requirements for the
+ given scale (12 writes/s, 1200 reads/s). Just add the ID generation
+ algorithm, load balancing, and database read replicas to complete the
+ high-level design.
+
+** Deep Dives
+
+*** Generating unique IDs for each URL
+
+Two properties we need for the ID:
+
+- Globally uniqueness :: No two long URLs map to the same short url
+- Shortness :: The ID can be represented by a few characters e.g. less
+  than 10
+
+The basic idea: generate a unique integer, then encode it into a short
+human-friendly format
+
+**** Globally Unique ID
+
+Options:
+
+1) Use hash function like sha256
+
+Pro: Reduced chances of hash collision
+
+Con: The has produced is too long for our requirements
+
+2) UUID v4
+
+Pro: 122 random bits, effectively collision free.
+
+Con: The resulting 36 character id is still too long
+
+3) Auto incremented sequence from the DB
+
+Pro: Given the scale, we get a unique id per url + and we can control
+the length
+
+Con: Susceptible to enumeration attacks (can add a random prefix to
+avoid this)
+
+Chosen solution: Auto incremented sequence
+
+
+**** Encoding to user friendly URLs
+
+1) Use hexadecimal (Base 16)
+
+Pro: widely recognized and easy to implement
+
+Cons: not compact enough. 64 bit integer gives a 16 character string
+
+2) Base 64
+
+Uses characters [A-Za-z0-9+/=]
+
+Pro: More compact than hex
+Con: special characters +,/,= can cause issues in URLs and are not user friendly
+
+
+3) Base 62
+
+Uses characters [A-Za-z0-9] i.e. 62 possible characters.
+
+Pro: Results in shorter strings without special characters
+
+Chosen solution: Base 62 encoding
+
+*** Scaling for high traffic
+
+If we experience an increase in URL generation requests we need
+to scale the writes.
+
+**** Incremental plan
+
+***** Preallocation of ID ranges
+
+Pre-allocate ID ranges from the auto-incremente sequence to resolve ID
+contention on centralized generator e.g. in batches of 10,000.
+
+Reduced DB roundtrip by 10,000x but introduced complexity in batch
+exhaustion and replenishment.
+
+***** Switch to distributed ID generation
+
+when writes exceed ~1000 per sec, we can change Id to include
+machine id + auto increment value per machine
+
+e.g. 10 bits for the machine id and 32 bits for the counter.
+
+Eliminate dependency on centralized generator roundrip, but introduce
+complexity in coordination and assignment of machine ids
+
+Each auto-increment state is locally stored e.g. in cache or file
+
+***** Shared writes by machine ID to increase write throughput
+
+Trade away ACID transactions for write scalability with NoSQL db
+like DynamoDB or Cassandra, using machine id as sharding key.
+
+Benefits:
+
+- concurrent writes
+- localized failures
+- Simplified maintanance per shard e.g. backups
+
+Whenever there's a cache miss, extract machine id from short code
+to identify correct shard for the data record.
+
+
+   
+   
+   

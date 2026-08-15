@@ -1,0 +1,282 @@
+#+TITLE: Invert Binary Tree
+#+DATE: <2026-08-14 Fri 09:33>
+#+FILETAGS: :leetcode:dsa:binary_tree:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Invert Binary Tree
+
+** Description
+
+You are given the root of a binary tree root. Invert the binary tree
+and return its root.
+
+Example 1:
+
+Input: root = [1,2,3,4,5,6,7]
+
+Output: [1,3,2,7,6,5,4]
+
+
+Example 2:
+
+
+Input: root = [3,2,1]
+
+Output: [3,1,2]
+
+Example 3:
+
+Input: root = []
+
+Output: []
+Constraints:
+
+0 <= The number of nodes in the tree <= 100.
+-100 <= Node.val <= 100
+
+** Approach
+
+Inverting is like flipping the tree from left to right.
+
+For each node, we need to invert each left and right subtree, followed
+by inverting the left and right child nodes.
+
+This means that we can use recursive post order traversal to achieve this.
+
+_Me_:
+
+Is this in the right direction?
+
+_AI_:
+
+Yes, post-order traversal (process children, then swap) is the right approach.
+
+What's the base case for your recursive function?
+
+_Me_:
+
+The base case for the recursive function is an empty node. If at any
+level the node passed to the function is null, we return null
+
+_AI_:
+
+Exactly. Now write the recursive logic: invert the left subtree,
+invert the right subtree, then swap the left and right children of the
+current node. Try writing that.
+
+** Solution
+
+#+begin_src python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+class Solution:
+    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        if root:
+            root.left = self.invertTree(root.left)
+            root.right = self.invertTree(root.right)
+
+            root.left, root.right = root.right, root.left
+        return root
+
+#+end_src
+
+_Me_:
+
+We can also do an iterative version using a stack. Is this correct?
+
+_AI_:
+
+
+Yes, an iterative version with a stack is correct. A simple DFS stack
+works: push root, pop, swap its children, then push both children
+(order doesn’t matter for a stack). That visits every node exactly
+once.
+
+Want to try writing it, or are you asking about an implementation you
+already have?
+
+_Me_:
+
+#+begin_src python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+class Solution:
+    def invertTree(self, root: Optional[TreeNode]) -> Optional[TreeNode]:
+        stack = [root]
+        while stack:
+            node = stack.pop()
+            if node:
+                stack.append(node.left)
+                stack.append(node.right)
+                node.left, node.right = node.right, node.left
+        return root
+        
+#+end_src
+
+
+** Analysis
+
+*** Time complexity
+
+O(n) for visiting each node of the tree once.
+
+*** Space complexity
+
+Recursive version is O(n) worst case because we create a stack frame
+for each node.
+
+Iterative version is O(log n) worst case because the stack grows to
+a size proportional to the depth of the tree.
+
+_Me_:
+
+Is this correct?
+
+_AI_:
+
+Yes, the iterative code correctly inverts the tree.
+
+*Time complexity*: O(n) — correct, each node visited once.  
+*Space complexity*: Your analysis needs a small fix.  
+- Recursive version uses O(h) stack space for recursion, where h is tree height.  
+- Iterative version also uses O(h) space for the stack (it stores at most one full level’s worth of nodes, but in the worst case a skewed tree pushes all n nodes).  
+
+So worst-case space is O(n) for both, not O(log n). O(log n) only applies to balanced trees.
+
+Otherwise, the implementation is correct.
+
+_Me_:
+
+For space complexity, are the following correct?
+
+- For the recursive version worst case, h is equivalent to n - the number of nodes
+- For the iterative version worst case, h is equivalent to log n where n is the number of nodes?
+
+_AI_:
+
+Almost—let’s clarify:
+
+- *Recursive version:* call stack depth = tree height =h=. In the
+  worst case (a skewed tree), =h = n=, so space is =O(n)=.
+- *Iterative version:* your stack size also tracks tree height =h=. In
+  a *balanced tree*, =h = O(log n)=. But in the *worst case* (skewed
+  tree), =h = n=, so worst-case space is also =O(n)=.
+
+So the correct statement is:
+- Worst-case space for both versions: *O(n)*.
+- For a balanced tree, both can be *O(log n)*.
+
+_Me_:
+
+What kind of tree would give a space complexity of O(n) for the
+iterative version? Give an example
+
+_AI_:
+
+#+begin_reasoning
+We need answer user asks what kind of tree gives O(n) space for iterative version, example. Need concise. We need consider stack approach: iterative DFS with stack, push root, pop, push children (both), swap. For a skewed tree (like linked list each node has only left child or only right child), stack size? Let's simulate: start stack [root]. pop root, push left and right (if only left child, push left, right None? code appends node.left and node.right even if None, then if node: swaps. Actually appends None too. stack grows with None entries. But we can ignore None. With only left child, after popping root, push left (and None). stack size 1. Pop left, push its left, so stack size remains 1. Wait that's O(1) not O(n) for left-skewed? Let's check. For right-skewed: same, stack size 1. So iterative DFS on a skewed tree has O(1) stack size if you push children (one child). But code pushes both children, including None, so stack contains Nones but O(1). Actually if each node has one child, stack at most 2? Let's simulate: stack=[1], pop1 push2,None -> [2,None]; pop None (if node: skip), push None,None? Wait code: stack.append(node.left); stack.append(node.right); node.left,node.right=... For None, node = None, then if node: false, no push. So after pop1, stack=[2,None]; next pop None skip; next pop2 push3,None; stack=[3,None]? Actually after popping None, stack=[2], then pop2. So size max 2. So O(1) for skewed tree. For a full balanced binary tree, stack size? BFS? But DFS stack for invert: Let's simulate: root has 2 children; pop root push left,right => stack [L,R] (size2). Pop R, push its children => stack [L,RL,RR] (size3). Pop RR push children (if leaves) => stack [L,RL] (size2). Pop RL push leaves => [L]? hmm. Max stack size is O(height) actually? Let's compute: Because DFS visits right subtree before left, stack stores remaining right siblings along path. For full binary tree, at root stack size 2, then after descending right path, stack includes left siblings along path: root's left, R's left, RR's left etc. That's height O(log n). So iterative DFS stack O(h). Worst-case stack size for DFS is O(n) for trees that are "V-shaped" / "comb"? Need find tree where stack grows with n.
+
+Consider a tree where each node has a left child and a right child, but we push both, and traverse one side. Stack retains all right subtrees along the path. So stack size = depth + maybe sibling subtrees. To get O(n), need a tree of height n with each node having a right child? But right child subtree itself may be large. Example: root has a large left subtree (size ~n/2) and a tiny right child? Wait if we pop root, stack has left child and right child. If we process right child (small), then stack holds left subtree root, which contains many nodes but that's one entry. When we eventually process left subtree, its children get pushed, etc. Stack size measured in number of nodes stored, not subtree sizes. Each stack entry is a node reference. So to have O(n) stack entries, need many nodes stored simultaneously.
+
+DFS stack stores nodes whose subtrees haven't been visited yet. For a "left-skewed tree" where each node has a right child? Let's think: root->right->right->... (one child each) stack size 1. To store many, need at each level push two nodes, then process one deeply, leaving the other pending. So a tree where each node on a path has a sibling subtree. That is essentially a tree with height n/2 and each node along a path has a side subtree (can be leaf). Then stack stores side subtrees => O(n). Example: a "caterpillar" tree: a long spine where each spine node has one leaf child. Let's simulate: root has left leaf and right spine child. Stack [left, rightSpine]. Pop rightSpine, push its left leaf and right spine => stack [left, leftLeaf, rightSpine2] (size3). Continue, stack grows with each spine level: [left1, left2, ..., leftK, rightSpineK]. So size O(n). So worst-case O(n).
+
+But user specifically asks "What kind of tree would give a space complexity of O(n) for the iterative version? Give an example". We need answer: a "caterpillar" tree (long chain with one extra leaf at each node) yields O(n). Provide example tree.
+
+Need be concise. Also mention that for a simple left/right skewed chain, stack is O(1). Need maybe code? No, not asked. We can describe.
+
+Let's formulate: The iterative stack version stores nodes whose subtrees are waiting to be processed. Worst case occurs when every node on a deep path has an unprocessed sibling subtree. Example: each node along a right spine has a left leaf child. The stack accumulates those left leaves as we descend the spine, reaching ~n/2 entries. So O(n).
+
+Let's craft response.
+#+end_reasoning
+
+The iterative stack version stores nodes whose subtrees are waiting to be processed.  
+Worst case: a tree that is a long “spine” where each node has one extra side branch.
+
+Example: a right-going chain where every node also has a left leaf.
+
+#+begin_src 
+      a
+     / \
+    L1  b
+       / \
+      L2  c
+         / \
+        L3  d
+           ...
+#+end_src
+
+As you descend the right spine, each left leaf (=L1=, =L2=, =L3=, ...)
+stays on the stack, so the stack size grows to ~n/2. Hence O(n).
+
+_Me_:
+
+I see, so height does not necessarily become log n for a skewed tree.
+
+
+** Further Discussion
+
+_Me_:
+
+I notice that order doesn't matter, any of pre-order, in order and
+post order can be used. Is this correct?
+
+_AI_:
+
+Correct, height can be O(n) for a skewed tree (e.g., a chain).
+
+Regarding traversal order: *not exactly*.
+
+- *Pre-order*: swap children, then recurse on both → works.
+- *Post-order*: recurse on both, then swap → works.
+- *In-order*: naive left-root-right does *not* work. If you invert
+  left, swap, then invert right, you might undo the inversion. You'd
+  need to handle it specially (invert left, swap, then invert the
+  /new/ left).
+
+So the simple recursive version typically uses pre- or post-order.
+
+_Me_:
+
+What other approaches exist to solve this?
+
+_AI_:
+
+Other approaches:
+
+- /BFS (level-order)*: use a queue. Pop a node, swap its children,
+  then enqueue its children (if they exist). Also O(n) time, O(n)
+  space.
+- /Iterative DFS with two stacks/: post-order variant, but
+  unnecessary.
+
+_Me_:
+
+What are real world applications of this approach?
+
+_AI_:
+
+Real-world uses of the same tree-transformation pattern:
+
+- Mirroring UI component trees for right-to-left languages (e.g.,
+  English ↔ Arabic/Hebrew layouts).
+- Image/scene graph mirroring: flipping a rendered scene or image
+  horizontally.
+- AST transformations in compilers (e.g., reordering commutative
+  operations).
+- Genetic/decision tree transformations in algorithms.
+- Functional programming: applying a recursive transformation to an
+  immutable tree structure.
+
+The key transferable idea: *traverse a tree and transform each node
+while preserving structure* — that applies to many tree rewriting
+problems beyond just inversion.
