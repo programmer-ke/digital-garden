@@ -1,0 +1,219 @@
+#+TITLE: Subtree of Another Tree
+#+DATE: <2026-08-17 Mon 05:55>
+#+FILETAGS: :leetcode:dsa:binary_tree:dfs:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Subtree of Another Tree
+
+** Description
+
+Given the roots of two binary trees root and subRoot, return true if
+there is a subtree of root with the same structure and node values of
+subRoot and false otherwise.
+
+A subtree of a binary tree tree is a tree that consists of a node in
+tree and all of this node's descendants. The tree tree could also be
+considered as a subtree of itself.
+
+Example 1:
+
+Input: root = [1,2,3,4,5], subRoot = [2,4,5]
+
+Output: true
+
+Example 2:
+
+Input: root = [1,2,3,4,5,null,null,6], subRoot = [2,4,5]
+
+Output: false
+
+Constraints:
+
+1 <= The number of nodes in both trees <= 100.
+-100 <= root.val, subRoot.val <= 100
+
+
+** Approach
+
+Use DFS to traverse the tree looking for a matching subtree.
+
+At each node, either the subtree starting there matches, or we
+look for a match in the left or the right subtrees.
+
+
+** Solution
+
+#+begin_src python
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+class Solution:
+    def isSubtree(self, root: Optional[TreeNode], subRoot: Optional[TreeNode]) -> bool:
+        if subRoot is None:
+            return True
+        elif root is None:
+            return False
+
+        if self.sameTree(root, subRoot):
+            return True
+        else:
+            return self.isSubtree(root.left, subRoot) or self.isSubtree(
+                root.right, subRoot
+            )
+
+    def sameTree(self, root, subroot):
+        if root is None and subroot is None:
+            return True
+        elif root is None or subroot is None:
+            return False
+
+        if root.val == subroot.val:
+            return self.sameTree(root.left, subroot.left) and self.sameTree(
+                root.right, subroot.right
+            )
+        return False
+#+end_src
+
+** Analysis
+
+*** Time Complexity
+
+Worst case we're visiting all nodes of the tree, and comparing it with
+almost all nodes of the subtree.
+
+Complexity will be O(m * n), n - no. of nodes in tree and m - no. of nodes in subtree
+
+*** Space Complexity
+
+Since we're recursing through each tree, subtree node, maximum amount of space
+for the recursion stack will be
+
+O(m + n)
+
+_Me_:
+
+Is this correct?
+
+_AI_:
+
+Yes, the solution is correct IAW the problem constraints (both trees
+are non-empty, but the empty-subtree base case is harmless). The
+=isSubtree= function correctly checks at each node whether the subtree
+rooted there matches =subRoot=, and if not, recurses on left and right
+children. The =sameTree= helper correctly verifies structural and
+value equality. The time complexity is O(m·n) in the worst case
+(comparing whole subtrees at many nodes) and space is O(m+n) for
+recursion stack depth, as noted.
+
+** Further Discussion                                :kmp:knuth_morris_pratt:
+
+_Me_:
+
+Is there a more optimal solution?
+
+_AI_:
+
+
+Yes. Constraints are small (≤100 nodes), so O(n·m) is acceptable.
+
+A more efficient approach exists: serialize both trees (preorder with
+explicit =None= markers) and check if =subRoot=’s serialization is a
+substring of =root=’s. This can be O(n+m) with KMP or linear-time
+substring search.
+
+Caveats: the serialization must be unambiguous — include null markers
+and a separator between values (e.g. =,= or =#=) so that =[12]=
+doesn’t match inside =[1,2]=.
+
+Another alternative: Merkle hashing — hash each subtree bottom-up and
+compare hashes. Average O(n+m), but requires careful collision
+handling.
+
+_Me_:
+
+Give me a documented version of the more efficient solution with O(n + m) runtime.
+
+_AI_:
+
+Here’s a documented O(n + m) solution using *preorder serialization + KMP*:
+
+#+begin_src python
+
+class Solution:
+    def isSubtree(self, root: Optional[TreeNode], subRoot: Optional[TreeNode]) -> bool:
+        # Serialize both trees as lists with None for missing children.
+        # Preorder with explicit None is a lossless representation of structure.
+        def serialize(node):
+            if node is None:
+                return [None]
+            return [node.val] + serialize(node.left) + serialize(node.right)
+
+        tree = serialize(root)
+        sub = serialize(subRoot)
+
+        # KMP finds a needle in a haystack in O(n+m), no false positives.
+        return self.kmp_search(tree, sub) != -1
+
+    def kmp_search(self, text, pattern):
+        """Returns index of first match, or -1."""
+        # Build longest-prefix-suffix table
+        lps = [0] * len(pattern)
+        j = 0
+        for i in range(1, len(pattern)):
+            while j > 0 and pattern[i] != pattern[j]:
+                j = lps[j - 1]
+            if pattern[i] == pattern[j]:
+                j += 1
+                lps[i] = j
+
+        # Search
+        i = j = 0
+        while i < len(text):
+            if text[i] == pattern[j]:
+                i += 1
+                j += 1
+                if j == len(pattern):
+                    return i - j
+            elif j > 0:
+                j = lps[j - 1]
+            else:
+                i += 1
+        return -1
+#+end_src
+
+*Why it works*
+
+- Serializing with =None= markers captures both values and shape.
+- A subtree appears as a contiguous slice of the parent serialization.
+- KMP finds that slice without backtracking, giving *O(n + m)* time and *O(n + m)* space.
+
+Using a list of tokens avoids string-boundary pitfalls (e.g. =2= matching inside =12=).
+
+
+_Me_:
+
+What are real world applications of this algo?
+
+_AI_:
+
+Real-world uses of subtree (or pattern) matching over trees:
+
+- *Compiler tooling*: matching abstract syntax tree (AST) patterns
+  (e.g. codemods, lint rules)
+- *File systems*: comparing directory structures, backup/sync tools
+- *DOM manipulation*: finding a known HTML component shape inside a
+  page
+- *XML/JSON validation*: checking if a schema fragment exists inside a
+  larger document
+- *Plagiarism detection*: finding copied code blocks after structural
+  normalization
+- *Bioinformatics*: comparing molecular tree structures (e.g. RNA
+  secondary structures)
+- *Symbolic math*: recognizing subexpressions (e.g. applying a rewrite
+  rule)
+
+KMP itself shows up broadly in substring search: text editors, grep,
+DNA sequence matching, data compression, network packet inspection.

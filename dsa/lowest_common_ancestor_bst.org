@@ -1,0 +1,143 @@
+#+TITLE: Lowest Common Ancestor in Binary Search Tree
+#+DATE: <2026-08-17 Mon 06:59>
+#+FILETAGS: :leetcode:dsa:binary_tree:bst:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Lowest Common Ancestor in Binary Search Tree
+
+** Description
+
+https://neetcode.io/problems/lowest-common-ancestor-in-binary-search-tree/question
+
+
+** Approach
+
+The Binary search tree is ordered. The goal is to find the smallest subset
+of nodes where both p and q occur in the tree.
+
+Starting from the root, at each node, we chose the segment that
+has both p and q. If we get to the node where p and q lie on
+different segments, or a node that is one of p or q, then that node
+is the lowest common ancestor.
+
+** Solution
+
+Recursive version:
+
+#+begin_src python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def lowestCommonAncestor(self, root: TreeNode, p: TreeNode, q: TreeNode) -> TreeNode:
+        if root is None or p is None or q is None:
+            return None
+
+        if max(p.val, q.val) < root.val:
+            return self.lowestCommonAncestor(root.left, p, q)
+        elif min(p.val, q.val) > root.val:
+            return self.lowestCommonAncestor(root.right, p, q)
+        else:
+            # split occurs here, or one of the p, q is root
+            return root
+#+end_src
+
+Iterative version:
+
+#+begin_src python
+
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+class Solution:
+    def lowestCommonAncestor(self, root: TreeNode, p: TreeNode, q: TreeNode) -> TreeNode:
+        current = root
+
+        while current:
+            if p.val < current.val and q.val < current.val:
+                current = current.left
+            elif p.val > current.val and q.val > current.val:
+                current = current.right
+            else:
+                # split occurs here, or one of p, q is current
+                break
+
+        return current
+
+#+end_src
+
+** Analysis
+
+*** Time complexity
+
+Each time we're halving the number of possibilities, so the time
+complexity is O(h), were h is the height of the tree.
+
+Balanced tree: O(h) becomes O(log n)
+
+Skewed tree: O(h) becomes O(n)
+
+*** Space complexity
+
+Recursive version is O(h) (O(n) worst case in skewed tree)
+
+Iterative version is O(1)
+
+_Me_:
+
+Is this correct?
+
+_AI_:
+
+Yes, it's correct. The recursive and iterative solutions exploit BST
+ordering properly, and the complexity analysis is accurate. The edge
+cases (p or q being the root, both on same side) are handled
+correctly.
+
+** Further Discussion
+
+_Me_:
+
+Is there a more optimal solution?
+
+_AI_:
+
+The iterative solution is already optimal:
+- *Time*: O(h), which is O(log n) for balanced trees and O(n)
+  worst-case (skewed). You must at least visit the path from root to
+  LCA, so no algorithm can do better in general.
+- *Space*: O(1) constant, which is minimal.
+
+No more efficient approach exists for a BST. If the tree were not
+ordered, you'd need O(n) time and O(h) stack space, but the BST
+property eliminates that need.
+
+_Me_:
+
+What are a few real world applications of this algorithm?
+
+_AI_:
+
+Real-world uses of LCA (especially in BSTs / trees):
+
+- *Version control systems* (Git): find the common merge base of two
+  branches.
+- *File system paths*: locate the lowest common directory between two
+  file paths.
+- *Database indexes*: B-trees / BSTs for range queries and
+  hierarchical data.
+- *Routing / networks*: find common gateway or intersection point in
+  hierarchical network topologies.
+- *Compiler ASTs*: find the common ancestor scope/block of two
+  expressions.
+- *Genealogy / org charts*: find nearest common ancestor of two
+  people.
+- *Dependency graphs*: identify shared dependency roots in package
+  managers.
