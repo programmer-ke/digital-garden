@@ -1,0 +1,54 @@
+#+FILETAGS: :system_design:webhook:
+
+* Design a Webhook
+
+Unlike traditional system relying on polling to receive events,
+webhooks push data immediately an event occurs.
+
+** Problem Statement
+
+You are tasked with designing a centralized Webhook Service for a
+large SaaS platform (similar to Stripe or Shopify) that notifies
+merchant applications about critical events like payment.completed or
+order.shipped.  The system must act as the single source of truth for
+event delivery, ensuring no data is lost even when merchant servers
+are unreliable.
+
+** Requirements
+
+*** Functional Requirements
+
+- The system should be able to notify merchant applications about a
+  critical event
+- The system should persist all events triggered for auditability
+
+*** Back of the envelope calculations
+
+- The system handles 1 million events per day
+  - This comes to ~12 events per second in steady state
+- Peak hours, traffic spikes 5x
+  - This comes to about ~60 events / sec during peak hours
+- End to end latency (from arrival to completion) should be 200 milliseconds
+  - A single processing unit should be able to handle about 5 events per second
+  - So at peak, we can have 60/5 = 12 concurrent processing units
+- The system should store events for 30 days.
+  - Assuming each event is 5kb, in a day we persist 5GB data
+  - In 30 days this becomes 150GB
+
+*** Non functional requirements
+
+- Latency :: the system should acknowledge and persist events within
+  200 milliseconds (p99 < 200ms)
+- Throughput :: The system should be able to handle 60 requests /
+  second at peak
+- Storage capacity :: The system should be able to store upto 150 GB
+  per month
+- Durability :: Acknowledged events are not lost. They are replicated
+  to multiple availabilty zones
+- Scalability :: We should be able to scale out the system horizontally
+  to handle 5x load at peak
+- Availability :: The system should have 99.99% uptime
+  - 1 - 0.9999 = 0.0001. No more than 0.0001 * 86400 = ~8 seconds
+    downtime per day
+- Auditability :: All events should be auditable within a 30 day
+  period

@@ -1,0 +1,205 @@
+#+TITLE: Valid Binary Search Tree
+#+DATE: <2026-08-20 Thu 09:35>
+#+FILETAGS: :leetcode:dsa:bst:binary_search_tree:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Valid Binary Search Tree
+
+** Description
+
+Given the root of a binary tree, return true if it is a valid binary
+search tree, otherwise return false.
+
+A valid binary search tree satisfies the following constraints:
+
+The left subtree of every node contains only nodes with keys less than
+the node's key.  The right subtree of every node contains only nodes
+with keys greater than the node's key.  Both the left and right
+subtrees are also binary search trees.
+
+Example 1:
+
+Input: root = [2,1,3]
+
+Output: true
+
+Example 2:
+
+Input: root = [1,2,3]
+
+Output: false
+
+Explanation: The root node's value is 1 but its left child's value is
+2 which is greater than 1.
+
+Constraints:
+
+1 <= The number of nodes in the tree <= 10000.  -1000000000 <=
+Node.val <= 1000000000
+
+** Approach
+
+To maintain the BST property, each node value in the left subtree has
+to be less than a given node's value, which is also less that each
+node value in its right subtree.
+
+The brute force solution is for each node, check that all the nodes
+values in left subtree are less, and the ones in the right subtree are
+greater, and repeat. For every single node. This gives a runtime of
+O(n^{2}) for a tree with n nodes.
+
+We can use a DFS approach where for each child, we recursively
+constrain the range of allowed values based on the parent value.
+
+** Solution
+
+#+begin_src python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+class Solution:
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+
+        def is_valid(minimum, node, maximum):
+            if node is None:
+                return True
+
+            if minimum < node.val < maximum:
+                return is_valid(minimum, node.left, node.val) and is_valid(
+                    node.val, node.right, maximum
+                )
+            return False
+
+        # at the root, we have an unbounded range
+        minval, maxval = float("-inf"), float("inf")
+
+        return is_valid(minval, root, maxval)
+#+end_src
+
+We can also use BFS to validate the BST, if for each node in the tree,
+we determine its bounds based on its parent's value.
+
+
+#+begin_src python
+from collections import deque
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+class Solution:
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        queue = deque()
+        queue.append((float('-inf'), root, float('inf')))
+        while queue:
+            minimum, node, maximum = queue.popleft()
+            if node is None:
+                continue
+            if not minimum < node.val < maximum:
+                return False
+            queue.append((minimum, node.left, node.val))
+            queue.append((node.val, node.right, maximum))
+        return True
+            
+#+end_src
+
+** Analysis
+
+*** DFS solution
+
+Time complexity is O(n), we do constant time work for each node of the
+tree.
+
+Space complexity is O(h), which is O(n) worst case (skewed tree) and
+O(log n) for a balanced tree.
+
+*** BFS solution
+
+Time complexity is similarly O(n)
+
+Space complexity is O(n) because for worst case (balanced tree), we're
+storing a maximum 2^h nodes for the last level, which comes to about n/2.
+
+_Me_:
+
+Is this correct?
+
+_AI_:
+
+Both solutions are logically correct — the bounds propagation is
+right, and you handle =None= and strict inequalities properly.
+
+One subtle thing to probe: your DFS recursion depth equals the tree's
+height. Given N ≤ 10,000 and Python's default recursion limit (~1000),
+what happens on a skewed tree (like a linked list)?
+
+The BFS version sidesteps that entirely — a nice practical advantage.
+
+** Further Discussion
+
+_Me_:
+
+Are there a more optimal solution? Explain with sample code if there is.
+
+_AI_:
+
+Given your solutions, time complexity is already optimal at O(n) because every node must be visited.  
+The only remaining optimization is space: you currently use O(h) for recursion/stack or O(n) for BFS.
+
+You can achieve *O(1) extra space* using a *Morris traversal*, which temporarily rewires the tree to perform an in‑order traversal without a stack.
+
+*Key idea*:  
+- In‑order traversal of a valid BST yields a strictly increasing sequence.
+- Morris traversal links the rightmost node of the left subtree back to the current node, allowing backtracking without a stack.
+
+*Sample code* (iterative, O(1) space):
+
+#+begin_src python
+class Solution:
+    def isValidBST(self, root: Optional[TreeNode]) -> bool:
+        prev = None
+        cur = root
+        while cur:
+            if not cur.left:
+                # visit cur
+                if prev is not None and prev.val >= cur.val:
+                    return False
+                prev = cur
+                cur = cur.right
+            else:
+                # find predecessor (rightmost in left subtree)
+                pred = cur.left
+                while pred.right and pred.right is not cur:
+                    pred = pred.right
+                if not pred.right:
+                    pred.right = cur  # create thread
+                    cur = cur.left
+                else:
+                    pred.right = None  # remove thread
+                    # visit cur
+                    if prev is not None and prev.val >= cur.val:
+                        return False
+                    prev = cur
+                    cur = cur.right
+        return True
+#+end_src
+
+*Note*: This modifies the tree temporarily but restores it. If you
+prefer not to mutate the tree, you'd need to revert the threads, but
+the above already does that in the =else= branch.
+
+*Practical consideration*:
+- Morris traversal avoids recursion‑depth issues for skewed trees (up
+  to 10,000 nodes here, well within Python's recursion limit, but
+  still a nice bonus).
+- The constant factor is slightly higher due to the threading logic,
+  but space is truly O(1).
+
+Would you like to walk through a dry run of this algorithm, or discuss
+trade‑offs further?

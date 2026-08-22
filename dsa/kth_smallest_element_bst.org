@@ -1,0 +1,296 @@
+#+TITLE: Kth Smallest Element in a Binary Search Tree
+#+DATE: <2026-08-22 Sat 08:38>
+#+FILETAGS: :leetcode:dsa:binary_search_tree:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Kth Smallest Element in a Binary Search Tree
+
+** Description
+
+Given the root of a binary search tree, and an integer k, return the
+kth smallest value (1-indexed) in the tree.
+
+A binary search tree satisfies the following constraints:
+
+The left subtree of every node contains only nodes with keys less than
+the node's key.  The right subtree of every node contains only nodes
+with keys greater than the node's key.  Both the left and right
+subtrees are also binary search trees.
+
+Example 1:
+
+Input: root = [2,1,3], k = 1
+
+Output: 1
+
+Example 2:
+
+Input: root = [4,3,5,2,null], k = 4
+
+Output: 5
+
+** Approach
+
+The brute force approach is simply to traverse the whole tree (bfs or
+dfs) and gather all the node values into an array, then sort the array
+and return the kth smallest.
+
+This will have a time complexity of O(n log n) for sorting and a space
+complexity of O(n).
+
+An improved approach is to traverse the tree in DFS. Because of the
+binary search tree property, an inorder traversal will visit the
+nodes in ascending order. Building the array in ascending order
+prevents the need to sort. After traversing all the nodes
+return the kth smallest element in the array.
+
+Has an improved time complexity of O(n)
+
+As we visit the nodes, we can have a counter we decrement until
+we reach the kth smallest node, preventing us from traversing the
+whole tree. This can improve the time complexity of O(k), where
+k < n.
+
+** Solution
+
+Recursive DFS:
+
+#+begin_src python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+class Solution:
+    def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:
+        self.count = k
+        self.kth_smallest = -1
+        self.dfs(root)
+        return self.kth_smallest
+
+    def dfs(self, node):
+        if node is None:
+            return
+
+        self.dfs(node.left)
+
+        if self.count == 0:
+            return
+
+        self.count -= 1
+
+        if self.count == 0:
+            self.kth_smallest = node.val
+            return
+
+        self.dfs(node.right)
+#+end_src
+
+Iterative DFS:
+
+#+begin_src python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+class Solution:
+    def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:
+
+        count = k
+        stack = []
+        stack.append(root)
+        seen = set()
+
+        while stack:
+            node = stack.pop()
+            if node.val not in seen:
+                seen.add(node.val)
+                stack.append(node)
+                if node.left:
+                    stack.append(node.left)
+            else:
+                # at this point, we've processed node's left subtree
+                count -= 1
+                if count == 0:
+                    return node.val
+
+                if node.right:
+                    stack.append(node.right)
+        
+#+end_src
+
+Iterative DFS without extra space for visited nodes. The idea
+is to iterate 'backwards' from the smallest node
+
+#+begin_src python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+class Solution:
+    def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:
+        count = k
+        stack = []
+        current = root
+
+        while stack or current:
+            while current:
+                stack.append(current)
+                current = current.left
+            current = stack.pop()
+            count -= 1
+            if count == 0:
+                return current.val
+            current = current.right
+#+end_src
+
+** Analysis
+
+*** Time complexity
+
+Recursive DFS: O(h + k), where h is the depth of the smallest node, worst case O(n), h == n
+Iterative DFS: similar to recursive
+
+*** Space complexity
+
+Recursive DFS: O(h). Worst case (skewed tree) O(n), h == n
+Iterative DFS: similar to recursive
+
+_Me_:
+
+Is this correct?
+
+_AI_:
+
+Yes, the solutions and analysis are correct. The three approaches all
+rely on in-order traversal (left -> node -> right) to visit BST values
+in ascending order, stopping at the kth node. The iterative version
+without extra space is the most efficient and clean. Complexity claims
+are accurate: O(h + k) time, O(h) space, worst-case O(n). The only
+minor note: the second solution uses a =seen= set keyed by node value,
+which is fine as BST values are distinct, but that set is unnecessary
+if you use the third approach.
+
+** Further Discussion
+
+_Me_:
+
+Is there a more optimal solution?
+
+_AI_:
+
+No, the iterative in-order traversal that stops early is optimal for a
+standard BST: O(h+k) time, O(h) space. For a balanced tree, that’s
+O(log n + k). If you need repeated queries, you could augment each
+node with subtree size to get O(log n) per query, but that modifies
+the tree. What’s your intent—single query or many?
+
+_Me_:
+
+What about using Morris traversal?
+
+_AI_:
+
+Morris traversal is a good idea! It reduces space to O(1) by
+temporarily modifying the tree's right pointers to create a threaded
+binary tree. It still visits nodes in in-order ascending order, so you
+can stop after k visits. Time complexity is O(n) in the worst case
+(though you can stop early after k nodes, it may still traverse some
+extra edges to find the leftmost or thread back).
+
+Trade-offs: It mutates the tree (temporary) but you can restore it. If
+that’s acceptable, it’s an elegant constant-space solution. Do you
+want to sketch the algorithm or compare it to the previous approaches?
+
+_Me_:
+
+Explain how Morris traversal works
+
+_AI_:
+
+Morris traversal exploits empty right pointers to avoid a
+stack/recursion.
+
+*Idea*
+- In-order order: left subtree → node → right subtree.
+- If a node has no right child, its right pointer is unused. We can
+  use it to point back to the “successor” later, so we can climb up
+  without a stack.
+- We temporarily create “threads” from the rightmost node of the left
+  subtree up to the current node.
+
+*Steps for each current node*
+1. If =current.left= is null:
+   - Visit current.
+   - Move to =current.right=.
+2. If =current.left= exists:
+   - Find =predecessor = current.left=, then go right until either its
+     right is null or its right is =current=.
+     - If right is null:
+       - Set =predecessor.right = current= (create thread).
+       - Move to =current.left=.
+     - If right is =current=:
+       - Restore: =predecessor.right = null= (remove thread).
+       - Visit current.
+       - Move to =current.right=.
+
+The tree is temporarily modified but restored by the end.
+
+*For kth smallest*
+- You visit nodes in in-order ascending order. Just count visits, stop
+  when count == k.
+- Space: O(1). Time: amortized O(n), but you can stop early after k
+  visits.
+
+Try it on =[2,1,3]= with k=1 to see the path. Want to walk through it?
+
+_Me_:
+
+Give an implementation of in-order Morris traversal
+
+_AI_:
+
+Here’s a kth-smallest implementation using Morris in-order traversal:
+
+#+begin_src python
+class Solution:
+    def kthSmallest(self, root: Optional[TreeNode], k: int) -> int:
+        current = root
+        count = 0
+
+        while current:
+            if current.left is None:
+                # Visit current
+                count += 1
+                if count == k:
+                    return current.val
+                current = current.right
+            else:
+                # Find predecessor
+                pred = current.left
+                while pred.right and pred.right is not current:
+                    pred = pred.right
+
+                if pred.right is None:
+                    # Create thread
+                    pred.right = current
+                    current = current.left
+                else:
+                    # Thread exists, restore and visit current
+                    pred.right = None
+                    count += 1
+                    if count == k:
+                        return current.val
+                    current = current.right
+#+end_src
+
+This visits nodes in ascending order, uses O(1) extra space, and
+temporarily modifies then restores the tree.

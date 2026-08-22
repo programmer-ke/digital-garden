@@ -301,7 +301,7 @@ Examples: AWS API gateway, Kong, NGINX plus
 
 ** Problem Decomposition
 
-*** Problem statement and clarifying question
+*** Problem statement and clarifying questions
 
 *** Extract functional and non-functional requirements
 

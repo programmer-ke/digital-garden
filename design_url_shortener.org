@@ -1,4 +1,4 @@
-#+FILETAGS: :system_design:online_judge:
+#+FILETAGS: :system_design:url_shortener:
 
 * Design a url shortener
 
