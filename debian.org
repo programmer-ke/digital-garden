@@ -69,7 +69,7 @@ dpkg's log file is found at =/var/log/dpkg.log=
   - The first field describes the source type:
     - =deb= :: binary package source
     - =deb-src= :: source package
-- =apt-cacher= and =apt-catcher-ng= can be used to proxy package
+- =apt-cacher= and =apt-cacher-ng= can be used to proxy package
   sources and cache requests
 - sources for external
     
@@ -125,9 +125,9 @@ dpkg's log file is found at =/var/log/dpkg.log=
   - In some cases fields in the =Release= and =InRelease= files may
     have changed. use the =--allow-releaseinfo-change= flag of
     =apt-get=
-- Do a minimal upgrade with =apt upgrade=
+- Do a minimal upgrade with =apt upgrade --without-new-pkgs=
   - ensure's package management tools have are up to date with bug fixes
-- Do a full upgrade with =apt full upgrade=
+- Do a full upgrade with =apt full-upgrade=
   - Any unreported bugs can be reported using =reportbug=
 - Post upgrade, find any packages that were removed (no package
   source) using =apt-show-versions | grep "No available version"=
@@ -198,7 +198,7 @@ dpkg's log file is found at =/var/log/dpkg.log=
   - check the bugtracker for that package if the bug has been reported
   - send a bug report using the =reportbug= command
 
-** Configuring system for another language
+** Configuring system for another language                           :locale:
 
 - A locale is a group of regional settings: language, alphabetical
   comparisons, dates, times, monetary sums etc
@@ -371,7 +371,7 @@ dpkg's log file is found at =/var/log/dpkg.log=
   or =system-config-printer=
 - Member of the =lpadmin= group can manage USB and network printers
 
-** Configuring the Bootloader
+** Configuring the Bootloader                                          :udev:
 
 - The master boot record occupies the first 512 bytes of the first
   hard disk, and is loaded by the BIOS to hand over control to a

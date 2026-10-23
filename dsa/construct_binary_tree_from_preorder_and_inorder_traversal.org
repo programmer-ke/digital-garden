@@ -1,0 +1,194 @@
+#+TITLE: Construct Binary Tree from Preorder and Inorder Traversal
+#+DATE: <2026-09-24 Thu 04:09>
+#+FILETAGS: :leetcode:dsa:trees:binary_tree:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Construct Binary Tree from Preorder and Inorder Traversal
+
+** Description
+
+You are given two integer arrays preorder and inorder.
+
+- preorder is the preorder traversal of a binary tree
+- inorder is the inorder traversal of the same tree
+
+Both arrays are of the same size and consist of unique values.
+Rebuild the binary tree from the preorder and inorder traversals and
+return its root.
+
+Example 1:
+
+Input: preorder = [1,2,3,4], inorder = [2,1,3,4]
+
+Output: [1,2,3,null,null,null,4]
+
+Constraints:
+
+1 <= inorder.length <= 2001.
+inorder.length == preorder.length
+-1000 <= preorder[i], inorder[i] <= 1000
+
+** Approach
+
+*** Solution 1
+
+The first element of preorder will tell us the root of the tree. The
+index m of the root in inorder will partition the tree to left and
+right subtrees. So we create the root node then recursively create the
+left and right subtrees.
+
+The left subtree will be created using:
+- preorder[1:m+1]
+- inorder[0:m]  
+
+The right subtree will be created using:
+- inorder[m+1:]
+- preorder[m+1:]
+
+Note: the length of each subtree side is equal since inorder and
+preorder are two ways of traversing the same tree.
+
+*** Solution 2
+
+To prevent linear search for position of root in inorder, we
+precompute the position of element in a hash table.
+
+We'll traverse preorder left to right at each iteration
+identifying the current root.
+
+We'll use dfs to partition inorder by subtree, to avoid creating
+copies of lists.
+
+** Solution
+
+*** Solution 1
+
+#+begin_src python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+class Solution:
+    def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:
+        if not (preorder or inorder):
+            return None
+
+        root = TreeNode(preorder[0])
+        m = inorder.index(preorder[0])
+        root.left = self.buildTree(preorder[1: m + 1], inorder[0:m])
+        root.right = self.buildTree(preorder[m + 1 :], inorder[m + 1 :])
+        return root
+#+end_src
+
+*** Solution 2
+
+#+begin_src python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+class Solution:
+    def buildTree(self, preorder: List[int], inorder: List[int]) -> Optional[TreeNode]:
+        inorder_position = {el: index for index, el in enumerate(inorder)}
+        self.current_root = 0
+
+        def dfs(start, end):
+            if start > end:
+                return None
+
+            root_val = preorder[self.current_root]
+            node = TreeNode(root_val)
+            self.current_root += 1
+
+            m = inorder_position[root_val]
+            node.left = dfs(start, m - 1)
+            node.right = dfs(m + 1, end)
+            return node
+
+        return dfs(0, len(inorder) - 1)
+        
+#+end_src
+
+
+** Analysis
+
+*** Solution 1
+
+- Time complexity is O(n^{2}) worst case because of list.index with does a linear search
+- Space complexity is similarly O(n^{2})
+
+_Me_:
+
+Is the analysis correct?
+
+_AI_:
+
+Yes, the analysis is correct.
+
+- *Time*:  Worst-case skewed  tree  — each  recursive  call scans  its
+  inorder segment linearly with =.index=,  and segment sizes shrink by
+  one each level:  n + (n-1) +  ... = *O(n²)*. Slicing  also adds O(n)
+  work per call, but doesn’t change the result.
+- *Space*: Each  call creates  new slices via  slicing, and  those are
+  held while  recursion continues.  In a  skewed tree,  the cumulative
+  held slice memory is (n-1) +  (n-2) + ... = *O(n²)*. Recursion stack
+  is O(n) on top of that.
+
+For a balanced  tree it would be  O(n log n) time and  space with this
+slicing approach, but your stated worst-case is right.
+
+*** Solution 2
+
+- Time complexity is O(n) - we've eliminated the linear search for
+  node positions in inorder
+- Space complexity is O(n) worst case (skewed tree), O(n) for hashmap
+  storage
+
+** Further Discussion
+
+_Me_:
+
+Is there a more optimal solution?
+
+_AI_:
+
+O(n) time is optimal: you must construct each node once. Space is O(n)
+in the worst case (skewed tree) due to recursion stack, plus O(n) for
+the hashmap. You could replace the hashmap with an index pointer and
+rely on inorder to bound subtrees, but that would require a linear
+scan each time — making it O(n²) — so trading space for time. Thus,
+Solution 2 is optimal in both time and space complexity classes.
+
+If you're concerned about recursion depth for n=2001, you could
+implement an iterative stack-based version, but that still uses O(n)
+extra space. No approach beats O(n) time.
+
+_Me_:
+
+What are practical applications of such a technique?
+
+_AI_:
+
+Practical applications:
+
+- *Serialization/deserialization*: Save a binary tree (game state, UI
+  layout, document AST) as two arrays, then rebuild it later. Cheaper
+  than storing =null= pointers.
+- *Network transfer*: Transmit tree structures compactly; the receiver
+  reconstructs the tree exactly.
+- *Compilers/interpreters*: Linearize an abstract syntax tree for
+  storage, then rebuild it for execution or analysis.
+- *Database indexing*: Some hierarchical indexes are stored as linear
+  traversal logs and need rebuilding.
+- *General pattern*: Using a hashmap to convert values→indices is a
+  reusable trick for any "two-order reconstruction" problem, not just
+  trees.
+
+The core lesson — trade memory for speed by precomputing lookup tables
+— appears throughout algorithms and systems design.
