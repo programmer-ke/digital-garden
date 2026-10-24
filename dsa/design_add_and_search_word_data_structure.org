@@ -1,0 +1,124 @@
+#+TITLE: Design Add and Search Word Data Structure
+#+DATE: <2026-10-24 Sat 12:12>
+#+FILETAGS: :leetcode:dsa:dfs:trie:prefix_search:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Design Add and Search Word Data Structure
+
+** Description
+
+https://neetcode.io/problems/design-word-search-data-structure/question
+
+** Approach
+
+- Use a prefix tree data structure to store words
+- when searching words:
+  - without any dots, follow exact path down the tree
+  - If we have dots, subtitute it for all branches along the path
+    and find the first possible match
+
+** Solution
+
+#+begin_src python
+class Node:
+    def __init__(self):
+        self.children = {}
+        self.end_of_word = False
+        
+class WordDictionary:
+
+    def __init__(self):
+        self.root = Node()
+
+    def addWord(self, word: str) -> None:
+        curr = self.root
+        for c in word:
+            if not c in curr.children:
+                curr.children[c] = Node()
+            curr = curr.children[c]
+        curr.end_of_word = True
+
+    def search(self, word: str) -> bool:
+        return self.dfs(word, self.root, from_index=0)
+
+    def dfs(self, word, node, from_index):
+        if from_index == len(word):
+            return node.end_of_word
+
+        c = word[from_index]
+        if c == ".":
+            for child in node.children.values():
+                if self.dfs(word, child, from_index + 1):
+                    return True
+            return False
+
+        if not c in node.children:
+            return False
+
+        return self.dfs(word, node.children[c], from_index + 1)
+            
+#+end_src
+
+#+RESULTS:
+
+** Analysis
+
+*** Time Complexity
+
+O(n) for adding a word of length n
+
+O(n) for searching a word of length n. Dots add at most 26^{2}n time
+
+*** Space complexity
+
+O(m*n) worst case for m words of length n
+
+_Me_:
+
+How does this sound?
+
+_AI_:
+
+Sounds solid. The DFS-branch-on-dot design is exactly right, and early
+=return True= prunes most branches. A few reflection prompts before we
+call it done:
+
+1. *Correctness check:* what does your code return for
+   =addWord("app"); search("ap")=? Walk through which line decides it
+   — that's where the =end_of_word= flag earns its keep.
+
+2. *Complexity precision:* for search you wrote =O(26^2 n)=. More
+   generally it's =O(26^d · n)= where =d= is the dot count (here =d ≤
+   2=). But is the =n= factor accurate, given each of the 26 branches
+   stops early when a path breaks? What's the tighter bound?
+
+3. *Tiny cleanup (optional):* =if not c in curr.children= →
+   conventional style is =if c not in curr.children=. Purely cosmetic.
+
+** Further Discussion
+
+_Me_:
+
+What are some real world applications?
+
+_AI_:
+
+A few places this pattern shows up — notice each leans on a /different/
+part of your design:
+
+1. /Spellcheck / autocomplete/ — the classic trie use; relies on
+   prefix traversal, no wildcards needed.
+
+2. /Glob / regex-lite matching/ — file path or log search where =.= or
+   =*= are wildcards. Your DFS branch-on-dot is literally the matching
+   engine.
+
+3. /Crossword solvers / word games/ — "find words matching =_ A _ E=".
+   Same API: build dictionary once, query with wildcards.
+
+4. /DNA / protein motif search/ — sequences over a small alphabet
+   where =N= means "any base". Constraints like your "at most 2 dots"
+   mirror real biological wildcard limits.
+
+5. /Fuzzy candidate generation in autocomplete/ — a user typo or
+   masked character becomes a =.= query.

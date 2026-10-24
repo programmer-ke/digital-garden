@@ -1,0 +1,187 @@
+#+TITLE: Binary Tree Maximum Sum Path
+#+DATE: <2026-10-23 Fri 15:53>
+#+FILETAGS: :leetcode:dsa:dynamic_programming:dfs:binary_tree:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Binary Tree Maximum Sum Path
+
+** Description
+
+https://neetcode.io/problems/binary-tree-maximum-path-sum/
+
+** Approach
+
+Through each node there are 3 possible path sums:
+
+- left -> node -> right
+- left -> node -> parent
+- right -> node -> parent
+
+While tracking the best path sum seen so far, we can traverse
+the tree with dfs. At each step:
+
+- update best path sum if left -> node -> right improves it
+- return best of left -> node and right -> node to parent
+
+Negative sums from left or right can be ignored because they always
+have a decreasing effect on the path sum
+
+Constraints:
+
+1 <= The number of nodes in the tree <= 30000.
+-1000 <= Node.val <= 1000
+
+** Solution
+
+#+begin_src python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+class Solution:
+    def maxPathSum(self, root: Optional[TreeNode]) -> int:
+        if root is None: return float('-inf')
+        
+        self.max_sum = root.val
+        self.dfs(root)
+        return self.max_sum
+
+    def dfs(self, node):
+        if node is None: return float('-inf')
+
+        left_sum = max(self.dfs(node.left), 0)
+        right_sum = max(self.dfs(node.right), 0)
+        # consider sum of left -> node -> right
+        self.max_sum = max(self.max_sum, left_sum + node.val + right_sum)
+        # allow parent to consider (left|right) -> node -> parent
+        return max(left_sum, right_sum) + node.val
+        
+#+end_src
+
+** Analysis
+
+*** Time complexity
+
+O(n) - We visit each node once doing constant work.
+
+*** Space complexity
+
+O(h), where h == n worst case (skewed tree) for the recursion stack
+
+_Me_:
+
+How does this sound?
+
+_AI_:
+
+Solid write-up — approach, code, and analysis all line up. A couple of
+small things to reflect on:
+
+1. *Dead code check*: the problem guarantees a non-empty tree. What
+   does the =if root is None: return 0= line protect against, and is
+   =0= the right value if it ever did fire? (Hint: think about a tree
+   where all values are negative.)
+
+2. Your "3 possible path sums" list is good, but note entries 2 and 3
+   are the same /shape/ — =left → node → parent= vs =right → node →
+   parent= are both "one child + node, extended upward." Might phrase
+   it as: one through-node path (candidate for global max), and two
+   upward paths (returned to parent). Minor clarity point only.
+
+3. Complexity analysis is correct. 👍
+
+Otherwise the core logic — clamp negatives to 0, update global max at
+the bend, return the better arm — is exactly right and the reasoning
+in your Approach section explains /why/ well. Nice.
+
+Want to tighten the write-up on point 1, or move on?
+
+_Me_:
+
+What would be appropriate for point 1? return float('-inf') instead?
+
+_AI_:
+
+Both work, but consider what the guard is even for:
+
+- The contract guarantees non-empty input, so the branch never
+  runs. Which option matches "the cleanest correct code" here — adding
+  a special-case return value, or removing the guard entirely?
+
+If you want to keep the guard (defensive habit), then yes,
+=float('-inf')= is the right value, since =0= would be a /wrong
+answer/ for e.g. a single-node tree of value =-5=. But then it's
+inconsistent with your =dfs= base case, which also returns =0= for
+=None= — there, =0= is correct because of the clamping, but the two
+=0=s mean different things. Worth being deliberate about which
+convention you pick.
+
+What's your call — drop the guard, or keep it with =-inf=?
+
+_Me_:
+
+Ok, I'll return float('-inf') instead because if we're testing
+multiple trees, then =-inf= is a good indicator of an empty tree.
+
+_AI_:
+
+That works. One nuance worth noting: =-inf= isn't just a convenient
+sentinel — it's semantically correct. The answer is "max path sum,"
+and an empty tree has /no/ paths, so the max over an empty set = =-inf=
+(or, within the constraints, any value < =-1000= would also be
+unreachable as a real answer). That makes the guard principled rather
+than a hack.
+
+One loose end from earlier: your =dfs= still returns =0= for =None=.
+That one stays =0=, right? Quick check — what breaks if you change
+it to =-inf= too?
+
+_Me_:
+
+It should break anything since the calling parent always clamps the
+value to minimum zero
+
+_AI_:
+
+Right — exactly correct. The =max(..., 0)= clamp absorbs =-inf= just
+like it absorbs any negative, so nothing downstream sees a difference.
+
+But notice the load-bearing detail: the clamp is what makes =0= /and/
+=-inf= both safe at the =dfs= base case. Remove the clamp and one of
+them breaks immediately. So the two base cases are coupled to that
+clamp — if you ever refactor, refactor the three together.
+
+Does the final version want =-inf= in both places for symmetry, or keep
+=0= in =dfs= since it's semantically "no contribution"?
+
+_Me_:
+
+Changed both to =-inf=
+
+** Further Discussion
+
+_Me_:
+
+Give me some real world applications of this algorithm
+
+_AI_:
+
+Concise map — the pattern is "tree-shaped data where you want the best
+connected sub-path":
+
+1. /Neuroscience/: max-weight subtree/path in dendritic trees — signal
+   strength through connected branches.
+2. /File systems/: largest-size contiguous chain of directories (files
+   as leaves).
+3. /Phylogenetics/: best-scoring clade/path in an evolutionary tree.
+4. /Org charts / networks/: strongest chain of relationships (sum of
+   edge/node strengths).
+5. /Terrain/hydrology/: best-connected ridge or valley path through a
+   watershed tree.
+
+Common thread: sum of node values, path must be connected, can bend
+once. Anything else look tree-shaped to you?
+

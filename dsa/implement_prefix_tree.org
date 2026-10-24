@@ -1,0 +1,118 @@
+#+TITLE: Implement Trie (Prefix Tree)
+#+DATE: <2026-10-24 Sat 08:09>
+#+FILETAGS: :leetcode:dsa:tree:trie:prefix_tree:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Implement Trie (Prefix Tree)
+
+** Description
+
+A prefix tree (also known as a trie) is a tree data structure used to
+efficiently store and retrieve keys in a set of strings. Some
+applications of this data structure include auto-complete and spell
+checker systems.
+
+Implement the PrefixTree class:
+
+PrefixTree() Initializes the prefix tree object.
+
+void insert(String word) Inserts the string word into the prefix tree.
+
+boolean search(String word) Returns true if the string word is in the
+prefix tree (i.e., was inserted before), and false otherwise.
+
+boolean startsWith(String prefix) Returns true if there is a
+previously inserted string word that has the prefix prefix, and false
+otherwise.
+
+Constraints:
+
+1 <= word.length, prefix.length <= 1000
+word and prefix are made up of lowercase English letters.
+
+** Approach
+
+- Each node consists of two attributes:
+  - children :: a hashmap of characters inserted upto that level with
+    associated child nodes
+  - end_of_word :: a boolean indicating that this node ends a unique
+    word
+
+- Each path down the tree represents a unique prefix    
+
+
+** Solution
+
+#+begin_src python
+class PrefixTreeNode:
+    def __init__(self):
+        self.children = {}
+        self.end_of_word = False
+        
+class PrefixTree:
+
+    def __init__(self):
+        self.root = PrefixTreeNode()
+
+    def insert(self, word: str) -> None:
+        curr = self.root
+        for c in word:
+            if c not in curr.children:
+                curr.children[c] = PrefixTreeNode()
+            curr = curr.children[c]
+        curr.end_of_word = True
+
+    def search(self, word: str) -> bool:
+        curr = self.root
+        for c in word:
+            if c not in curr.children:
+                return False
+            curr = curr.children[c]
+        return curr.end_of_word
+
+    def startsWith(self, prefix: str) -> bool:
+        curr = self.root
+        for c in prefix:
+            if c not in curr.children:
+                return False
+            curr = curr.children[c]
+        return True
+#+end_src
+
+** Analysis
+
+*** Time complexity
+
+O(m) - m is the length of the word for each of insert, search and startsWith
+
+*** Space complexity
+
+_Me_:
+
+How can space complexity be determined?
+
+_AI_:
+*Best case:* high prefix sharing collapses toward O(m) + O(number of
+distinct characters) — e.g., inserting "aa", "aaa", "aaaa" uses only
+~4 nodes.
+
+*Common phrasing:* O(n·m) in worst case, where no two words share a
+prefix.
+
+** Further Discussion
+
+_Me_:
+
+What are real world applications of tries?
+
+_AI_:
+
+- *Autocomplete* — search bars, IDEs, phones predicting next word
+- *Spell checkers* — detect misspellings, suggest corrections
+- *IP routing* — longest prefix match in routers (bits instead of
+  letters)
+- *Dictionary/rhyme lookups* — all words with a given prefix/suffix
+- *T9/predictive text* — map digit sequences to candidate words
+- *Word games* — boggle solvers, find valid words from letters
+- *DNA sequence search* — alphabet of 4 letters, match patterns
+- *URL/path routing* — web frameworks route by path prefix

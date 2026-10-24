@@ -1,0 +1,154 @@
+#+TITLE: Serialize and Deserialize Binary Tree
+#+DATE: <2026-10-24 Sat 06:25>
+#+FILETAGS: :leetcode:dsa:binary_tree:dfs:bfs:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Serialize and Deserialize Binary Tree
+
+** Description
+
+https://leetcode.com/problems/serialize-and-deserialize-binary-tree/description/
+
+** Approach
+
+a) Need a way to traverse all nodes in the tree
+ - To easily reconstruct the tree, we need to access parent nodes
+   before their child nodes. Pre-order dfs and bfs are options here.
+b) Need some way to preserve the structure of the tree
+ - Including the null children of the terminal nodes preserves
+   strucure
+c) Need to encode tree into a string for transmission
+ - We can use the commma separated node values, with N for null
+   placeholders
+
+** Solution
+
+#+begin_src python
+# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+
+class Codec:
+    
+    # Encodes a tree to a single string.
+    def serialize(self, root: Optional[TreeNode]) -> str:
+        tree = []
+        def dfs(node):
+            if node is None:
+                tree.append("n")
+            else:
+                tree.append(str(node.val))
+                dfs(node.left)
+                dfs(node.right)
+        dfs(root)
+        return ",".join(tree)
+        
+    # Decodes your encoded data to tree.
+    def deserialize(self, data: str) -> Optional[TreeNode]:
+        def dfs():
+            nonlocal i
+            if tree[i] == "n":
+                i += 1
+                return None
+            val = int(tree[i])
+            node = TreeNode(val)
+            i += 1
+            node.left = dfs()
+            node.right = dfs()
+            return node
+        
+        tree = data.split(",")
+        i = 0
+        return dfs()
+    
+#+end_src
+
+** Analysis
+
+*** Time complexity
+
+O(n) - we traverse through each node once both serializing and deserializing
+
+*** Space complexity
+
+O(h), h == n worst case (skewed tree) for the recursion stack
+
+_Me_:
+
+How does this sound?
+
+_AI_:
+
+#+begin_reasoning
+The user is asking for feedback on their solution following the Solve It method. I should be concise, socratic, help them reflect. Not dump a full review. Let me give brief assessment and maybe a reflection question.
+
+Their solution looks correct. Pre-order DFS with null markers, comma-separated. Deserialize uses index pointer via nonlocal. Complexity analysis is right (space O(h) for recursion; output string is O(n) but that's the output).
+
+A few things to probe: round-trip property — did they verify serialize(deserialize(x)) == x? Negative values? Multi-digit values handled since they use commas. What about the space complexity — is the recursion stack the dominant space, or the output string? Minor point: =i= referenced before defined in =deserialize= — actually =i = 0= is set after defining =dfs= but before calling it, so fine.
+
+Follow the method: reflect stage. Ask a socratic question to verify. Keep short.
+#+end_reasoning
+
+Solid approach — pre-order + null markers is the canonical trick here,
+and your deserialize consumes tokens in the same order, so the
+round-trip holds. A couple of small reflection prompts:
+
+1. *Verification*: Have you actually run the round-trip
+   =deserialize(serialize(root))= on both examples (including the
+   empty tree)? That's the fast feedback loop worth doing.
+2. *Edge values*: Your comma encoding handles multi-digit and negative
+   values — good. But what breaks if a value itself contained a comma?
+   (Fine for LeetCode ints, worth noting as a design limitation.)
+3. *Space analysis*: is O(h) the /total/ auxiliary space, or just the
+   recursion stack? Where does the token list live in that accounting?
+
+One code-level nit to check: in =deserialize=, =i= is assigned /after/
+=dfs= is defined but /before/ it's called — that works via =nonlocal=,
+but what's the failure mode if someone calls =dfs= before =i = 0=?
+Worth being aware of the ordering dependency.
+
+Overall: I'd call this done once the round-trip test passes. What do
+you think — anything you'd change, or ready to move on?
+
+_Me_:
+
+Space complexity should actually be O(n) as the dominating factor.
+
+_AI_:
+
+Right — good catch. The token list and output string both scale with
+n, so O(n) dominates the O(h) stack. More precise framing:
+
+- /Space/: O(n) total (output/tokens) — O(h) auxiliary for the
+  recursion stack.
+
+One nuance worth keeping straight: when interviewers ask "space
+complexity" they usually mean /auxiliary/ space excluding the output,
+in which case O(h) is the answer to give. But as written ("space
+complexity") O(n) is correct.
+
+** Further Discussion
+
+_Me_:
+
+Give me some real world examples where such a technique is used
+
+_AI_:
+
+A few concrete ones, kept short:
+
+1. /Lisp S-expressions/ — =(1 (2) (3 (4 5)))= is essentially pre-order
+   with explicit nesting instead of null markers. Parsing it
+   reconstructs the tree.
+2. /Git objects/ — each commit references a serialized tree object
+   (directory → blob/tree entries). Git reconstructs the working
+   directory structure by deserializing these.
+3. /JSON/XML DOM/ — nested objects/elements serialize a tree;
+   =null= fields play exactly the role of your ="n"= markers.
+4. /Filesystem paths/ — ="/a/b/c"= is a compact serialization of one
+   root-to-leaf path (partial serialization, reconstructs a trie).
+5. /Database B-trees on disk/ — pages serialize subtrees with key
+   counts/child pointers so the tree survives process restarts.
