@@ -1,0 +1,174 @@
+#+TITLE: Combination Sum
+#+DATE: <2026-10-26 Mon 09:33>
+#+FILETAGS: :leetcode:dsa:backtracking:combinations:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Combination Sum
+
+** Description
+
+https://leetcode.com/problems/combination-sum/description/
+
+** Approach 1
+
+- Use dfs backtracking to enumerate all possible terms that add up to the target
+  - execute two branches recursively:
+    - As many repeating possibilities with the given starting candidate in the list
+    - As many possibilities with the next candidate
+    - base cases:
+      - sum equals target
+      - sum exceeds target or candidate list exhausted
+  - This creates a dfs tree of all possible candidates for the solution
+
+** Solution 1
+
+#+begin_src python
+from typing import List
+
+class Solution:
+    def combinationSum(self, nums: List[int], target: int) -> List[List[int]]:
+        self.results = []
+        self.target = target
+        self.candidates = nums
+        
+        self.dfs(0, [], 0)
+        return self.results
+
+    def dfs(self, start, collection, total):
+        if total == self.target:
+            self.results.append(collection.copy())
+            return
+
+        if total > self.target or start >= len(self.candidates):
+            return
+
+        # repeating branch
+        collection.append(self.candidates[start])
+        self.dfs(start, collection, total + self.candidates[start])
+
+        collection.pop()  # remove repetition
+
+        # advancing branch
+        self.dfs(start + 1, collection, total)
+
+nums = [2,5,6,9]
+target = 9
+
+print(Solution().combinationSum(nums, target)) #  == [[2,2,5],[9]]
+
+nums = [3,4,5]
+target = 16
+
+print(Solution().combinationSum(nums, target)) # == [[3,3,3,3,4],[3,3,5,5],[4,4,4,4],[3,4,4,5]]
+
+nums = [3]
+target = 5
+
+print( Solution().combinationSum(nums, target)) #  == []
+#+end_src
+
+#+RESULTS:
+: [[2, 2, 5], [9]]
+: [[3, 3, 3, 3, 4], [3, 3, 5, 5], [3, 4, 4, 5], [4, 4, 4, 4]]
+: []
+#+end_src
+
+** Approach 2
+
+- sort candidates in ascending order
+- Use dfs backtracking to enumerate all possible terms that add up to the target
+  - In this case, do recursive dfs only for the repeating branch
+  - Advancing will be done in a for loop with early stopping when
+    adding a candidate exceeds the target
+
+** Solution 2
+
+#+begin_src python
+from typing import List
+
+class Solution:
+    def combinationSum(self, nums: List[int], target: int) -> List[List[int]]:
+        nums.sort()
+        self.candidates = nums
+        self.target = target
+        self.results = []
+
+        self.dfs(0, [], 0)
+
+        return self.results
+
+    def dfs(self, start, collection, total):
+        if total == self.target:
+            self.results.append(collection.copy())
+            return
+
+        for i in range(start, len(self.candidates)):
+            # advance from start
+            if total + self.candidates[i] > self.target:
+                # adding current and all subsequent candidates exceeds target
+                return
+
+            # repeats for candidates[i]
+            collection.append(self.candidates[i])
+            self.dfs(i, collection, total + self.candidates[i])
+            collection.pop()
+
+nums = [2,5,6,9]
+target = 9
+
+print(Solution().combinationSum(nums, target)) #  == [[2,2,5],[9]]
+
+nums = [3,4,5]
+target = 16
+
+print(Solution().combinationSum(nums, target)) # == [[3,3,3,3,4],[3,3,5,5],[4,4,4,4],[3,4,4,5]]
+
+nums = [3]
+target = 5
+
+print( Solution().combinationSum(nums, target)) #  == []
+#+end_src
+
+#+RESULTS:
+: [[2, 2, 5], [9]]
+: [[3, 3, 3, 3, 4], [3, 3, 5, 5], [3, 4, 4, 5], [4, 4, 4, 4]]
+: []
+#+end_src
+
+
+** Analysis
+
+Given n = len(candidates), t = len(candidates) and m is min(candidates)
+
+*** Space complexity
+
+O(t/m) - recursion stack
+
+*** Time complexity
+
+O(2^{t/n}) - two branches (repeating, advancing) for a depth of upto t/n
+
+O(n * 2^{t/n}) - Overall for all candidates
+
+** Further Discussion
+
+_Me_:
+
+What are some real world uses of this approach?
+
+_AI_:
+
+- *Change-making* — cash registers, ATMs: which coin/bill
+  denominations sum to a given amount.
+- *Payment splitting* — reaching an exact invoice total from a set of
+  fixed voucher/denomination values.
+- *Packaging/filling* — combining standard box/barrel/pallet sizes to
+  fill an order of a specific weight or volume.
+- *Pharmacy dosing* — combining available pill strengths to hit an
+  exact prescribed dose (with tight safety constraints).
+- *Chemistry* — assembling molecular fragments or isotopes whose
+  masses sum to a target.
+- *Scheduling* — packing unlimited task durations into an
+  exactly-sized time window.
+- *Subset-sum–based cryptography* — knapsack-style problems underlie
+  certain (mostly historical) public-key schemes.

@@ -1,0 +1,156 @@
+#+TITLE: Word Search II
+#+DATE: <2026-10-26 Mon 06:01>
+#+FILETAGS: :leetcode:dsa:trie:prefix_tree:backtracking:dfs:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Word Search II
+
+** Description
+
+https://neetcode.io/problems/search-for-word-ii/question
+
+** Solution
+
+#+begin_src python
+from typing import List
+
+
+class TrieNode:
+    def __init__(self):
+        self.children = {}
+        self.word_index = -1
+        self.refs = 0
+
+    def add(self, word, index):
+        curr = self
+        for c in word:
+            if c not in curr.children:
+                curr.children[c] = TrieNode()
+            curr = curr.children[c]
+            curr.refs += 1
+        curr.word_index = index
+
+
+class Solution:
+    def findWords(self, board: List[List[str]], words: List[str]) -> List[str]:
+        root = TrieNode()
+
+        for i, word in enumerate(words):
+            root.add(word, i)
+
+        self.found_words = []
+        self.search_words = words
+        self.board = board
+        
+        self.rows, self.cols = len(board), len(board[0])
+
+        for i in range(self.rows):
+            for j in range(self.cols):
+                root.refs -= self.dfs(i, j, root)
+
+        return self.found_words
+
+    def dfs(self, row, col, parent):
+        num_found = 0
+        
+        out_of_bounds = not 0 <= row < self.rows or not 0 <= col < self.cols
+        if out_of_bounds:
+            return num_found
+
+        visited = self.board[row][col] == "*"
+        no_path = self.board[row][col] not in parent.children
+
+        if visited or no_path:
+            return num_found
+
+        char = self.board[row][col]
+        node = parent.children[char]
+
+        # check if word identified
+        if node.word_index != -1:
+            # word found
+            self.found_words.append(self.search_words[node.word_index])
+            num_found += 1
+            node.word_index = -1
+
+        # recursively search neighbours for words
+        self.board[row][col] = "*"
+
+        for r, c in [(row-1, col), (row, col+1), (row+1, col), (row, col-1)]:
+            num_found += self.dfs(r, c, node)
+
+        # reset state after search
+        self.board[row][col] = char
+        
+        node.refs -= num_found
+        if node.refs == 0:
+            # no further words through this node
+            del parent.children[char]
+
+        return num_found
+#+end_src
+
+#+RESULTS:
+
+
+#+begin_src python :results value
+board = [
+  ["a","b","c","d"],
+  ["s","a","a","t"],
+  ["a","c","k","e"],
+  ["a","c","d","n"]
+]
+
+words = ["bat","cat","back","backend","stack"]
+
+Solution().findWords(board, words)
+#+end_src
+
+#+RESULTS:
+| back | backend | cat |
+
+** Analysis
+
+*** Time complexity
+
+Given m words of length n and x, y the dimensions of the board:
+
+Time complexity of adding words to trie: O(mn)
+
+Time complexity of searching a single board location: O(3^{n}) - 3
+possible direction for each branch
+
+Overall time complexity: O(xy * 3^{n} + mn)
+
+*** Space complexity
+
+We use additional space for the trie, this becomes O(mn).
+The recursion stack is bound at word length, O(n)
+
+Overall space complexity: O(mn + n)
+
+
+** Further Discussion
+
+_Me_:
+
+What are real world uses of such an algorithm?
+
+_AI_:
+
+Good reflection question — worth separating the /algorithm's
+components/ from the /grid-search shape/, since each has its own
+applications.
+
+*Grid + trie word search specifically:*
+- Word games: Boggle/Scrabble solvers, word-puzzle generators (the
+  canonical use case)
+- Crossword/word-search puzzle validation and generation
+- Pattern spotting in 2D data: e.g., finding nucleotide/amino-acid
+  "words" in a 2D representation of sequence data
+
+*Trie + backtracking search more broadly:*
+- Autocomplete / dictionary lookup (the trie's prefix pruning is the
+  reusable idea)
+- Route/T9-style keypad word prediction
+- IP routing tables (tries over bit strings)
