@@ -1,0 +1,156 @@
+#+TITLE: Find Median From Data Stream
+#+DATE: <2026-10-27 Tue 13:08>
+#+FILETAGS: :leetcode:dsa:heap:priority_queue:two_pointers:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Find Median From Data Stream
+
+** Description
+
+
+** Approach
+
+- Use a min heap and max heap to track values split by median
+  - max heap for smaller values, min heap for larger ones
+- Calculate mean by using the min and max values from max heap and min
+  heap respectively
+
+** Solution
+
+#+begin_src python
+import heapq
+
+class MedianFinder:
+
+    def __init__(self):
+        self.small, self.large = [], []
+
+    def addNum(self, num: int) -> None:
+        if not self.large or num > self.top_largeheap():
+            self.push_largeheap(num)
+        else:
+            self.push_smallheap(num)
+
+        # rebalance
+        diff = len(self.large) - len(self.small)
+        if diff > 1:
+            # rebalance from largeheap
+            top = self.pop_largeheap()
+            self.push_smallheap(top)
+        elif diff < -1:
+            # small heap is too large
+            top  = self.pop_smallheap()
+            self.push_largeheap(top)
+
+    def findMedian(self) -> float:
+        # return the middle value if odd numbered so far..
+        diff = len(self.large) - len(self.small)
+        if diff == 1:
+            return self.top_largeheap()
+        elif diff == -1:
+            return self.top_smallheap()
+        # even numbered, return mean of middle values
+        return (self.top_largeheap() + self.top_smallheap()) / 2
+
+    # helper functions
+    def push_largeheap(self, value):
+        """add a value to largeheap"""
+        heapq.heappush(self.large, value)
+
+    def top_largeheap(self):
+        return self.large[0]
+
+    def pop_largeheap(self):
+        return heapq.heappop(self.large)
+
+    def push_smallheap(self, value):
+        """add a value to smallheap"""
+        heapq.heappush(self.small, -value)
+
+    def top_smallheap(self):
+        return -1 * self.small[0]
+
+    def pop_smallheap(self):
+        return -1 * heapq.heappop(self.small)
+    
+#+end_src
+
+** Analysis
+
+Given n additions and m median requests
+
+*** Time complexity
+
+O(n log n) for additions
+O(m) for m median requests
+
+*** Space complexity
+
+O(n) space used for the heap
+
+_Me_:
+
+How does this sound?
+
+_AI_:
+
+Sounds solid overall. Structure of the two-heap split is right, and
+the code matches your stated approach.
+
+A couple of reflective notes before moving on:
+
+1. *The key invariant to convince yourself of*: =max(small) <=
+   min(large)=. Your routing condition (=num > top_large= → large,
+   else small) is what maintains it. Can you articulate /why/ that
+   comparison is sufficient — including after the rebalance moves? If
+   yes, correctness follows almost immediately.
+
+2. *Edge cases worth a quick trace* (this is cheap and builds
+   confidence):
+   - single element → =findMedian= returns it
+   - duplicates equal to =top_large= (they route to =small= — does the
+     invariant still hold?)
+   - strictly increasing stream, e.g. =1,2,3,4,5= — does rebalancing
+     kick in correctly each time?
+
+3. *Complexity*: =findMedian= is O(1) per call, not O(m) — O(m) is the
+   total for m calls. Worth tightening that wording.
+
+** Further Discussion
+
+_Me_:
+
+What are some real world usecases for such an approach?
+
+_AI_:
+
+Good question — the pattern generalizes to "maintain an order
+statistic on a live stream." Some concrete cases:
+
+- /Latency / response-time monitoring/: track p50 (median) of request
+  durations continuously as requests arrive. Median is more robust to
+  outliers than mean, so it better represents "typical" latency.
+
+- /Sensor readings / IoT/: temperature, heart rate, etc. — you want
+  the current median of recent readings to smooth noise.
+
+- /Financial tick data/: rolling median of trade prices or spreads,
+  where you care about the middle of the distribution rather than the
+  mean (which high-frequency spikes distort).
+
+- /Anomaly detection/: if a new value deviates strongly from the
+  running median (say, relative to the interquartile range), flag it.
+  Median + IQR is a classic outlier test.
+
+- /Load balancing / autoscaling/: median CPU or memory across servers
+  gives a robust "typical load" signal to scale on.
+
+/Reflection prompt/: notice all these share one thing in common — the
+reason for choosing median over mean. What is it? And can you think of
+a case where the /mean/ would actually be the right thing to track
+live, and this structure would be the wrong tool?
+
+One more angle: this exact "two-heap" trick appears inside larger
+algorithms too — e.g., median-of-arrays selection problems, or
+adaptive thresholds in streaming joins. Recognizing the pattern is
+more valuable than memorizing this one class.
