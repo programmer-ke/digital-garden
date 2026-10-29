@@ -1,0 +1,175 @@
+#+TITLE: Course Schedule
+#+DATE: <2026-10-29 Thu 05:34>
+#+FILETAGS: :leetcode:dsa:topological_sort:graphs:dfs:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Course Schedule
+
+** Description
+
+https://neetcode.io/problems/course-schedule/question
+
+** Approach 1
+
+- use an adjacency list to map courses to their depencencies
+- use dfs to determine whether a course can be completed without
+  circular depencencies
+
+** Solution 1
+
+#+begin_src python
+from typing import List
+
+class Solution:
+    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+        self.deps = {}
+        for course, dep in prerequisites:
+            if course not in self.deps:
+                self.deps[course] = [dep]
+            else:
+                self.deps[course].append(dep)
+        self.visited = set()
+        for course in range(numCourses):
+            if not self.satisified(course):
+                return False
+        return True
+
+    def satisified(self, course):
+        if course not in self.deps:
+            # has no deps, satisified
+            return True
+        if course in self.visited:
+            # cycle detected in search path
+            return False
+
+        self.visited.add(course)
+
+        for dep in self.deps[course]:
+            if not self.satisified(dep):
+                return False
+
+        self.visited.remove(course)
+        del self.deps[course]  # all dependencies satisified
+        return True
+
+numCourses, prerequisites = 2, [[0,1]]
+
+assert Solution().canFinish(numCourses, prerequisites)
+#+end_src
+
+#+RESULTS:
+
+** Approach 2
+
+- use topological sort:
+  - create a frequency map of dependants for each course
+  - create an adjacency list mapping each course to its dependencies
+  - use a queue to process courses without dependants until there's none left
+  - if all courses processed, then there are no cycles  
+
+** Solution 2
+
+#+begin_src python
+from collections import deque
+
+class Solution:
+    def canFinish(self, numCourses: int, prerequisites: List[List[int]]) -> bool:
+
+        num_dependants = [0] * numCourses
+        deps = [[] for _ in range(numCourses)]
+
+        for course, dep in prerequisites:
+            num_dependants[dep] += 1
+            deps[course].append(dep)
+
+        # add courses with no dependants to queue
+        q = deque([])
+        for c in range(numCourses):
+            if num_dependants[c] == 0:
+                q.append(c)
+
+        # process courses via bfs
+        finished = 0
+        while q:
+            c = q.popleft()
+            finished += 1
+
+            # update dependencies
+            for dep in deps[c]:
+                num_dependants[dep] -= 1
+                if num_dependants[dep] == 0:
+                    q.append(dep)
+
+        return finished == numCourses
+
+numCourses, prerequisites = 2, [[0,1]]
+
+assert Solution().canFinish(numCourses, prerequisites)
+#+end_src
+
+#+RESULTS:
+
+** Analysis
+
+Given N nodes and E edges:
+
+*** Time complexity
+
+Since we traverse all nodes and edges - O(N + E)
+
+*** Space complexity
+
+We store all nodes and their edges - O(N + E)
+
+_Me_:
+
+How does this sound?
+
+_AI_:
+
+Both look correct to me — I traced the two examples plus a couple of chains/diamonds and they behave.
+
+A few things to reflect on:
+
+*Solution 1*
+- Typo: =satisified= → =satisfied=
+- Watch the recursion depth: with =numCourses <= 1000=, a long
+  dependency chain can exceed Python's default recursion limit
+  (~1000). Have you thought about how you'd handle that?
+- The =visited= set is really the current /path/ (add before, remove
+  after) — good, that's exactly what's needed for cycle detection. The
+  =del self.deps[course]= memoization is a nice touch.
+
+*Solution 2*
+- =deps[course].append(dep)= works for both branches — the =if not
+  deps[course]= special case is redundant.
+- Socratic nudge here: what order do the courses come out of your
+  queue in Example 1? You process =0= then =1=, but a valid /take/
+  order is =1= then =0=. Why does the algorithm still give the right
+  yes/no answer?
+
+*Analysis* — agree, O(N + E) for both.
+
+** Further Discussion
+
+_Me_:
+
+What are some real world applications of this?
+
+_AI_:
+
+Topological sort shows up whenever there's a dependency ordering
+problem:
+
+- *Build systems* — Make/Bazel compiling targets in dependency order;
+  detecting circular includes/imports
+- *Package managers* — npm/pip/apt resolving install order; failing on
+  circular dependencies
+- *Course prerequisites* — literally this problem, also degree
+  planning tools
+- *Task scheduling* — CI/CD pipelines, cron jobs, workflow engines
+  (Airflow) where tasks have ordering constraints
+- *Spreadsheets* — detecting circular cell references (=A1=B1+1,
+  B1=A1+1=)
+- *Linkers* — resolving symbol dependencies between modules
+- *Database queries* — join ordering, view dependency resolution

@@ -1,0 +1,114 @@
+#+TITLE: Pacific Atlantic Water Flow
+#+DATE: <2026-10-28 Wed 14:54>
+#+FILETAGS: :leetcode:dsa:graphs:dfs:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Pacific Atlantic Water Flow
+
+** Description
+
+https://leetcode.com/problems/pacific-atlantic-water-flow/description/
+
+** Approach
+
+- Starting from each edge, use dfs to mark all cells reachable
+  (i.e. height does not decrease)
+  - use two sets for pacific and atlantic edges
+- Afterwards, return the cells that belong in both sets
+
+** Solution
+
+#+begin_src python
+class Solution:
+    def pacificAtlantic(self, heights: List[List[int]]) -> List[List[int]]:
+        pac, atl = set(), set()
+
+        self.heights = heights
+        self.n_rows, self.n_cols = len(heights), len(heights[0])
+        last_row, last_col = self.n_rows - 1, self.n_cols - 1
+
+        for col in range(self.n_cols):
+            self.dfs(0, col, heights[0][col], pac)
+            self.dfs(last_row, col, heights[last_row][col], atl)
+
+        for row in range(self.n_rows):
+            self.dfs(row, 0, heights[row][0], pac)
+            self.dfs(row, last_col, heights[row][last_col], atl)
+
+        # return intersection of the two sets as the result
+        return list(atl & pac)
+
+    def dfs(self, row, column, prev_height, visited):
+        if (not (0 <= row < self.n_rows and 0 <= column < self.n_cols) or
+            (row, column) in visited or
+            self.heights[row][column] < prev_height):
+            return
+
+        visited.add((row, column))
+
+        # for each direction, recursive search
+        for r, c in [(row + 1, column), (row - 1 , column), (row, column + 1), (row, column - 1)]:
+            self.dfs(r, c, self.heights[row][column], visited)
+        
+        
+#+end_src
+
+** Analysis
+
+Given an m * n  board,
+
+*** Time complexity
+
+Visiting cells from each edge, collecting visited ones - O(m * n)
+
+Overall time complexity - O(m * n)
+
+*** Space complexity
+
+Collecting visited nodes - O(m * n)
+
+DFS recursion stack (worst case) - O(m * n)
+
+Overall space complexity - O(m * n)
+
+_Me_:
+
+How does this sound?
+
+_AI_:
+
+Your approach is the right one — working /backwards/ from the oceans
+is the key insight, and the two-set intersection cleanly answers the
+"both oceans" requirement. The code looks correct to me, and the
+complexity analysis is right.
+
+** Further Discussion
+
+_Me_:
+
+What are real world applications of this approach?
+
+_AI_:
+
+A few that come to mind:
+
+- *Hydrology / watershed analysis* — the direct analogue: which
+  regions drain into which river basin or reservoir. Real terrain
+  models work exactly this way.
+- *Network reachability* — e.g. which machines can reach /both/ of
+  two data centers, or which routers can reach multiple uplinks. Same
+  reverse-BFS/DFS from the "sinks."
+- *Supply chain / logistics* — which suppliers can serve both a
+  northern and a southern distribution region given routing
+  constraints.
+- *Disease / rumor spreading* — reversed: which nodes can reach two
+  different "outbreak" populations through non-decreasing
+  transmission paths.
+- *Game level design* — flood-fill reachability from multiple goals
+  to find cells solvable for more than one objective.
+
+The general pattern is *multi-source reverse reachability with an
+intersection*, which shows up whenever you ask "what can reach /all/
+of these destinations?" instead of "what can reach /any/?"
+
+

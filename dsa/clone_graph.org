@@ -1,0 +1,114 @@
+#+TITLE: Clone Graph
+#+DATE: <2026-10-28 Wed 13:01>
+#+FILETAGS: :leetcode:dsa:graph:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Clone Graph
+
+** Description
+
+https://neetcode.io/problems/clone-graph/question
+
+** Approach
+
+- use a hashmap to track clones
+- use bfs traverse the graph and create edges (set a node's
+  neighbours)
+
+** Solution
+
+#+begin_src python
+"""
+# Definition for a Node.
+class Node:
+    def __init__(self, val = 0, neighbors = None):
+        self.val = val
+        self.neighbors = neighbors if neighbors is not None else []
+"""
+from collections import deque
+
+class Solution:
+    def cloneGraph(self, node: Optional['Node']) -> Optional['Node']:
+        if not node:
+            return None
+        clones = {}
+        clones[node] = Node(node.val)
+        q = deque([node])
+        while q:
+            curr = q.popleft()
+            for n in curr.neighbors:
+                if n not in clones:
+                    clones[n] = Node(n.val)
+                    q.append(n)
+                clones[curr].neighbors.append(clones[n])
+
+        return clones[node]
+#+end_src
+
+** Analysis
+
+*** Time complexity
+
+We visit each node once and each edge twice
+
+Time complexity is O(n + e), n is number of nodes and e number of edges
+
+*** Space complexity
+
+clones map stores n nodes and queue worst case will also store n nodes
+
+Space complexity is O(n)
+
+_Me_:
+
+How does this sound?
+
+_AI_:
+
+Looks solid. Quick review:
+
+*Correctness* ✅
+- Every edge is processed twice (once from each endpoint), so each
+  clone gets its full neighbor list. No duplicate edges to worry
+  about.
+- The append is outside the =if= — which is exactly right; otherwise
+  edges to already-cloned nodes would be missed.
+- =None= guard covers the empty graph.
+
+*Analysis* ✅
+- O(n + e) time and O(n) space match the implementation.
+
+
+** Further Discussion
+_Me_:
+
+What are the uses of this approach in real world problems?
+
+_AI_:
+
+The core pattern — /traverse a structure while maintaining an old→new
+mapping/ — shows up everywhere:
+
+/Real uses:/
+1. /Deep copy / serialization/ — copying object graphs with shared
+   references (e.g., copying a document DOM, a scene graph in a game
+   engine, or an in-memory circuit/netlist).
+2. /Version control / snapshotting/ — duplicating a data structure
+   with pointer aliasing without duplicating unrelated subtrees.
+3. /Distributed systems/ — replicating a topology (cluster/node graph)
+   to another region; each node gets a new identity but the same
+   connectivity.
+4. /Immutable data structure updates/ — "copy-on-write" path copying
+   in persistent trees/graphs (Clojure, Git objects, databases).
+5. /Undo/redo & transactions/ — snapshot a working graph, mutate the
+   clone, swap it in atomically.
+
+/Reusable idea:/ Any problem that says "clone/replicate a structure
+with cycles or shared references" reduces to =map = old→new= +
+BFS/DFS, regardless of whether the structure is a graph, tree with
+parent pointers, or a linked list with random pointers (LeetCode 138
+is the same problem).
+
+/What's the same in all these cases?/ The thing that forces the
+hashmap — cycles or shared references — is exactly what breaks naive
+recursive copying. Any other structure where you've hit this?
