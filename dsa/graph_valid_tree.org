@@ -1,0 +1,107 @@
+#+TITLE: Graph Valid Tree
+#+DATE: <2026-10-29 Thu 11:44>
+#+FILETAGS: :leetcode:dsa:graphs:valid_tree:bfs:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Graph Valid Tree
+
+** Description
+
+https://neetcode.io/problems/count-connected-components/question
+
+** Approach
+
+- use adjacency list to display undirected graph
+- use bfs to traverse graph from root. If no loop detected (using
+  a visited set), and all nodes visited, then it is a tree
+    
+
+** Solution
+
+#+begin_src python
+from typing import List
+from collections import deque
+
+class Solution:
+    def validTree(self, n: int, edges: List[List[int]]) -> bool:
+        if len(edges) > n - 1:
+            # more edges that needed indicating loops
+            return False
+
+        adj = [[] for _ in range(n)]
+
+        for l, r in edges:
+            adj[l].append(r)
+            adj[r].append(l)
+
+        visited = {0}
+        q = deque([(0, -1)])
+        while q:
+            node, parent = q.popleft()
+
+            # add neighbour to the q
+            for nb in adj[node]:
+                # skip nb if parent
+                if nb == parent:
+                    continue
+                if nb in visited:
+                    # loop detected
+                    return False
+                visited.add(nb)
+                q.append((nb, node))
+           
+        # all nodes traversed from root
+        return len(visited) == n
+
+
+n = 5; edges = [[0,1],[0,2],[0,3],[1,4]]
+assert Solution().validTree(n, edges)
+
+n = 5; edges = [[0,1],[1,2],[2,0],[3,4]]
+assert not Solution().validTree(n, edges)
+#+end_src
+
+#+RESULTS:
+
+** Analysis
+
+Given N as nodes and E as edges:
+
+*** Time complexity
+
+We visit all the nodes and check the edges - O(N + E)
+
+*** Space complexity
+
+The adjacency list and the queue need - O(N + E)
+
+** Further Discussion
+
+_Me_:
+
+What are the real world uses of this approach?
+
+_AI_:
+
+A few places where "is this a tree?" matters:
+
+- *Network topology*: detecting loops in Ethernet/BGP networks — a
+  broadcast storm means your links form a cycle, not a tree/spanning
+  tree (STP/RSTP protocols do exactly this).
+- *Build systems / package managers*: dependency graphs must be
+  acyclic — a cycle means an unbuildable project (make, npm, cargo all
+  detect this).
+- *Version control*: Git's commit graph is a DAG; =git log=
+  merges/merges-vs-rebase change the shape. Detecting a cycle in
+  commit ancestry would indicate corruption.
+- *Cluster membership / leader election*: nodes broadcasting "who is
+  my parent" — a cycle means a partition or bug.
+- *Filesystems*: hard links can create cycles (why =rm -rf= needs
+  visited tracking), symlinks definitely do.
+
+Notice a common thread: in each case, the "edges" arrive over time,
+and you want an /incremental/ check, not a full re-traversal.
+
+What would change in your algorithm if edges were added one at a time
+and you needed to answer after each insertion? (Hint: think about
+Union-Find.)
