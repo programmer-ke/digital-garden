@@ -1,9 +1,73 @@
 #+TITLE: Blog Posts
 
+- [[file:dsa/graph_valid_tree.org][Graph Valid Tree]]
+  #+html: <p class='pubdate'>by krm on Oct 29, 2026 11:44</p>
+- [[file:dsa/course_schedule_expanded.org][Course Schedule]]
+  #+html: <p class='pubdate'>by krm on Oct 29, 2026 05:34</p>
+- [[file:dsa/pacific_atlantic_water_flow.org][Pacific Atlantic Water Flow]]
+  #+html: <p class='pubdate'>by krm on Oct 28, 2026 14:54</p>
+- [[file:dsa/clone_graph.org][Clone Graph]]
+  #+html: <p class='pubdate'>by krm on Oct 28, 2026 13:01</p>
+- [[file:dsa/median_from_data_stream.org][Find Median From Data Stream]]
+  #+html: <p class='pubdate'>by krm on Oct 27, 2026 13:08</p>
+- [[file:dsa/word_search.org][word search]]
+  #+html: <p class='pubdate'>by krm on Oct 27, 2026 11:32</p>
+- [[file:dsa/combination_sum.org][Combination Sum]]
+  #+html: <p class='pubdate'>by krm on Oct 26, 2026 09:33</p>
+- [[file:dsa/word_search_ii.org][Word Search II]]
+  #+html: <p class='pubdate'>by krm on Oct 26, 2026 06:01</p>
+- [[file:dsa/design_add_and_search_word_data_structure.org][Design Add and Search Word Data Structure]]
+  #+html: <p class='pubdate'>by krm on Oct 24, 2026 12:12</p>
+- [[file:dsa/implement_prefix_tree.org][Implement Trie (Prefix Tree)]]
+  #+html: <p class='pubdate'>by krm on Oct 24, 2026 08:09</p>
+- [[file:dsa/serialize_and_deserialize_binary_tree.org][Serialize and Deserialize Binary Tree]]
+  #+html: <p class='pubdate'>by krm on Oct 24, 2026 06:25</p>
+- [[file:dsa/binary_tree_max_sum_path.org][Binary Tree Maximum Sum Path]]
+  #+html: <p class='pubdate'>by krm on Oct 23, 2026 15:53</p>
+- [[file:debian.org][Debian]]
+  #+html: <p class='pubdate'>by krm on Oct 05, 2026 12:54</p>
+- [[file:dsa/construct_binary_tree_from_preorder_and_inorder_traversal.org][Construct Binary Tree from Preorder and Inorder Traversal]]
+  #+html: <p class='pubdate'>by krm on Sep 24, 2026 04:09</p>
+- [[file:dsa/kth_smallest_element_bst.org][Kth Smallest Element in a Binary Search Tree]]
+  #+html: <p class='pubdate'>by krm on Aug 22, 2026 08:38</p>
+- [[file:design_webhook.org][design webhook]]
+  #+html: <p class='pubdate'>by krm on Aug 21, 2026 11:24</p>
+- [[file:system_design_notes.org][system design notes]]
+  #+html: <p class='pubdate'>by krm on Aug 21, 2026 10:34</p>
+- [[file:design_url_shortener.org][design url shortener]]
+  #+html: <p class='pubdate'>by krm on Aug 21, 2026 10:16</p>
+- [[file:dsa/valid_binary_search_tree.org][Valid Binary Search Tree]]
+  #+html: <p class='pubdate'>by krm on Aug 20, 2026 09:35</p>
+- [[file:dsa/prompt.org][prompt]]
+  #+html: <p class='pubdate'>by krm on Aug 19, 2026 11:47</p>
+- [[file:dsa/lowest_common_ancestor_bst.org][Lowest Common Ancestor in Binary Search Tree]]
+  #+html: <p class='pubdate'>by krm on Aug 17, 2026 06:59</p>
+- [[file:dsa/subtree_of_another_tree.org][Subtree of Another Tree]]
+  #+html: <p class='pubdate'>by krm on Aug 17, 2026 05:55</p>
+- [[file:dsa/maximum_depth_binary_tree.org][Maximum Depth of Binary Tree]]
+  #+html: <p class='pubdate'>by krm on Aug 14, 2026 10:43</p>
+- [[file:dsa/same_tree.org][Same Binary Tree]]
+  #+html: <p class='pubdate'>by krm on Aug 14, 2026 09:33</p>
+- [[file:dsa/invert_binary_tree.org][Invert Binary Tree]]
+  #+html: <p class='pubdate'>by krm on Aug 14, 2026 09:33</p>
+- [[file:design_online_judge.org][design online judge]]
+  #+html: <p class='pubdate'>by krm on Aug 13, 2026 09:46</p>
+- [[file:fluent-python.org][fluent python]]
+  #+html: <p class='pubdate'>by krm on Aug 12, 2026 13:11</p>
+- [[file:dsa/merge_k_sorted_linkedlists.org][Merge K Sorted Linked Lists]]
+  #+html: <p class='pubdate'>by krm on Aug 12, 2026 05:48</p>
+- [[file:dsa/reorder_linked_list.org][Reorder Linked List]]
+  #+html: <p class='pubdate'>by krm on Aug 08, 2026 08:31</p>
+- [[file:css.org][css]]
+  #+html: <p class='pubdate'>by krm on Aug 06, 2026 13:12</p>
+- [[file:dsa/merge_two_sorted_linkedlists.org][Merge 2 Sorted Linkedlists]]
+  #+html: <p class='pubdate'>by krm on Aug 06, 2026 05:14</p>
+- [[file:dsa/reverse_a_linked_list.org][Reverse a Linked List]]
+  #+html: <p class='pubdate'>by krm on Aug 06, 2026 02:59</p>
+- [[file:dsa/search_rotated_sorted_array.org][Search in Rotated Sorted Array]]
+  #+html: <p class='pubdate'>by krm on Aug 05, 2026 03:45</p>
 - [[file:dsa/minimum_in_rotated_sorted_array.org][Find Minimum in Rotated Sorted Array]]
   #+html: <p class='pubdate'>by krm on Aug 03, 2026 05:01</p>
-- [[file:system_design_notes.org][system design notes]]
-  #+html: <p class='pubdate'>by krm on Aug 01, 2026 09:07</p>
 - [[file:dsa/minimum_window_substring_dialog.org][Minimum Window Substring]]
   #+html: <p class='pubdate'>by krm on Jul 31, 2026 15:49</p>
 - [[file:blockchain.org][blockchain]]
@@ -14,20 +78,14 @@
   #+html: <p class='pubdate'>by krm on Jul 15, 2026 15:32</p>
 - [[file:dsa/longest_repeating_character_replacement.org][Longest Repeating Character Replacement]]
   #+html: <p class='pubdate'>by krm on Jul 13, 2026 10:28</p>
-- [[file:css.org][css]]
-  #+html: <p class='pubdate'>by krm on Jul 11, 2026 14:30</p>
 - [[file:ecdsa.org][ecdsa]]
   #+html: <p class='pubdate'>by krm on Jul 04, 2026 16:22</p>
 - [[file:foundry.org][foundry]]
-  #+html: <p class='pubdate'>by krm on Jul 04, 2026 16:22</p>
-- [[file:debian.org][Debian]]
   #+html: <p class='pubdate'>by krm on Jul 04, 2026 16:22</p>
 - [[file:dsa/longest_substring_without_repeating_dialog_version.org][Longest Substring Without Repeating Characters]]
   #+html: <p class='pubdate'>by krm on Jul 04, 2026 00:00</p>
 - [[file:testtime.org][Test Time]]
   #+html: <p class='pubdate'>by krm on Jun 22, 2026 16:11</p>
-- [[file:fluent-python.org][fluent python]]
-  #+html: <p class='pubdate'>by krm on Jun 13, 2026 13:22</p>
 - [[file:dsa/best_time_to_buy_sell_stock.org][Best time to buy and sell stock]]
   #+html: <p class='pubdate'>by krm on Jun 13, 2026 00:00</p>
 - [[file:dsa/valid_parentheses.org][Valid Parentheses]]
@@ -38,8 +96,6 @@
   #+html: <p class='pubdate'>by krm on Jun 08, 2026 00:00</p>
 - [[file:dsa/valid_palindrome.org][Valid Palindrome]]
   #+html: <p class='pubdate'>by krm on Jun 06, 2026 00:00</p>
-- [[file:dsa/prompt.org][prompt]]
-  #+html: <p class='pubdate'>by krm on Jun 05, 2026 14:12</p>
 - [[file:dsa/longest_consecutive_sequence.org][Longest Consecutive Sequence]]
   #+html: <p class='pubdate'>by krm on Jun 05, 2026 00:00</p>
 - [[file:dsa/top_k_frequent_elements.org][top k frequent elements]]
@@ -76,8 +132,6 @@
   #+html: <p class='pubdate'>by krm on Oct 20, 2025 16:08</p>
 - [[file:docker.org][docker]]
   #+html: <p class='pubdate'>by krm on Sep 04, 2025 16:13</p>
-- [[file:dsa/word_search.org][word search]]
-  #+html: <p class='pubdate'>by krm on Jul 19, 2025 09:10</p>
 - [[file:ethereum-app-dev.org][ethereum app dev]]
   #+html: <p class='pubdate'>by krm on Jul 17, 2025 14:38</p>
 - [[file:dsa/non_decreasing_array.org][non decreasing array]]

@@ -1,0 +1,122 @@
+#+TITLE: Number of Unconnected Components in an Undirected Graph
+#+DATE: <2026-10-30 Fri 13:17>
+#+FILETAGS: :leetcode:dsa:graphs:union_find:disjoint_set_union:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Number of Unconnected Components in an Undirected Graph
+
+** Description
+
+https://neetcode.io/problems/count-connected-components/question
+
+** Approach
+
+Possible options:
+
+- mark connected nodes using DFS/BFS and count partitions
+- use disjoint set union
+
+Here we shall use a disjoint set union.
+
+** Solution
+
+#+begin_src python
+from typing import List
+
+
+class Solution:
+    def countComponents(self, n: int, edges: List[List[int]]) -> int:
+        dsu = DSU(n)
+        num_partitions = n
+        for l, r in edges:
+            if dsu.union(l, r):
+                num_partitions -= 1
+        return num_partitions
+
+class DSU:
+    def __init__(self, n):
+        self.parent = list(range(n))
+        self.rank = [1] * n
+
+    def union(self, l, r):
+        parent_l = self.find(l)
+        parent_r = self.find(r)
+
+        if parent_l == parent_r:
+            # already joined
+            return False
+
+        # join lower ranked partition to higher ranked one
+        if self.rank[parent_l] > self.rank[parent_r]:
+            self.parent[parent_r] = self.parent[parent_l]
+            self.rank[parent_l] += self.rank[parent_r]
+        else:
+            self.parent[parent_l] = self.parent[parent_r]
+            self.rank[parent_r] += self.rank[parent_l]
+        return True
+
+    def find(self, node):
+        """finds parent of node"""
+        curr = node
+        while curr != self.parent[curr]:
+            # move up tree to find parent
+            # do 'path compression' to flatten tree
+            grand_parent = self.parent[self.parent[curr]]
+            self.parent[curr] = grand_parent
+            curr = self.parent[curr]
+        return curr
+
+# Input:
+n = 5; edges = [[0,1],[1,2],[3,4]]
+
+# Output: 2
+assert Solution().countComponents(n, edges) == 2
+
+# Input:
+n = 5; edges = [[0,1],[1,2],[2,3],[3,4]]
+
+# Output: 1
+assert Solution().countComponents(n, edges) == 1
+#+end_src
+
+#+RESULTS:
+
+By doing path compression and joining the lower ranked partition to
+the higher one, we flatten the tree in a partition so that finding the
+parent of a partition is near constant.
+
+
+** Analysis
+
+Given V nodes and E edges:
+
+*** Time complexity
+
+O(V + E * a(V)) where a(V) is the amortized (near constant) cost of union find
+
+*** Space complexity
+
+O(V)
+
+** Further Discussion
+
+_Me_:
+
+What are some real world application of this?
+
+_AI_:
+
+A few classic ones:
+
+- *Networks / social graphs*: find friend circles, cluster users,
+  detect if two people are connected.
+- *Image processing*: connected-component labeling to find contiguous
+  regions (e.g., blobs in a binary image).
+- *Percolation problems*: does a path exist through a grid (water
+  flowing, conductivity)?
+- *Kruskal's MST*: DSU is the core subroutine to avoid cycles while
+  picking edges.
+- *Circuit / network connectivity*: are two nodes electrically
+  connected? Detect redundant (cycle-forming) links.
+- *Compiler / alias analysis*: merging variables that may refer to the
+  same object.
