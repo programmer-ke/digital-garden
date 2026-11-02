@@ -1,0 +1,266 @@
+#+TITLE: Climbing Stairs
+#+DATE: <2026-11-02 Mon 07:10>
+#+FILETAGS: :leetcode:dsa:dynamic_programming:memoization:recursion:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Climbing Stairs
+
+** Description
+
+You are given an integer n representing the number of steps to reach
+the top of a staircase. You can climb with either 1 or 2 steps at a
+time.
+
+Return the number of distinct ways to climb to the top of the
+staircase.
+
+Example 1:
+
+Input: n = 2
+
+Output: 2
+
+Explanation:
+
+1 + 1 = 2
+2 = 2
+Example 2:
+
+Input: n = 3
+
+Output: 3
+Explanation:
+
+1 + 1 + 1 = 3
+1 + 2 = 3
+2 + 1 = 3
+
+Constraints:
+
+1 <= n <= 45
+
+** Approach 1
+
+- At each step, we can take either one or two steps and do this
+  recursively until we either reach or exceed the last step.
+- This creates a decision tree on which we can do a depth first
+  search to count the paths that lead to the last step
+  
+** Solution 1
+
+#+begin_src python
+class Solution:
+    def climbStairs(self, n: int) -> int:
+        self.N = n
+        return self.dfs(0)
+
+    def dfs(self, current_step):
+        if current_step >= self.N:
+            return current_step == self.N
+        return self.dfs(current_step + 1) + self.dfs(current_step + 2)
+
+
+assert Solution().climbStairs(2) == 2
+assert Solution().climbStairs(3) == 3
+#+end_src
+
+#+RESULTS:
+
+** Analysis 1
+
+*** Time complexity
+
+At each step there are 2 options. For a total of approx n steps,
+time complexity is O(2^{n})
+
+Using memoization to avoid repeated computations, the time
+complexity can be reduced to O(n).
+
+*** Space Complexity
+
+Depth of the recursion stack, which unwinds when we meet or
+exceed the target - O(n)
+
+
+** Approach 2
+
+- Two base cases:
+  - there's 1 way to get to step 1: f(1) = 1
+  - there's 2 ways to get to step 2: f(2) = 2
+- Recursively, to get to step n: f(n) = f(n-1) + f(n-2) e.g. f(3) = f(2) + f(1) = 3
+- This forms a fibonacci sequence: 1, 2, 3, 5, 8 ...
+
+** Solution 2
+
+#+begin_src python
+class Solution:
+    def climbStairs(self, n: int) -> int:
+        current, nxt = 1, 2
+        for _ in range(1, n):  # iterating by no. steps made from step 1
+            current, nxt = nxt, current + nxt
+        return current
+
+assert Solution().climbStairs(2) == 2
+assert Solution().climbStairs(3) == 3
+#+end_src
+
+#+RESULTS:
+
+** Analysis 2
+
+*** Time complexity
+
+- We iterate n-1 times for n steps: O(n)
+
+*** Space complexity
+
+- constant space used by tracking steps: O(1)
+
+_Me_:
+
+How does this sound?
+
+_AI_:
+
+Overall this reads well — clear structure, correct code, and the
+analyses match the solutions. A few small nits:
+
+1. *Analysis 2 says "We iterate n-times"* — the loop =range(1, n)=
+   runs =n - 1= times. The O(n) conclusion is right, but for precision
+   say "n − 1 iterations" or just "we iterate proportionally to n:
+   O(n)".
+
+2. *The comment in Solution 2 is hard to parse*: =# iterating by
+   no. steps made from step 1=. Something like =# walk the fibonacci
+   sequence n-1 times= or =# advance n-1 times from f(1)=1= would be
+   clearer.
+
+3. *Memoization is mentioned but not shown.* Analysis 1 says "Using
+   memoization... time complexity can be reduced to O(n)" — consider
+   either adding a short memoized variant (it bridges nicely into the
+   bottom-up DP of Approach 2) or dropping the mention to keep the
+   post tight.
+
+4. *Approach 2 could connect back to Approach 1 explicitly* — e.g.,
+   note that the DFS decision tree recomputes the same subproblems,
+   and f(n) = f(n−1) + f(n−2) is exactly that recurrence made
+   explicit. That motivates the transition to DP.
+
+5. Tiny wording: in Approach 1, "until we either reach or exceed the
+   last step" is good, but you could add that paths that overshoot are
+   discarded (that's what =current_step == self.N= handles).
+
+Otherwise: examples trace the recurrence nicely (f(3) = f(2) + f(1) =
+3), the fibonacci observation is spot on, and the constraints note (n
+≤ 45, so even the naive O(2ⁿ) is borderline but acceptable) could be
+worth a half-sentence if you want. Good post.
+
+** Further Discussion
+
+_Me_:
+
+Is there a more optimized solution?
+
+_AI_:
+
+Yes — but it depends on whether you care about theoretical or practical speed.
+
+*1. Matrix exponentiation / fast doubling — O(log n) time, O(log n) (or O(1) iterative) space*
+
+The recurrence f(n) = f(n−1) + f(n−2) is linear, so you can exponentiate the transition matrix:
+
+#+begin_src 
+| f(n+1)  f(n)   |   | 1 1 |^n
+| f(n)    f(n-1) | = | 1 0 |
+#+end_src
+
+Using binary exponentiation on the 2×2 matrix gives O(log n). Even better, /fast doubling/ for Fibonacci avoids matrices entirely:
+
+#+begin_src python
+def fib(k):
+    if k == 0: return (0, 1)
+    a, b = fib(k >> 1)           # a = F(m), b = F(m+1), m = k//2
+    c = a * (2*b - a)            # F(2m)
+    d = a*a + b*b                # F(2m+1)
+    return (d, c + d) if k & 1 else (c, d)
+#+end_src
+
+Then answer = fib(n + 1) (with the right offset for your indexing).
+
+*2. Binet's formula — O(1), but fragile*
+
+f(n) = round(φⁿ / √5) with φ = (1+√5)/2. Constant time, but floating-point precision breaks for large n. Fine for n ≤ 45, not a good interview answer in general.
+
+*3. Precomputation — O(1) lookup*
+
+Since 1 ≤ n ≤ 45, a hardcoded table of 45 values is trivially fast and arguably the most "optimized" in practice.
+
+*Is it worth it?*
+
+For this problem, no. O(n) with O(1) space already runs in microseconds; the log-time variants add complexity for negligible gain at n ≤ 45. But knowing fast doubling is valuable when the same recurrence appears with n up to 10¹⁸ — that's where O(n) falls over and O(log n) is required. Worth mentioning in the post as a "going further" note rather than a replacement solution.
+
+_Me_:
+
+What are some real world applications of this?
+
+_AI_:
+
+The recurrence f(n) = f(n−1) + f(n−2) and the "count the ways to reach
+a state" pattern show up everywhere:
+
+/1. Tiling and packing problems/
+
+How many ways to tile a 2×n board with 2×1 dominoes? Or fill an n-unit
+row with 1-unit and 2-unit tiles (your staircase, restated). This
+models:
+- /Manufacturing/cutting stock/: how many ways to cut a length-n rod
+  into pieces of fixed sizes without waste.
+- /Schedule packing/: ways to fill n time slots with 1-hour and 2-hour
+  meetings.
+
+/2. Combinatorics in bioinformatics/
+
+The number of ways a DNA/protein sequence can be segmented or folded
+often follows linear recurrences. Counting independent sets on a path
+graph (non-adjacent selections, e.g., choosing non-conflicting genes
+to express) is exactly Fibonacci.
+
+/3. Probability and gambling/
+
+Classic "gambler's ruin" and "reachability" problems: a frog on a lily
+pad, a robot on a grid, or a random walk reaching step n — counting
+distinct paths is the same decision-tree you built in Approach 1.
+
+/4. Fibonacci itself in nature and systems/
+
+Since your solution 2 is literally Fibonacci:
+- /Phyllotaxis/ (leaf/seed arrangement), pinecone spirals — Fibonacci
+  numbers show up in counts of spirals.
+- /Financial modeling/: Fibonacci retracement levels in technical
+  analysis (dubious statistically, but widely used).
+- /Euclid's algorithm/ runs in O(log n) steps partly because
+  consecutive Fibonacci numbers are its worst case — so fast Fibonacci
+  doubling is used to /analyze/ and /optimize/ GCD-heavy code (e.g.,
+  in cryptography).
+
+/5. Algorithmic building blocks/
+
+- /State-counting DP/ generally: ways to parenthesize expressions
+  (Catalan), decode strings ("A"→"1", "AB"→"12"), climb stairs with
+  arbitrary step sets (generalize 1 or 2 to {1, 3, 5}).
+- /Dynamic Fibonacci in compilers/optimization/: computing large
+  Fibonacci or linear recurrences fast via matrix exponentiation is a
+  textbook demo of fast doubling — the same technique used for fast
+  exponentiation in RSA and polynomial evaluation.
+
+/6. Concrete engineering use/
+
+Any problem of the form "how many ways to cover/partition something
+from smaller sub-covers" — network routing (count distinct
+non-overlapping routes of fixed hop sizes), change-making (count
+combinations of coin denominations), and error-correction codeword
+counting.
+
+The takeaway for a blog post: the staircase is the "hello world" of
+/counting DP/ — the same shape of recurrence, with different story
+dressing, underlies all of the above.

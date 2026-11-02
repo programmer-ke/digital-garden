@@ -1,0 +1,114 @@
+#+TITLE: House Robber
+#+DATE: <2026-11-02 Mon 09:19>
+#+FILETAGS: :leetcode:dsa:dynamic_programming:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* House Robber
+
+** Description
+
+https://neetcode.io/problems/house-robber/question
+
+** Approach
+
+- At each position n we have the option of getting:
+  - loot[n] + loot[n-2]
+  - loot[n-1]
+- track the max of the two options till end of array
+
+- dp[n] = max(nums[n] + dp[n-2], dp[n-1])  
+
+** Solution
+
+#+begin_src python
+from typing import List
+
+
+class Solution:
+    def rob(self, nums: List[int]) -> int:
+        two_back, one_back = 0, 0
+        for loot in nums:
+            one_back, two_back = max(loot + two_back, one_back), one_back
+
+        return one_back
+
+nums = [1,1,3,3]
+
+# Output: 4
+assert Solution().rob(nums) == 4
+
+nums = [2,9,8,3,6]
+
+# Output: 16
+assert Solution().rob(nums) == 16
+#+end_src
+
+#+RESULTS:
+
+** Analysis
+
+*** Time Complexity
+
+Traversing the list once doing constant time work for each element: O(n)
+
+*** Space Complexity
+
+Only need to use a few extra variables for tracking state: O(1)
+
+** Further Discussion
+
+_Me_:
+
+Are there any more optimal solutions?
+
+_AI_:
+
+No — your solution is already optimal at *O(n) time* and *O(1)
+space*. You can't do better because you must at least read every
+element once to know whether to rob it, so O(n) is a lower bound on
+time. And you're already using constant extra space.
+
+A couple of minor notes on code style rather than complexity:
+
+- The =one_back, two_back = max(loot + two_back, one_back), one_back=
+  one-liner works correctly (tuple assignment evaluates the RHS
+  first), but it's a bit dense. Splitting into a temp variable can be
+  clearer:
+
+_Me_:
+
+What are some real world applications of this approach?
+
+_AI_:
+
+The core pattern — /maximize a sum subject to "no two chosen items may
+be adjacent"/ — shows up in several domains:
+
+- *Scheduling / Resource Allocation*: Choose meetings or jobs to
+  maximize value when back-to-back (conflicting) slots can't both be
+  taken.
+
+- *Sensor Placement*: Place sensors along a corridor/road to
+  maximize coverage while adjacent sensors are redundant, so you skip
+  every other candidate location.
+
+- *Server / Cache Selection*: Pick machines to activate to maximize
+  throughput while activating neighbors causes resource contention.
+
+- *Photography / Portfolio Selection*: Choose items along a timeline
+  (e.g., stock trades on consecutive days, portfolio picks per period)
+  where overlapping/nearby selections conflict.
+
+- *Domino / Tiling-style problems*: Any "pick or skip" decision
+  along a sequence — e.g., skipping every other billboard on a highway
+  to maximize revenue while meeting spacing rules.
+
+- *Tree versions (House Robber III)*: Burglar alarm on a tree of
+  rooms — extends the idea to hierarchical layouts (floors in a
+  building, network nodes).
+
+- *Signal Processing*: Selecting sample points to maximize total
+  signal strength when adjacent samples are correlated/redundant.
+
+All of these reduce to the same recurrence: at each step, take
+=value + skip-one-back= or =keep-one-back=.

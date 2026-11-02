@@ -1,0 +1,130 @@
+#+TITLE: Alien Dictionary
+#+DATE: <2026-10-31 Sat 04:39>
+#+FILETAGS: :leetcode:dsa:graphs:topological_sort:dfs:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Alien Dictionary
+
+** Description
+
+https://neetcode.io/problems/foreign-dictionary/question
+
+** Approach
+
+- Use an adjacency list to store graph of character ordering
+  - each character has neighbours that follow it lexicographically
+- Do DFS search to detect loops. If no loops then it is a valid
+  Directed Acyclic Graph
+  - While searching, track the post-order ordering of nodes. When
+    reversed, this will be the lexicographic ordering of characters
+
+** Solution
+
+#+begin_src python
+from typing import List
+
+
+class Solution:
+    def foreignDictionary(self, words: List[str]) -> str:
+        self.graph = {c: set() for word in words for c in word}
+        # add nodes
+        for i in range(len(words) - 1):
+            w1, w2 = words[i], words[i+1]
+            min_length = min(len(w1), len(w2))
+            if w1[:min_length] == w2[:min_length] and len(w1) > len(w2):
+                # incorrect ordering, prefix is greater
+                return ""
+            for j in range(min_length):
+                if w1[j] != w2[j]:
+                    self.graph[w1[j]].add(w2[j])
+                    break
+
+        # detect loops
+        self.ordering = []
+        self.visited_current_path = set()
+        self.visited_global = set()
+        for node in self.graph:
+            if self.loop_detected(node):
+                return ""
+
+        self.ordering.reverse()
+        return "".join(self.ordering)
+
+    def loop_detected(self, node):
+        if node in self.visited_current_path:
+            return True
+        if node in self.visited_global:
+            return False
+
+        self.visited_current_path.add(node)
+
+        for nbr in self.graph[node]:
+            if self.loop_detected(nbr):
+                return True
+
+        self.visited_current_path.remove(node)
+        self.visited_global.add(node)
+        self.ordering.append(node)
+        return False
+
+words = ["z","o"]
+# Output: "zo"
+assert Solution().foreignDictionary(words) == "zo"
+
+
+words = ["hrn","hrf","er","enn","rfnn"]
+print(Solution().foreignDictionary(words))
+# Output: "hernf"
+
+#+end_src
+
+#+RESULTS:
+: hernf
+
+** Analysis
+
+Given m words of length n
+
+*** Time complexity
+
+O(m * n + V + E) given V possible characters and E orderings.
+
+Asymptotically, O(V + E) becomes O(1) (26 chars, 26 * 25 possible edges).
+
+So time complexity is O(m * n)
+
+***  Space complexity
+
+O(V + E) storing the characters and their relationships and the
+recursion stack worst case matches graph size.
+
+** Further Discussion
+
+_Me_:
+
+What are the applications of this in the real world?
+
+_AI_:
+
+Nice place to pause and reflect. The core pattern here is *inferring
+ordering constraints from observed data, then validating/ordering via
+topological sort*. Real-world instances:
+
+- *Build systems & package managers* — =pip=, =npm=, =make=:
+  install/compile dependencies in an order respecting "A requires B
+  first". A cycle = unbuildable project, exactly your loop detection.
+- *Task scheduling* — CI pipelines, course prerequisite chains,
+  manufacturing steps.
+- *Spreadsheet recalculation* — cells form a DAG; evaluate in
+  topological order, flag circular references.
+- *Import/module resolution* — linkers and compilers ordering
+  compilation units.
+- *Historical linguistics & collation* — the literal version of this
+  problem: infer the alphabet order of an ancient script from sorted
+  word lists, or define locale collation rules (e.g. Swedish =z < å=).
+- *Version inference* — deriving a total order of releases from
+  pairwise "A came before B" observations.
+
+Interesting mirror: notice the /cycle detection/ half is arguably the
+more valuable part in practice — a dependency cycle in a build graph
+is a bug report, while any valid topological order just works.
