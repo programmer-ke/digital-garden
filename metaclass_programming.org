@@ -1,0 +1,915 @@
+#+FILETAGS: :python:metaprogramming:metaclasses:
+
+* Exercise 1: Dynamic Class Creation with =type=
+
+Write a function =create_class(name, attrs)= that creates and returns
+a new class at runtime using =type()=. The function should accept a
+class name and a dictionary of attributes (including methods).
+
+** Test
+
+#+begin_src python
+def test_dynamic_class():
+    cls = create_class("Dog", {"sound": lambda self: "woof", "legs": 4})
+    d = cls()
+    assert type(d).__name__ == "Dog"
+    assert d.sound() == "woof"
+    assert d.legs == 4
+#+end_src
+
+** Implementation
+
+#+begin_src python
+def create_class(name, attrs):
+    return type(name, (), attrs)
+#+end_src
+
+* Exercise 2: Custom =__init_subclass__= Registry
+
+Create a base class =Animal= that automatically registers every
+subclass in =Animal.registry= (a list).
+
+** Test
+
+#+begin_src python
+def test_subclass_registry():
+    from ex import Animal
+
+    class Dog(Animal):
+        pass
+
+    class Cat(Animal):
+        pass
+
+    assert Dog in Animal.registry
+    assert Cat in Animal.registry
+    assert len(Animal.registry) == 2
+#+end_src
+
+** Implementation
+
+#+begin_src python
+class Animal:
+    registry = []
+
+    def __init_subclass__(cls, **kwargs):
+        Animal.registry.append(cls)
+#+end_src
+
+* Exercise 3: Class Decorator Adding =get_info=
+
+Write a decorator =@add_get_info= that adds a =get_info()= method to
+any class. =get_info()= should return a dict with the class ="name"=,
+a list of ="methods"= (non-dunder callables), and a dict of
+="attributes"=.
+
+** Test
+
+#+begin_src python
+def test_class_decorator():
+    from ex import add_get_info
+
+    @add_get_info
+    class Foo:
+        x = 1
+
+        def bar(self):
+            return "bar"
+
+    info = Foo().get_info()
+    assert info["name"] == "Foo"
+    assert "bar" in info["methods"]
+    assert info["attributes"]["x"] == 1
+#+end_src
+
+** Implementation
+
+#+begin_src python
+def add_get_info(cls):
+
+    def get_info(self):
+
+        name = type(self).__name__
+        methods, attributes = [], {}
+
+        for k, v in type(self).__dict__.items():
+            if k.startswith("__"):
+                continue
+            if inspect.isfunction(v):
+                methods.append(k)
+            else:
+                attributes[k] = v
+
+        attributes |= vars(self)
+
+        return {"name": name, "methods": methods, "attributes": attributes}
+
+    cls.get_info = get_info
+    return cls
+#+end_src
+
+* Exercise 4: =__init_subclass__= Validation
+
+Create a base class =Versioned= that raises =TypeError= at subclass
+creation time if the subclass does not define a =version= class
+attribute.
+
+** Test
+
+#+begin_src python
+def test_validate_version():
+    from ex import Versioned
+
+    class Good(Versioned):
+        version = "1.0"
+
+    assert Good.version == "1.0"
+
+    with pytest.raises(TypeError):
+
+        class Bad(Versioned):
+            pass
+#+end_src
+
+** Implementation
+
+#+begin_src python
+class Versioned:
+    registry = []
+
+    def __init_subclass__(cls, **kwargs):
+
+        try:
+            version = cls.__dict__["version"]
+        except KeyError as exc:
+            raise TypeError("missing version!") from exc
+        else:
+            Versioned.registry.append((cls.__name__, version))
+#+end_src
+
+* Exercise 5: Metaclass Uppercasing Method Names
+
+Write a metaclass =UpperMeta= that renames every non-dunder method to
+its uppercase form during class creation.
+
+** Test
+
+#+begin_src python
+def test_uppercase_methods():
+    from ex import UpperMeta
+
+    class Foo(metaclass=UpperMeta):
+        def hello(self):
+            return "hi"
+
+    f = Foo()
+    assert f.HELLO() == "hi"
+    assert not hasattr(f, "hello")
+#+end_src
+
+** Implementation
+
+#+begin_src python
+class UpperMeta(type):
+    def __new__(mcs, name, bases, namespace):
+
+        non_dunder_methods = [
+            (k, v)
+            for k, v in namespace.items()
+            if inspect.isfunction(v) and not k.startswith("__")
+        ]
+        for k, v in non_dunder_methods:
+            namespace.pop(k)
+            namespace[k.upper()] = v
+
+        cls = super().__new__(mcs, name, bases, namespace)
+        return cls
+#+end_src
+
+* Exercise 6: =__prepare__= Logging Namespace
+
+Write a metaclass =LoggingMeta= with =__prepare__= that returns a
+custom dict logging every key assigned during class body execution.
+Store the log in =LoggingMeta.log=.
+
+** Test
+
+#+begin_src python
+def test_prepare_logging():
+    from ex import LoggingMeta
+
+    class Foo(metaclass=LoggingMeta):
+        a = 1
+        b = 2
+
+    assert "a" in LoggingMeta.log
+    assert "b" in LoggingMeta.log
+#+end_src
+
+** Implementation
+
+#+begin_src python
+class LoggingMeta(type):
+    @classmethod
+    def __prepare__(metacls, name, bases, **kwargs):
+        return LoggingDict(metacls)
+
+    def __new__(metacls, name, bases, namespace):
+        return super().__new__(metacls, name, bases, dict(namespace))
+
+
+class LoggingDict(UserDict):
+    def __init__(self, metacls):
+        super().__init__()
+        self.__metacls = metacls
+        self.__metacls.log = []
+
+    def __setitem__(self, key, value):
+        self.__metacls.log.append(key)
+        super().__setitem__(key, value)
+#+end_src
+
+* Exercise 7: Typed Descriptor
+
+Write a descriptor =Typed(expected_type)= that validates the type of
+values assigned to the attribute. Raise =TypeError= on mismatch.
+
+** Test
+
+#+begin_src python
+def test_typed_descriptor():
+    from ex import Typed
+
+    class Person:
+        name = Typed(str)
+        age = Typed(int)
+
+    p = Person()
+    p.name = "Alice"
+    p.age = 30
+    assert p.name == "Alice"
+    assert p.age == 30
+
+    with pytest.raises(TypeError):
+        p.age = "thirty"
+
+    with pytest.raises(TypeError):
+        p.name = 123
+#+end_src
+
+** Implementation
+
+#+begin_src python
+class Typed:
+    def __init__(self, type_):
+        self._type = type_
+
+    def __set_name__(self, owner, name):
+        self._storage_name = name
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+        try:
+            return instance.__dict__[self._storage_name]
+        except KeyError as exc:
+            raise AttributeError(f"attribute not set: {self._storage_name}") from exc
+
+    def __set__(self, instance, value):
+        if not isinstance(value, self._type):
+            raise TypeError(f"expected type {self._type}, got {type(value)}")
+        instance.__dict__[self._storage_name] = value
+#+end_src
+
+* Exercise 8: Auto-Property Metaclass
+
+Write a metaclass =PropMeta= that automatically converts every
+attribute named =_x= (single leading underscore) into a property =x=
+(getter/setter) on the class.
+
+** Test
+
+#+begin_src python
+def test_auto_property():
+    from ex import PropMeta
+
+    class Foo(metaclass=PropMeta):
+        _x = 0
+        _y = 1
+
+    f = Foo()
+    assert f.x == 0
+    assert f.y == 1
+    f.x = 42
+    f.y = 21
+    assert f.x == 42
+    assert f.y == 21
+#+end_src
+
+** Implementation
+
+#+begin_src python
+class PropMeta(type):
+    def __new__(metacls, name, bases, namespace):
+        attrs = [k for k in namespace if not k.startswith("__") and k.startswith("_")]
+
+        def create_accessors(key):
+            def fset(self, val):
+                setattr(self, key, val)
+
+            def fget(self):
+                return getattr(self, key)
+
+            return fget, fset
+
+        for k in attrs:
+            namespace[k[1:]] = property(*create_accessors(k))
+
+        return super().__new__(metacls, name, bases, namespace)
+#+end_src
+
+* Exercise 9: MRO Manipulation
+
+Create classes =A=, =B(A)=, =C(A)=, =D(B, C)=. Then write a metaclass
+=MROMeta= that records the MRO of every class it creates into a list
+=MROMeta.log=.
+
+** Test
+
+#+begin_src python
+def test_mro():
+    from ex import MROMeta
+
+    class A:
+        pass
+
+    class B(A):
+        pass
+
+    class C(A):
+        pass
+
+    class D(B, C):
+        pass
+
+    assert D.__mro__ == (D, B, C, A, object)
+
+    class X(metaclass=MROMeta):
+        pass
+
+    assert MROMeta.log[-1] == ["X", "object"]
+#+end_src
+
+** Implementation
+
+#+begin_src python
+class MROMeta(type):
+    def __new__(metacls, name, bases, namespace):
+        cls = super().__new__(metacls, name, bases, namespace)
+        metacls.log = [[c.__name__ for c in klass.__mro__] for klass in bases + (cls,)]
+        return cls
+#+end_src
+
+* Exercise 10: =__getattr__= on Metaclass for Defaults
+
+Write a metaclass =DefaultMeta= with a class-level =_defaults= dict.
+When a missing attribute is accessed on the class, return the default
+value from =_defaults= if present, otherwise raise =AttributeError=.
+
+** Test
+
+#+begin_src python
+def test_class_getattr_default():
+    from ex import DefaultMeta
+
+    class Config(metaclass=DefaultMeta):
+        _defaults = {"debug": False, "port": 8080}
+
+    assert Config.debug is False
+    assert Config.port == 8080
+    with pytest.raises(AttributeError):
+        Config.nonexistent
+#+end_src
+
+** Implementation
+
+#+begin_src python
+class DefaultMeta(type):
+    def __new__(metacls, name, bases, namespace):
+        cls = super().__new__(metacls, name, bases, namespace)
+
+        def get_default(cls, name):
+            try:
+                return cls._defaults[name]
+            except KeyError as exc:
+                raise AttributeError(name) from exc
+
+        metacls.__getattr__ = get_default
+
+        return cls
+#+end_src
+
+* Exercise 11: ORM-like Model
+
+Build a mini-ORM: a =Model= base class with a metaclass =ModelMeta=
+and a =Field= descriptor. The metaclass should collect all =Field=
+instances into =cls._fields=. =Model.create_table()= should return a
+SQL-ish string listing field names.
+
+** Test
+
+#+begin_src python
+def test_orm_model():
+    from ex import Model, Field
+
+    class User(Model):
+        id = Field(int)
+        name = Field(str)
+
+    assert set(User._fields.keys()) == {"id", "name"}
+    assert User._fields["name"].ftype == str
+    table = User.create_table()
+    assert "id" in table
+    assert "name" in table
+#+end_src
+
+** Implementation
+
+#+begin_src python
+class Field:
+    def __init__(self, field_type):
+        self.ftype = field_type
+
+    def __set_name__(self, owner, name):
+        self.storage_name = name
+
+
+class ModelMeta(type):
+    def __init__(cls, name, bases, namespace):
+        super().__init__(name, bases, namespace)
+        cls._fields = {}
+
+        for base in reversed(bases):
+            try:
+                cls._fields |= base._fields
+            except AttributeError:
+                pass
+        cls._fields |= {k: v for k, v in namespace.items() if isinstance(v, Field)}
+
+
+class Model(metaclass=ModelMeta):
+
+    @classmethod
+    def create_table(cls):
+        typed_columns = [(name, field.ftype) for name, field in cls._fields.items()]
+        table_name = cls.__name__.lower()
+        sql_columns = ",\n".join(
+            f"{name} {field_type.__name__}" for name, field_type in typed_columns
+        )
+        return textwrap.dedent(
+            f"""CREATE TABLE {table_name} (
+            {sql_columns}
+        );"""
+        )
+#+end_src
+
+* Exercise 12: Cached Descriptor with =__set_name__=
+
+Implement a =Cached= descriptor base class using =__set_name__= and
+=__get__=. Subclasses override =compute(obj)=. The computed value
+should be cached so =compute= is called only once per instance.
+
+** Test
+
+#+begin_src python
+def test_cached_descriptor():
+    from ex import Cached
+
+    class Expensive(Cached):
+        def compute(self, obj):
+            obj.compute_count = getattr(obj, "compute_count", 0) + 1
+            return 42
+
+    class Foo:
+        val = Expensive()
+
+    f = Foo()
+    assert f.val == 42
+    assert f.val == 42
+    assert f.compute_count == 1
+#+end_src
+
+** Implementation
+
+#+begin_src python
+class Cached:
+    def __set_name__(self, owner, name):
+        self._storage_name = name
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+        value = self.compute(instance)
+        setattr(instance, self._storage_name, value)
+        return value
+
+    def compute(self, obj):
+        raise NotImplementedError()
+#+end_src
+
+* Exercise 13: Class Builder DSL
+
+Implement a =Builder= class that lets you fluently define a new class
+at runtime with =.add_attr(name, value)=, =.add_method(name, func)=,
+and =.build()= which returns the new class.
+
+** Test
+
+#+begin_src python
+def test_class_builder():
+    from ex import Builder
+
+    cls = (
+        Builder("Greeter")
+        .add_attr("prefix", "Hello")
+        .add_method("greet", lambda self, name: f"{self.prefix}, {name}!")
+        .build()
+    )
+    obj = cls()
+    assert obj.greet("World") == "Hello, World!"
+    assert type(obj).__name__ == "Greeter"
+#+end_src
+
+** Implementation
+
+#+begin_src python
+class Builder:
+    def __init__(self, class_name):
+        self.name = class_name
+        self.attrs = {}
+        self.methods = {}
+
+    def add_attr(self, name, value):
+        self.attrs[name] = value
+        return self
+
+    def add_method(self, name, func):
+        self.methods[name] = func
+        return self
+
+    def build(self):
+        namespace = self.attrs | self.methods
+        return type(self.name, (), namespace)
+#+end_src
+
+* Exercise 14: Thread-Safe Singleton
+
+Write a metaclass =SingletonMeta= that ensures only one instance of
+any class using it is created, even under concurrent access.
+
+** Test
+
+#+begin_src python
+def test_singleton():
+    import threading
+    from ex import SingletonMeta
+
+    class DB(metaclass=SingletonMeta):
+        pass
+
+    results = []
+
+    def worker():
+        results.append(DB())
+
+    threads = [threading.Thread(target=worker) for _ in range(20)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    assert all(r is results[0] for r in results)
+#+end_src
+
+** Implementation
+
+#+begin_src python
+class SingletonMeta(type):
+    _instances = {}
+    _lock = threading.Lock()
+
+    def __call__(cls, *args, **kwargs):
+        with cls._lock:
+            if cls not in cls._instances:
+                cls._instances[cls] = super().__call__(*args, **kwargs)
+        return cls._instances[cls]
+#+end_src
+
+* Exercise 15: Proxy with Attribute Forwarding
+
+Write a =Proxy= base class (or metaclass) that wraps an inner object
+and forwards all attribute access to it.
+
+** Test
+
+#+begin_src python
+def test_proxy():
+    from ex import Proxy
+
+    class RealService:
+        def get_data(self):
+            return [1, 2, 3]
+
+        version = "2.0"
+
+    svc = RealService()
+    p = Proxy(svc)
+    assert p.get_data() == [1, 2, 3]
+    assert p.version == "2.0"
+#+end_src
+
+** Implementation
+
+#+begin_src python
+class Proxy:
+    def __init__(self, wrapped):
+        self._wrapped = wrapped
+
+    def __getattr__(self, name):
+        return getattr(self._wrapped, name)
+
+    def __setattr__(self, name, value):
+        if name.startswith("_"):
+            super().__setattr__(name, value)
+        else:
+            setattr(self._wrapped, name, value)
+#+end_src
+
+* Exercise 16: Method Timing Injection via Metaclass
+
+Write a metaclass =TimeMeta= that wraps every non-dunder method to
+track the number of calls in =method.calls=.
+
+** Test
+
+#+begin_src python
+def test_timing_injection():
+    from ex import TimeMeta
+
+    class Worker(metaclass=TimeMeta):
+        def run(self):
+            return "done"
+
+    w = Worker()
+    assert w.run() == "done"
+    w.run()
+    assert Worker.run.calls == 2
+#+end_src
+
+** Implementation
+
+#+begin_src python
+class TimeMeta(type):
+
+    def __init__(cls, name, bases, namespace):
+        super().__init__(name, bases, namespace)
+
+        method_names = {
+            k
+            for k, v in namespace.items()
+            if inspect.isfunction(v) and not k.startswith("__")
+        }
+
+        def custom_getattribute(self, name):
+            attr = super(cls, self).__getattribute__(name)
+            if name in method_names:
+                try:
+                    attr.__func__.calls += 1
+                except AttributeError:
+                    attr.__func__.calls = 1
+            return attr
+
+        cls.__getattribute__ = custom_getattribute
+#+end_src
+
+* Exercise 17: Plugin System
+
+Build a =Plugin= base class with a metaclass that auto-registers
+every subclass into =PluginMeta.registry= (a dict keyed by class
+name), excluding the base itself.
+
+** Test
+
+#+begin_src python
+def test_plugin_system():
+    from ex import Plugin, PluginMeta
+
+    class AuthPlugin(Plugin):
+        pass
+
+    class LogPlugin(Plugin):
+        pass
+
+    assert "AuthPlugin" in PluginMeta.registry
+    assert "LogPlugin" in PluginMeta.registry
+    assert "Plugin" not in PluginMeta.registry
+    assert len(PluginMeta.registry) == 2
+#+end_src
+
+** Implementation
+
+#+begin_src python
+class PluginMeta(type):
+    registry = {}
+
+    def __init__(cls, name, bases, namespace):
+        super().__init__(name, bases, namespace)
+
+        if bases:
+            PluginMeta.registry[name] = cls
+
+
+class Plugin(metaclass=PluginMeta):
+    pass
+#+end_src
+
+* Exercise 18: Immutable / Frozen Instances
+
+Write a =Frozen= base class (with metaclass or =__init_subclass__=)
+where instances become immutable after =__init__= completes. Further
+=setattr= calls should raise =AttributeError=.
+
+** Test
+
+#+begin_src python
+def test_frozen():
+    from ex import Frozen
+
+    class Point(Frozen):
+        def __init__(self, x, y):
+            self.x = x
+            self.y = y
+
+    p = Point(1, 2)
+    assert p.x == 1
+    assert p.y == 2
+
+    with pytest.raises(AttributeError):
+        p.x = 99
+#+end_src
+
+** Implementation
+
+#+begin_src python
+class Frozen:
+    _frozen = False
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+
+        old_init = cls.__init__
+
+        def custom_init(self, *args, **kwargs):
+            old_init(self, *args, **kwargs)
+            self._frozen = True
+
+        cls.__init__ = custom_init
+
+    def __setattr__(self, k, v):
+        if self._frozen:
+            raise AttributeError("Frozen object!")
+        super().__setattr__(k, v)
+#+end_src
+
+* Exercise 19: Custom ABC-like Mechanism
+
+Implement =abstractmethod= (a decorator marking functions) and
+=AbstractMeta= (a metaclass) that prevents instantiation of classes
+with unimplemented abstract methods.
+
+** Test
+
+#+begin_src python
+def test_custom_abc():
+    from ex import AbstractMeta, abstractmethod
+
+    class Base(metaclass=AbstractMeta):
+        @abstractmethod
+        def speak(self): ...
+
+    with pytest.raises(TypeError):
+        Base()
+
+    class Dog(Base):
+        def speak(self):
+            return "woof"
+
+    assert Dog().speak() == "woof"
+#+end_src
+
+** Implementation
+
+#+begin_src python
+class AbstractMeta(type):
+    def __init__(cls, name, bases, namespace):
+        super().__init__(name, bases, namespace)
+
+        cls._abstract_methods = set()
+
+        for k, v in cls.__dict__.items():
+            if getattr(v, "is_abstract", False):
+                cls._abstract_methods.add(k)
+
+        for base in cls.__mro__[1:]:
+            if hasattr(base, "_abstract_methods"):
+                cls._abstract_methods |= base._abstract_methods
+
+    def __call__(cls, *args, **kwargs):
+        for method in cls._abstract_methods:
+            if (func := inspect.getattr_static(cls, method)) and getattr(
+                func, "is_abstract", False
+            ):
+                raise TypeError(f"define concrete method: {method}")
+        return super().__call__(*args, **kwargs)
+
+
+def abstractmethod(func):
+    func.is_abstract = True
+    return func
+#+end_src
+
+* Exercise 20: Serialization Framework
+
+Build a =SerdeModel= base class with a metaclass and =SerdeField=
+descriptor supporting =to_dict()= and =from_dict()=, including
+optional fields (default =None=).
+
+** Test
+
+#+begin_src python
+def test_serializer():
+    from ex import SerdeModel, SerdeField
+
+    class User(SerdeModel):
+        id = SerdeField(int)
+        name = SerdeField(str)
+        email = SerdeField(str, optional=True)
+
+    u = User(id=1, name="Alice", email="a@b.com")
+    d = u.to_dict()
+    assert d == {"id": 1, "name": "Alice", "email": "a@b.com"}
+
+    u2 = User.from_dict(d)
+    assert u2.to_dict() == d
+
+    u3 = User(id=2, name="Bob")
+    d3 = u3.to_dict()
+    assert d3 == {"id": 2, "name": "Bob", "email": None}
+    User.from_dict(d3)
+#+end_src
+
+** Implementation
+
+#+begin_src python
+class SerdeField:
+    def __init__(self, ftype, optional=False):
+        self._ftype = ftype
+        self._optional = optional
+
+    def __set_name__(self, owner, name):
+        self._storage_name = name
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+        try:
+            return instance.__dict__[self._storage_name]
+        except KeyError as exc:
+            if self._optional:
+                return None
+            raise AttributeError(f"missing attribute: {self._storage_name}") from exc
+
+    def __set__(self, instance, value):
+        if not isinstance(value, self._ftype) and not (value is None and self._optional):
+            raise TypeError(f"expected type {self._ftype}, got {type(value)}")
+        instance.__dict__[self._storage_name] = value
+
+
+class SerdeModel:
+
+    def __init__(self, **kwargs):
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
+    def to_dict(self):
+        fields = {}
+        for klass in type(self).__mro__:
+            fields |= {
+                k: v for k, v in vars(klass).items() if isinstance(v, SerdeField)
+            }
+        return {k: getattr(self, k) for k in fields}
+
+    @classmethod
+    def from_dict(cls, d):
+        return cls(**d)
+#+end_src
