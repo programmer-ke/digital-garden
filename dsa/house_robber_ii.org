@@ -1,0 +1,55 @@
+#+TITLE: House Robber II
+#+DATE: <2026-11-04 Wed 04:53>
+#+FILETAGS: :leetcode:dsa:dynamic_programming:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* House Robber II
+
+** Description
+
+https://leetcode.com/problems/house-robber-ii/description/
+
+** Approach
+
+- General rule:
+  - select the maximum of (current value in list + max two back, max one back)
+- However, we need to ensure that the last value and first value are not
+  summed together
+- Solution: pick the max of two iterations, one excluding the first, the other
+  excluding the last
+
+** Solution
+
+#+begin_src python
+from typing import List
+
+
+class Solution:
+    def rob(self, nums: List[int]) -> int:
+        n = len(nums)
+        return max(self.get_max_loot(nums, 0, n-1), self.get_max_loot(nums, 1, n), nums[0])
+
+    def get_max_loot(self, nums, index, end):
+        two_back, one_back = 0, 0
+        while index < end:
+            one_back, two_back = max(nums[index] + two_back, one_back), one_back
+            index += 1
+        return one_back
+            
+nums = [3,4,3]
+
+# Output: 4
+assert Solution().rob(nums) == 4
+
+nums = [2,9,8,3,6]
+# Output: 15
+assert Solution().rob(nums) == 15
+
+#+end_src
+
+#+RESULTS:
+
+
+** Analysis
+
+** Further Discussion
