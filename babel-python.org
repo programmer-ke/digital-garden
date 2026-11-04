@@ -129,33 +129,3 @@ Another plotting example:
 
 #+RESULTS:
 [[file:img/example-plot.png]]
-
-
-# todo: document methods of using virtual environment with org-mode
-
-Chatgpt:
-
-Python virtual environments can be used seamlessly within Org-mode by
-configuring the Emacs environment to use the virtual environment's
-Python executable. This can be done by setting the
-org-babel-python-command variable to the path of the virtual
-environment's Python executable. For example:
-
-python
-
-(setq org-babel-python-command "/path/to/virtualenv/bin/python")
-
-This will ensure that any Python code blocks executed within Org-mode
-are executed within the virtual environment.
-
-Additionally, you can use pyvenv to activate the virtual environment
-within Emacs. This can be done by running M-x pyvenv-workon and
-selecting the virtual environment from the list of available
-environments. This will set the python-shell-interpreter variable to
-the path of the virtual environment's Python executable and allow you
-to interact with the virtual environment's packages and modules within
-Emacs.
-
-Overall, configuring Org-mode and Emacs to use Python virtual
-environments seamlessly involves setting the appropriate variables and
-using pyvenv to activate the virtual environment within Emacs.
