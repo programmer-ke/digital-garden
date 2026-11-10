@@ -309,13 +309,14 @@ Examples: AWS API gateway, Kong, NGINX plus
 - This can help tease out non-functional requirements e.g. DAU, reads
   per sec, writes per sec
 
-*** Verbs -> Use Cases
+**** Verbs -> Use Cases (Functional requirements)
 
 Verbs reveal operations, map them to CRUD operations.
 
 Extract approx 5 use-cases
 
-*** Adjectives -> constraints and add-ons
+
+**** Adjectives -> constraints and add-ons (Non functional requirements)
 
 Adjectives reveal non-functional requirements that require
 architectural decisions. These affect factors such as:
@@ -336,7 +337,7 @@ Examples:
   scaling
 
 
-*** Nouns -> Entities and ownership
+*** Data Model: Nouns -> Entities and ownership
 
 Nouns reveal data models. List entities and their relationships.
 
@@ -351,12 +352,18 @@ the functional requirements/use cases
 
 *** High-level Design
 
-- Start with the basic data flow supporting the use-cases
-- Apply constraints identified in step 2, justifying each one at a time
+- Implement a first cut (basice dataflow supporting the use cases)
+- Add fixes one at a time. Each time specify what is fixed, and what
+  problem remains that leads to the next fix
+  - Use constraints identify earlier to justify each fix
 
 *** Deep Dives
 
 Here, the focus is on specific challenges or edge-cases. Tweak the
 design further based on the suggested scenarios
+
+For each deep dive:
+- specify problem, alternatives considered and solution selected with
+  justification.
 
 

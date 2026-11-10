@@ -1,0 +1,219 @@
+#+TITLE: Coin Change
+#+DATE: <2026-11-10 Tue 15:31>
+#+FILETAGS: :leetcode:dsa:dynamic_programming:dfs:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Coin Change
+
+** Description
+
+https://leetcode.com/problems/coin-change/description/
+
+
+** Approach 1
+
+*** Top down dynamic programming with memoization.
+
+- break down the problem to the minimum number of coins for a given amount
+  required is 1 + the minimum required for (amount - coin), for each coin
+  in the denomination
+
+- this can be modeled as a recursive dfs to find the minimum with each possible
+  denomination
+
+- To prevent repeated recursion, we can cache the minimum for a given amount
+  once it is found.
+
+** Solution 1
+
+#+begin_src python
+from typing import List
+
+
+class Solution:
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        self.coins = coins
+        self.cache = {}
+        self.sentinel = amount + 1
+        num_coins = self.get_min_coins(amount)
+        return -1 if num_coins == self.sentinel else num_coins
+
+    def get_min_coins(self, amount):
+        if amount == 0:
+            return 0
+        if amount in self.cache:
+            return self.cache[amount]
+
+        # get minimum coins for the complement
+        result = self.sentinel
+        for denom in self.coins:
+            if (amount - denom) > -1:
+                result = min(result, 1 + self.get_min_coins(amount - denom))
+
+        self.cache[amount] = result
+        return result
+
+coins = [1,5,10]; amount = 12
+
+# Output: 3
+assert Solution().coinChange(coins, amount) == 3
+
+coins = [2]; amount = 3
+
+# Output: -1
+assert Solution().coinChange(coins, amount) == -1
+
+coins = [1]; amount = 0
+
+# Output: 0
+assert Solution().coinChange(coins, amount) == 0    
+#+end_src
+
+#+RESULTS:
+
+** Analysis 1
+
+Given amount a and number of coins n
+
+*** Time complexity
+
+- O(n * a) - For each coin, we need a steps worst case to determine min coins
+
+*** Space complexity
+
+- O(a) for the cache and dfs recursion depth
+
+** Approach 2
+
+*** Bottom up dynamic programming
+
+- General approach, build up solutions from 0 ... amount
+- if there is a solution for a given amount (a - denomination) , 0 <= a < amount + 1:
+  then the solution for a is 1 + solution of (a - denomination)
+  
+** Solution 2
+
+#+begin_src python
+class Solution:
+    def coinChange(self, coins: List[int], amount: int) -> int:
+        sentinel = amount + 1
+        solutions = [sentinel] * (amount + 1)
+        solutions[0] = 0
+
+        for a in range(1, amount + 1):
+            for denom in coins:
+                if a - denom > -1:
+                    solutions[a] = min(solutions[a], 1 + solutions[a - denom])
+        return -1 if solutions[amount] == sentinel else solutions[amount]
+        
+coins = [1,5,10]; amount = 12
+
+# Output: 3
+assert Solution().coinChange(coins, amount) == 3
+
+coins = [2]; amount = 3
+
+# Output: -1
+assert Solution().coinChange(coins, amount) == -1
+
+coins = [1]; amount = 0
+
+# Output: 0
+assert Solution().coinChange(coins, amount) == 0    
+
+#+end_src
+
+#+RESULTS:
+
+** Analysis 2
+
+*** Time complexity
+
+O(n * a)
+
+*** Space complexity
+
+O(a) for the solutions cache
+
+_Me_:
+
+How does this sound?
+
+_AI_:
+
+Looks good overall! Both solutions are correct and the structure is
+clean. A few small notes:
+
+1. *Recursion depth in Solution 1* — With =amount= up to 10,000 and
+   coins of denomination 1, the DFS can recurse ~10,000 deep,
+   exceeding Python's default recursion limit (~1,000). Either mention
+   this as a practical limitation or add =sys.setrecursionlimit=. The
+   leetcode judge may or may not hit this depending on the test cases.
+
+2. *Time complexity explanation* — "For each coin, we need a steps
+   worst case" is a bit ambiguous. Clearer phrasing: each amount from
+   1 to =a= is computed exactly once, and each computation iterates
+   over =n= coins → O(n × a).
+
+3. *Space complexity for Approach 1* — Worth noting the recursion
+   stack explicitly: O(a) for cache + O(a) for call stack = O(a)
+   total, same as bottom-up.
+
+Otherwise the recurrence, sentinel choice, and memoization strategy
+are all solid. Nice write-up.
+
+
+** Further Discussion
+
+_Me_:
+
+What are some real world applications of this?
+
+_AI_:
+
+Here are a few real-world areas where this problem (minimum number of
+coins to make change) shows up:
+
+1. /Cash registers / vending machines/ — Greedy change-making works
+   for standard currency systems, but not for arbitrary
+   denominations. DP gives the optimal (fewest coins/notes) for any
+   set of denominations, e.g. self-checkout kiosks or ATMs dispensing
+   bills.
+
+2. /Foreign or non-standard currencies/ — Some denomination systems
+   aren't "canonical" (greedy fails), e.g. old British pre-decimal
+   coinage or custom token systems. DP guarantees minimality.
+
+3. /Manufacturing / packaging/ — Determining the fewest combination of
+   standard package sizes (e.g. 1kg, 5kg, 10kg bags) to fulfill an
+   exact order weight — same recurrence, different domain.
+
+4. /Resource allocation/ — Making up a target quantity (time, memory
+   blocks, energy units) from a fixed set of discrete resource chunk
+   sizes with minimum waste/units.
+
+5. /Discount / coupon optimization/ — Reaching an exact discount
+   target using the fewest promotional coupons of fixed values.
+
+6. /Cryptocurrency / token systems/ — Splitting or composing
+   transactions from fixed UTXO or token denominations while
+   minimizing the number of outputs/inputs.
+
+7. /Scheduling / tiling/ — Filling an exact duration or length using a
+   fixed set of block sizes with the fewest blocks (e.g. shift
+   planning, cutting stock problems in simplified form).
+
+8. /Compression and encoding/ — Representing values with a limited set
+   of "symbols" of fixed costs, minimizing symbol count (related to
+   quantization problems).
+
+A common thread: whenever you must hit an exact target using discrete,
+reusable units and want to minimize the number of units, this DP
+applies. The variants differ in constraints — e.g. bounded supply
+(limited coins), minimizing cost instead of count, or
+multi-dimensional targets — but the DP shape is recognizable.
+
+Note the problem you solved assumes /unlimited/ supplies and /unit
+cost per coin/. When denominations are canonical (like most real
+currencies), greedy is faster and simpler; DP is the general tool for
+arbitrary denomination sets.

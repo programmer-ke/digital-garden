@@ -1,0 +1,207 @@
+#+TITLE: Decode Ways
+#+DATE: <2026-11-05 Thu 05:58>
+#+FILETAGS: :leetcode:dsa:dynamic_programming:recursion:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Decode Ways
+
+** Description
+
+https://neetcode.io/problems/decode-ways/question
+
+** Approach 1
+
+Using recursion
+
+- Base case
+  - for a single character that doesn't start with '0', there's a
+    single way to decode
+  - A valid two-character to single letter string adds an additional way to decode
+  - A substring that starts with '0' is invalid so we ignore
+  - starting from the first character, we can recursively determine
+    how many ways they can be decoded
+
+** Solution 1
+
+#+begin_src python
+class Solution:
+    def numDecodings(self, s: str) -> int:
+        self.string = s
+        return self.dfs(0)
+
+    def dfs(self, index):
+
+        if index == len(self.string):
+            return 1
+
+        if self.string[index] == '0':
+            return 0
+
+
+        result = self.dfs(index + 1)
+
+        if (index + 1 < len(self.string) and
+            (self.string[index] == '1' or
+             (self.string[index] == '2' and self.string[index+1] < '7'))):
+            # valid 2 character sequence
+            result += self.dfs(index + 2)
+        return result
+
+s = "12"
+
+# Output: 2
+assert Solution().numDecodings(s) == 2
+
+s = "01"
+
+#Output: 0
+assert Solution().numDecodings(s) == 0
+        
+#+end_src
+
+** Approach 2
+
+Dynamic programming from the bottom up:
+
+- check for valid decoding from the end of the string
+  - use 3 variables to track state:
+    - current
+    - one_back (starts at 1 - end of string)
+    - two_back
+  - if current character is '0', current count is 0
+  - if current character is valid, current count is one_back
+  - if we have two+ trailing character that decode to a valid character, add two_back to current
+  - every iteration, shift one back to two back, current to one back and reset current  
+
+** Solution 2
+
+#+begin_src python
+class Solution:
+    def numDecodings(self, s: str) -> int:
+        one_back = 1
+        current = two_back = 0
+        for i in range(len(s) - 1, -1, -1):
+            if s[i] != '0':
+                current = one_back
+            if i + 1 < len(s) and (s[i] == '1' or s[i] == '2' and s[i+1] < '7'):
+                current += two_back
+            current, one_back, two_back = 0, current, one_back
+        return one_back
+
+s = "12"
+
+# Output: 2
+assert Solution().numDecodings(s) == 2
+
+s = "01"
+
+#Output: 0
+assert Solution().numDecodings(s) == 0
+
+#+end_src
+
+#+RESULTS:
+
+** Analysis
+
+*** Time complexity
+
+Naive dfs - O(2^{n})
+
+Bottom up dynamic programming - O(n)
+
+*** Space complexity
+
+Naive dfs - O(n)
+
+Bottom up dynamic programming O(1)
+
+** Further Discussion
+
+_Me_:
+
+what are some application of this in the real world
+
+_AI_:
+
+Great question! The "decode ways" problem is really about *counting
+the number of ways to segment a sequence under constraints*. That
+pattern shows up in several real-world domains:
+
+*1. Communication & Telecommunications*
+- Early mobile phones mapped digits to letters on the keypad (T9,
+  multi-tap). Given a sequence of keypresses, how many possible
+  words/messages could the user have meant?
+- Error-tolerant parsing of numeric codes transmitted over lossy
+  channels — if a message arrives as digits, how many valid
+  interpretations exist?
+
+*2. Natural Language Processing (tokenization)*
+- Segmenting text written without word boundaries (Chinese, Japanese,
+  Thai). A string like =我爱你= could be segmented =我/爱你= or =我爱/
+  你=. Counting (or enumerating) valid segmentations is the same
+  recursion: consume one "character" or two, if the piece forms a
+  valid word.
+- This is essentially a *word-break / segmentation counting* problem,
+  the linguistic analogue of decode ways.
+
+*3. Parsing & Compilers*
+- Lexing numbers or identifiers where multiple token boundaries are
+  legal. A stream like =123= could tokenize as =1,23= or =12,3= or
+  =1,2,3= depending on grammar rules.
+- Counting valid parse trees of an ambiguous grammar.
+
+*4. Bioinformatics*
+- Parsing sequences of nucleotides into codons and reading frames. A
+  DNA strand can be read in multiple valid frames/segmentations;
+  counting valid readings matters for gene prediction.
+
+*5. Cryptanalysis*
+- Simple substitution ciphers where digits map to letters (A=1...Z=26
+  is /exactly/ this problem). Given ciphertext digits, how many
+  plaintexts are possible? This bounds the search space for decoding
+  intercepted messages.
+
+*6. Financial / ID Systems*
+- Validating and interpreting variable-length numeric identifiers
+  (account numbers, routing codes, part numbers) where the field
+  boundaries aren't fixed — how many valid parse interpretations does
+  a raw digit string admit?
+
+*The unifying idea:* whenever input is a flat sequence but meaning
+requires /segmenting/ it into valid chunks of one or more items, you
+get the same recurrence:
+
+#+begin_example
+ways(i) = ways(i+1)      # take one item
+        + ways(i+2)      # take a valid pair (if allowed)
+#+end_example
+
+And the same optimizations apply everywhere: naive recursion blows up
+exponentially on repeated subproblems, while memoization or bottom-up
+DP collapses it to O(n) time / O(1) space.
+
+The tokenization case is arguably the most impactful — modern NLP
+pipelines (BPE, WordPiece, SentencePiece) are all variants of "how do
+we segment a sequence," though they usually optimize a score rather
+than just count the ways.
+
+#+begin_src python
+# Bonus: the same DP as a word-segmentation counter
+def count_segmentations(s: str, words: set) -> int:
+    n = len(s)
+    dp = [0] * (n + 1)
+    dp[0] = 1
+    for i in range(1, n + 1):
+        for j in range(i):
+            if s[j:i] in words:
+                dp[i] += dp[j]
+    return dp[n]
+
+# "ilike" -> "i/like", "il/ike"(if 'il','ike' in words), ...
+words = {"i", "like", "sam", "sung", "ilike", "samsung"}
+assert count_segmentations("ilike", words) == 2  # "i like", "ilike"
+#+end_src
+
+#+RESULTS:
+
