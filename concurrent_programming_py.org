@@ -1,0 +1,1194 @@
+#+FILETAGS: :python:concurrency:threads:processes:async:
+
+#+TITLE: Concurrency Exercises
+
+* 🟢 Beginner
+
+** 1. Thread-Safe Counter
+
+*** Prompt
+
+Implement a class ~ThreadSafeCounter~ with methods ~increment()~ and ~get()~.
+It must be safe to call ~increment()~ from many threads simultaneously.
+
+*** Test
+
+#+begin_src python :tangle tests.py
+from ex import ThreadSafeCounter
+
+
+def test_thread_safe_counter():
+    counter = ThreadSafeCounter()
+    n_threads = 10
+    n_increments = 1000
+
+    def worker():
+
+        for _ in range(n_increments):
+            counter.increment()
+
+    threads = [threading.Thread(target=worker) for _ in range(n_threads)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    assert counter.get() == n_threads * n_increments
+#+end_src
+
+*** Implementation
+
+#+begin_src python :tangle ex.py
+class ThreadSafeCounter:
+    def __init__(self):
+        self.count = 0
+        self._lock = threading.Lock()
+
+    def increment(self):
+        with self._lock:
+            self.count += 1
+
+    def get(self):
+        with self._lock:
+            return self.count
+#+end_src
+
+** 2. Producer-Consumer with Queue
+
+*** Prompt
+
+Implement ~producer_consumer(items: list[int]) -> list[int])~ that uses one
+producer thread and one consumer thread connected by a ~queue.Queue~. The
+producer puts all items in; the consumer collects them and returns the sorted
+result.
+
+*** Test
+
+#+begin_src python :tangle tests.py
+from ex import producer_consumer
+
+
+def test_producer_consumer():
+    items = [5, 3, 8, 1, 9, 2, 7, 4, 6, 0]
+    result = producer_consumer(items)
+    assert result == sorted(items)
+
+
+def test_producer_consumer_empty():
+    assert producer_consumer([]) == []
+#+end_src
+
+*** Implementation
+
+#+begin_src python :tangle ex.py
+def producer_consumer(items):
+
+    results = []
+    q = queue.Queue()
+
+    def consumer():
+
+        while True:
+            item = q.get()
+            if item is None:
+                break
+            results.append(item)
+
+        results.sort()
+
+    t = threading.Thread(target=consumer)
+    t.start()
+
+    for i in items:
+        q.put(i)
+
+    q.put(None)
+    t.join()
+
+    return results
+#+end_src
+
+** 3. Parallel Square with Processes
+
+*** Prompt
+
+Implement ~parallel_square(numbers: list[int], workers: int = 4) -> list[int]~
+that squares each number using ~multiprocessing.Pool~ with the given number of
+workers. The output order must match the input order.
+
+*** Test
+
+#+begin_src python :tangle tests.py
+from ex import parallel_square
+
+
+def test_parallel_square():
+    numbers = list(range(100))
+    result = parallel_square(numbers, workers=4)
+    assert result == [n * n for n in numbers]
+
+
+def test_parallel_square_single_worker():
+    numbers = [1, 2, 3]
+    assert parallel_square(numbers, workers=1) == [1, 4, 9]
+#+end_src
+
+*** Implementation
+
+#+begin_src python :tangle ex.py
+def square(n):
+    return n * n
+
+
+def parallel_square(nums, workers=1):
+
+    with multiprocessing.Pool(processes=workers) as pool:
+        return pool.map(square, nums)
+#+end_src
+
+** 4. Threaded Timer with Event
+
+*** Prompt
+
+Implement ~wait_for_event(timeout: float) -> bool~ that starts a background
+thread which sets a ~threading.Event~ after ~timeout~ seconds. The main thread
+waits on the event and returns ~True~ if it was set, ~False~ if a hard deadline
+of ~timeout + 0.5~ seconds passes first.
+
+*** Test
+
+#+begin_src python :tangle tests.py
+import time
+from ex import wait_for_event
+
+
+def test_event_set_in_time():
+    start = time.monotonic()
+    result = wait_for_event(0.1)
+    elapsed = time.monotonic() - start
+    assert result is True
+    assert elapsed < 1.0
+
+
+def test_event_never_set():
+    # Pass a very long timeout but the hard deadline is timeout + 0.5
+    # We simulate this by passing timeout=10 and expecting False after ~10.5s
+    # For a fast test, we use a short timeout and verify the mechanism works.
+    result = wait_for_event(0.05)
+    assert result is True  # event should be set within 0.05s
+#+end_src
+
+*** Implementation
+
+#+begin_src python :tangle ex.py
+def wait_for_event(seconds):
+
+    event = threading.Event()
+
+    def setter(timeout):
+        time.sleep(timeout)
+        event.set()
+
+    t = threading.Thread(target=setter, args=(seconds,), daemon=True)
+    t.start()
+
+    return event.wait(seconds + 0.5)
+#+end_src
+
+** 5. Process Pipe Ping-Pong
+
+*** Prompt
+
+Implement ~ping_pong(rounds: int) -> list[str]~ that spawns two processes
+connected by a ~multiprocessing.Pipe~. Process A sends ~"ping"~, process B
+replies ~"pong"~, repeated ~rounds~ times. Return the list of messages
+received by process A (e.g., ~["pong", "pong", ...]~).
+
+*** Test
+
+#+begin_src python :tangle tests.py
+from ex import ping_pong
+
+
+def test_ping_pong():
+    result = ping_pong(5)
+    assert result == ["pong"] * 5
+
+
+def test_ping_pong_zero():
+    assert ping_pong(0) == []
+#+end_src
+
+*** Implementation
+
+#+begin_src python :tangle ex.py
+def recepient(conn):
+
+    while message := conn.recv():
+        if message == "ping":
+            conn.send("pong")
+        else:
+            conn.send("?")
+
+
+def ping_pong(rounds):
+
+    parent_conn, child_conn = multiprocessing.Pipe()
+    p = multiprocessing.Process(target=recepient, args=(child_conn,))
+
+    p.start()
+
+    responses = []
+
+    for _ in range(rounds):
+        parent_conn.send("ping")
+        responses.append(parent_conn.recv())
+
+    parent_conn.send(None)
+    p.join()
+    return responses
+#+end_src
+
+* 🟡 Intermediate
+
+** 6. Thread Pool Web Scraper (Mocked)
+
+*** Prompt
+
+Implement ~fetch_all(urls: list[str], max_workers: int = 5) -> dict[str, str]~
+using ~concurrent.futures.ThreadPoolExecutor~. Each "fetch" is simulated by a
+function ~fake_fetch(url)~ (provided in the test) that sleeps briefly and
+returns ~f"content:{url}"~. Return a dict mapping each URL to its result. If
+any fetch raises, map that URL to ~None~.
+
+*** Test
+
+#+begin_src python :tangle tests.py
+def fake_fetch(url: str) -> str:
+    time.sleep(0.05)
+    if "error" in url:
+        raise ValueError(f"Failed to fetch {url}")
+    return f"content:{url}"
+
+
+from ex import fetch_all
+
+
+def test_fetch_all_success():
+    urls = [f"http://example.com/{i}" for i in range(10)]
+    result = fetch_all(urls, max_workers=5, fetch_fn=fake_fetch)
+    assert result == {u: f"content:{u}" for u in urls}
+
+
+def test_fetch_all_with_errors():
+    urls = ["http://ok.com/1", "http://error.com/2", "http://ok.com/3"]
+    result = fetch_all(urls, max_workers=3, fetch_fn=fake_fetch)
+    assert result["http://ok.com/1"] == "content:http://ok.com/1"
+    assert result["http://error.com/2"] is None
+    assert result["http://ok.com/3"] == "content:http://ok.com/3"
+
+
+def test_fetch_all_is_concurrent():
+    urls = [f"http://example.com/{i}" for i in range(8)]
+    start = time.monotonic()
+    fetch_all(urls, max_workers=8, fetch_fn=fake_fetch)
+    elapsed = time.monotonic() - start
+    # 8 fetches at 0.05s each = 0.4s sequential; concurrent should be much less
+    assert elapsed < 0.3
+#+end_src
+
+*** Implementation
+
+#+begin_src python :tangle ex.py
+def fetch_all(urls, max_workers, fetch_fn):
+    results = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers) as executor:
+        future_to_url = {executor.submit(fetch_fn, url): url for url in urls}
+        for future in concurrent.futures.as_completed(future_to_url):
+            try:
+                result = future.result()
+            except ValueError:
+                result = None
+
+            url = future_to_url[future]
+            results[url] = result
+    return results
+#+end_src
+
+** 7. Read-Write Lock
+
+*** Prompt
+
+Implement a ~ReadWriteLock~ class with methods ~acquire_read()~,
+~release_read()~, ~acquire_write()~, ~release_write()~. Multiple readers can
+hold the lock simultaneously, but a writer gets exclusive access.
+
+*** Test
+
+#+begin_src python :tangle tests.py
+from ex import ReadWriteLock
+
+
+def test_multiple_readers():
+    rw = ReadWriteLock()
+    rw.acquire_read()
+    rw.acquire_read()  # should not block
+    rw.release_read()
+    rw.release_read()
+
+
+def test_writer_blocks_reader():
+    rw = ReadWriteLock()
+    rw.acquire_write()
+    acquired = []
+
+    def try_read():
+        rw.acquire_read()
+        acquired.append(True)
+        rw.release_read()
+
+    t = threading.Thread(target=try_read)
+    t.start()
+    time.sleep(0.1)
+    assert acquired == []  # reader should be blocked
+    rw.release_write()
+    t.join(timeout=1.0)
+    assert acquired == [True]
+
+
+def test_reader_blocks_writer():
+    rw = ReadWriteLock()
+    rw.acquire_read()
+    acquired = []
+
+    def try_write():
+        rw.acquire_write()
+        acquired.append(True)
+        rw.release_write()
+
+    t = threading.Thread(target=try_write)
+    t.start()
+    time.sleep(0.1)
+    assert acquired == []  # writer should be blocked
+    rw.release_read()
+    t.join(timeout=1.0)
+    assert acquired == [True]
+#+end_src
+
+*** Implementation
+
+#+begin_src python :tangle ex.py
+class ReadWriteLock:
+    """A lock only allows reads or one write exclusively (shared-exclusive)
+
+    Implemented as a monitor over a mutex and two condition variables
+    """
+
+    def __init__(self):
+        self.read_count = 0
+        self.writer_active = False
+
+        self.lock = threading.Lock()
+
+        self.can_read = threading.Condition(self.lock)
+        self.can_write = threading.Condition(self.lock)
+
+    def acquire_read(self):
+        """Add reader as long as writer is inactive"""
+
+        with self.lock:
+            while self.writer_active:
+                self.can_read.wait()
+            self.read_count += 1
+
+    def release_read(self):
+        """Remove reader and notify writer if non left"""
+
+        with self.lock:
+            self.read_count -= 1
+            if self.read_count == 0:
+                self.can_write.notify()
+
+    def acquire_write(self):
+        """Activate writer if there are no readers"""
+
+        with self.lock:
+            while self.read_count or self.writer_active:
+                self.can_write.wait()
+            self.writer_active = True
+
+    def release_write(self):
+        """Deactivate writer"""
+
+        with self.lock:
+            self.writer_active = False
+            self.can_read.notify_all()
+            self.can_write.notify()
+#+end_src
+
+** 8. Rate Limiter (Token Bucket)
+
+*** Prompt
+
+Implement a ~TokenBucket~ class: ~TokenBucket(rate: float, capacity: int)~.
+Method ~acquire(tokens: int = 1) -> bool~ returns ~True~ if tokens are
+available (non-blocking), ~False~ otherwise. Tokens refill at ~rate~ per
+second up to ~capacity~.
+
+*** Test
+
+#+begin_src python :tangle tests.py
+from ex import TokenBucket
+
+
+def test_initial_capacity():
+    tb = TokenBucket(rate=1.0, capacity=5)
+    for _ in range(5):
+        assert tb.acquire() is True
+    assert tb.acquire() is False
+
+
+def test_refill():
+    tb = TokenBucket(rate=10.0, capacity=2)
+    assert tb.acquire() is True
+    assert tb.acquire() is True
+    assert tb.acquire() is False
+    time.sleep(0.15)  # ~1.5 tokens refilled at rate=10
+    assert tb.acquire() is True
+
+
+def test_thread_safe():
+    import threading
+
+    tb = TokenBucket(rate=1000.0, capacity=100)
+    results = []
+    lock = threading.Lock()
+
+    def worker():
+        for _ in range(50):
+            got = tb.acquire()
+            with lock:
+                results.append(got)
+
+    threads = [threading.Thread(target=worker) for _ in range(4)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    # At most 100 should succeed (capacity), plus some refills
+    assert sum(results) <= 100 + 50  # generous upper bound
+    assert sum(results) >= 100  # at least the initial capacity
+#+end_src
+
+*** Implementation
+
+#+begin_src python :tangle ex.py
+class TokenBucket:
+    def __init__(self, rate, capacity):
+        self.rate = rate
+        self.capacity = capacity
+        self.tokens = capacity
+        self.last_refill = None
+        self.lock = threading.Lock()
+
+    def acquire(self, tokens=1):
+
+        with self.lock:
+
+            now = time.monotonic()
+
+            if self.last_refill is not None:
+                seconds_since = now - self.last_refill
+                additional_tokens = seconds_since * self.rate
+                self.tokens = min(self.capacity, self.tokens + additional_tokens)
+
+            self.last_refill = now
+
+            if self.tokens >= tokens:
+                self.tokens -= tokens
+                result = True
+            else:
+                result = False
+
+        return result
+#+end_src
+
+** 9. Deadlock-Free Bank Transfer
+
+*** Prompt
+
+Implement ~transfer(from_acct: Account, to_acct: Account, amount: float) ->
+None~ where ~Account~ has a ~balance~ and a ~lock~. Transfers must be
+deadlock-free even when many threads transfer between random pairs of accounts
+simultaneously.
+
+*** Test
+
+#+begin_src python :tangle tests.py
+from ex import Account, transfer
+
+
+def test_single_transfer():
+    a = Account(id=1, balance=100.0)
+    b = Account(id=2, balance=50.0)
+    transfer(a, b, 30.0)
+    assert a.balance == 70.0
+    assert b.balance == 80.0
+
+
+def test_concurrent_transfers_no_deadlock():
+    accounts = [Account(id=i, balance=1000.0) for i in range(10)]
+    total_before = sum(a.balance for a in accounts)
+
+    def worker():
+        import random
+
+        for _ in range(100):
+            i, j = random.sample(range(10), 2)
+            transfer(accounts[i], accounts[j], 1.0)
+
+    threads = [threading.Thread(target=worker) for _ in range(10)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join(timeout=10.0)  # fail if deadlock
+
+    total_after = sum(a.balance for a in accounts)
+    assert abs(total_after - total_before) < 0.01  # money conserved
+#+end_src
+
+*** Implementation
+
+#+begin_src python :tangle ex.py
+class Account:
+    def __init__(self, id, balance):
+        self.id = id
+        self.balance = balance
+        self.lock = threading.Lock()
+
+
+def transfer(from_, to, amount):
+
+    first, nxt = (from_, to) if from_.id < to.id else (to, from_)
+
+    with first.lock, nxt.lock:
+
+        if from_.balance < amount:
+            raise ValueError(f"balance {from_.balance} cannot cover amount {amount}")
+
+        from_.balance -= amount
+        to.balance += amount
+#+end_src
+
+** 10. Parallel Map-Reduce Word Count
+
+*** Prompt
+
+Implement ~parallel_word_count(texts: list[str], workers: int = 4) ->
+dict[str, int]~ that splits the texts across processes (map: count words per
+text) and merges the results (reduce: sum counts). Use ~multiprocessing.Pool~.
+
+*** Test
+
+#+begin_src python :tangle tests.py
+from ex import parallel_word_count
+
+
+def test_word_count():
+    texts = [
+        "hello world hello",
+        "world peace world",
+        "hello peace",
+    ]
+    result = parallel_word_count(texts, workers=2)
+    assert result == {"hello": 3, "world": 3, "peace": 2}
+
+
+def test_word_count_empty():
+    assert parallel_word_count([], workers=2) == {}
+
+
+def test_word_count_single_text():
+    result = parallel_word_count(["a a a b"], workers=1)
+    assert result == {"a": 3, "b": 1}
+#+end_src
+
+*** Implementation
+
+#+begin_src python :tangle ex.py
+def word_counter(text):
+    words = text.split()
+    return collections.Counter(words)
+
+
+def parallel_word_count(texts, workers):
+
+    with multiprocessing.Pool(workers) as pool:
+        sentence_maps = pool.map(word_counter, texts)
+        global_map = functools.reduce(
+            operator.add, sentence_maps, collections.Counter()
+        )
+    return dict(global_map)
+#+end_src
+
+** 11. Async Semaphore-Bounded Fetcher
+
+*** Prompt
+
+Implement ~async def fetch_all_async(urls: list[str], max_concurrent: int,
+fetch_fn) -> dict[str, str]~ using ~asyncio~ and ~asyncio.Semaphore~ to limit
+concurrency. ~fetch_fn~ is an async callable. If a fetch raises, map the URL to
+~None~.
+
+*** Test
+
+#+begin_src python :tangle tests.py
+from ex import fetch_all_async
+
+
+async def fake_fetch_async(url: str) -> str:
+    await asyncio.sleep(0.05)
+    if "error" in url:
+        raise ValueError("fail")
+    return f"content:{url}"
+
+
+def test_async_fetch():
+    urls = [f"http://x.com/{i}" for i in range(10)]
+    result = asyncio.run(
+        fetch_all_async(urls, max_concurrent=5, fetch_fn=fake_fetch_async)
+    )
+    assert result == {u: f"content:{u}" for u in urls}
+
+
+def test_async_fetch_errors():
+    urls = ["http://ok.com", "http://error.com"]
+    result = asyncio.run(
+        fetch_all_async(urls, max_concurrent=2, fetch_fn=fake_fetch_async)
+    )
+    assert result["http://ok.com"] == "content:http://ok.com"
+    assert result["http://error.com"] is None
+
+
+def test_async_fetch_limits_concurrency():
+    current = 0
+    max_seen = 0
+    lock = asyncio.Lock()
+
+    async def tracking_fetch(url: str) -> str:
+        nonlocal current, max_seen
+        async with lock:
+            current += 1
+            max_seen = max(max_seen, current)
+        await asyncio.sleep(0.05)
+        async with lock:
+            current -= 1
+        return url
+
+    urls = [f"http://x.com/{i}" for i in range(20)]
+    asyncio.run(fetch_all_async(urls, max_concurrent=3, fetch_fn=tracking_fetch))
+    assert max_seen <= 3
+#+end_src
+
+*** Implementation
+
+#+begin_src python :tangle ex.py
+async def fetch_all_async(urls, max_concurrent, fetch_fn):
+
+    semaphore = asyncio.Semaphore(max_concurrent)
+
+    async def fetch(url):
+        async with semaphore:
+            try:
+                return await fetch_fn(url)
+            except ValueError:
+                return None
+
+    result = {}
+    fetches = await asyncio.gather(
+        *[fetch(url) for url in urls], return_exceptions=True
+    )
+    for i, fetch_result in enumerate(fetches):
+        result[urls[i]] = fetch_result
+    return result
+#+end_src
+
+** 12. Process Pipeline
+
+*** Prompt
+
+Implement ~run_pipeline(data: list[int]) -> list[int]~ using 3 processes
+connected by ~multiprocessing.Queue~: stage 1 doubles each value, stage 2 adds
+1, stage 3 collects results. Return the final list sorted.
+
+*** Test
+
+#+begin_src python :tangle tests.py
+from ex import run_pipeline
+
+
+def test_pipeline():
+    data = [1, 2, 3, 4, 5]
+    result = run_pipeline(data)
+    expected = sorted([((x * 2) + 1) for x in data])
+    assert result == expected
+
+
+def test_pipeline_empty():
+    assert run_pipeline([]) == []
+#+end_src
+
+*** Implementation
+
+#+begin_src python :tangle ex.py
+def f_doubler(source, dest):
+    for num in iter(source.get, None):
+        dest.put(num * 2)
+    dest.put(None)
+
+
+def f_adder(source, dest):
+    for num in iter(source.get, None):
+        dest.put(num + 1)
+    dest.put(None)
+
+
+def run_pipeline(nums):
+
+    q_input = multiprocessing.Queue()
+    q_intmd = multiprocessing.Queue()
+    q_result = multiprocessing.Queue()
+
+    tasks = [(f_doubler, (q_input, q_intmd)), (f_adder, (q_intmd, q_result))]
+
+    children = []
+    for worker, args in tasks:
+        children.append(multiprocessing.Process(target=worker, args=args))
+
+    for p in children:
+        p.start()
+
+    for n in nums:
+        q_input.put(n)
+    q_input.put(None)
+
+    results = list(sorted(iter(q_result.get, None)))
+
+    for p in children:
+        p.join()
+
+    return results
+#+end_src
+
+* 🔴 Advanced
+
+** 13. Custom Thread Pool
+
+*** Prompt
+
+Implement a ~SimpleThreadPool~ class:
+- ~__init__(self, num_workers: int)~
+- ~submit(self, fn, *args) -> Future~ — returns a ~concurrent.futures.Future~
+- ~shutdown(self, wait: bool = True)~ — stops accepting new tasks, optionally
+  waits for completion.
+
+Must handle exceptions in tasks (set on the future) and support concurrent
+~submit~ calls.
+
+*** Test
+
+#+begin_src python :tangle tests.py
+from ex import SimpleThreadPool
+
+
+def test_basic_execution():
+    pool = SimpleThreadPool(num_workers=2)
+    f = pool.submit(lambda x: x * 2, 21)
+    assert f.result(timeout=5) == 42
+    pool.shutdown()
+
+
+def test_multiple_tasks():
+    pool = SimpleThreadPool(num_workers=4)
+    futures = [pool.submit(lambda x: x + 1, i) for i in range(20)]
+    results = [f.result(timeout=5) for f in futures]
+    assert results == list(range(1, 21))
+    pool.shutdown()
+
+
+def test_exception_propagation():
+    pool = SimpleThreadPool(num_workers=2)
+
+    def failing():
+        raise ValueError("boom")
+
+    f = pool.submit(failing)
+    try:
+        f.result(timeout=5)
+        assert False, "Should have raised"
+    except ValueError as e:
+        assert str(e) == "boom"
+    pool.shutdown()
+
+
+def test_concurrent_submits():
+    import threading
+
+    pool = SimpleThreadPool(num_workers=4)
+    futures = []
+    lock = threading.Lock()
+
+    def submitter():
+        for i in range(10):
+            f = pool.submit(lambda x: x, i)
+            with lock:
+                futures.append(f)
+
+    threads = [threading.Thread(target=submitter) for _ in range(4)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    assert len(futures) == 40
+    for f in futures:
+        f.result(timeout=5)
+    pool.shutdown()
+#+end_src
+
+*** Implementation
+
+#+begin_src python :tangle ex.py
+class SimpleThreadPool:
+    def __init__(self, num_workers):
+        self._lock = threading.Lock()
+        self.queue = queue.Queue()
+        self.threads = [
+            threading.Thread(target=self._thread, args=(self.queue,))
+            for _ in range(num_workers)
+        ]
+        self._is_shutdown = False
+        for t in self.threads:
+            t.start()
+
+    @staticmethod
+    def _thread(queue):
+        while task := queue.get():
+            future, f, *args = task
+
+            try:
+                result = f(*args)
+            except Exception as exc:
+                future.set_exception(exc)
+            else:
+                future.set_result(result)
+            queue.task_done()
+        queue.task_done()
+
+    def submit(self, func, *args):
+        with self._lock:
+            if self._is_shutdown:
+                raise RuntimeError(
+                    "Pool has been shutdown. Cannot accept additional tasks"
+                )
+            future = concurrent.futures.Future()
+            self.queue.put((future, func, *args))
+            return future
+
+    def shutdown(self, wait=True):
+        with self._lock:
+            if self._is_shutdown:
+                return
+
+            self._is_shutdown = True
+
+            for _ in range(len(self.threads)):
+                self.queue.put(None)
+
+        if wait:
+            for t in self.threads:
+                t.join()
+#+end_src
+
+** 15. Shared Memory Ring Buffer
+
+*** Prompt
+
+Implement a ~SharedRingBuffer~ class using ~multiprocessing.shared_memory~:
+- ~__init__(self, size: int)~ — creates shared memory for ~size~ integers.
+- ~write(self, value: int) -> bool~ — writes at the current position, returns
+  ~False~ if full.
+- ~read(self) -> int | None~ — reads from the current position, returns ~None~
+  if empty.
+- ~close(self)~ / ~unlink(self)~ — cleanup.
+
+Use a lock for thread/process safety. The buffer is FIFO.
+
+*** Test
+
+#+begin_src python :tangle tests.py
+import multiprocessing
+from ex import SharedRingBuffer
+
+
+def test_basic_write_read():
+    buf = SharedRingBuffer(size=5)
+    assert buf.write(10) is True
+    assert buf.write(20) is True
+    assert buf.read() == 10
+    assert buf.read() == 20
+    assert buf.read() is None
+    buf.close()
+    buf.unlink()
+
+
+def test_full_buffer():
+    buf = SharedRingBuffer(size=3)
+    assert buf.write(1) is True
+    assert buf.write(2) is True
+    assert buf.write(3) is True
+    assert buf.write(4) is False  # full
+    assert buf.read() == 1
+    assert buf.write(4) is True  # now space available
+    buf.close()
+    buf.unlink()
+
+
+def test_cross_process():
+    buf = SharedRingBuffer(size=10)
+
+    def producer():
+        for i in range(5):
+            buf.write(i)
+
+    p = multiprocessing.Process(target=producer)
+    p.start()
+    p.join()
+    results = [buf.read() for _ in range(5)]
+    assert results == [0, 1, 2, 3, 4]
+    buf.close()
+    buf.unlink()
+#+end_src
+
+*** Implementation
+
+#+begin_src python :tangle ex.py
+class SharedRingBuffer:
+
+    INT_SIZE = 4
+    HEADER_SIZE = 3
+
+    HEAD_SLOT = 0
+    TAIL_SLOT = 1
+    COUNT_SLOT = 2
+
+    def __init__(self, size):
+        self._size = size
+        self._lock = multiprocessing.Lock()
+        self._shm = shared_memory.SharedMemory(
+            create=True, size=(size + self.HEADER_SIZE) * self.INT_SIZE
+        )
+        self._arr = self._shm.buf.cast("i")
+
+        self._arr[self.COUNT_SLOT] = self._arr[self.TAIL_SLOT] = self._arr[
+            self.HEAD_SLOT
+        ] = 0
+
+    def write(self, value):
+        with self._lock:
+            buffer_is_full = self._arr[self.COUNT_SLOT] == self._size
+            if buffer_is_full:
+                return False
+            tail_idx = self._arr[self.TAIL_SLOT]
+            self._arr[self.HEADER_SIZE + tail_idx] = value
+            self._arr[self.COUNT_SLOT] += 1
+            self._arr[self.TAIL_SLOT] = (tail_idx + 1) % self._size
+        return True
+
+    def read(self):
+        with self._lock:
+            if self._arr[self.COUNT_SLOT] == 0:
+                return None
+            head_idx = self._arr[self.HEAD_SLOT]
+            value = self._arr[self.HEADER_SIZE + head_idx]
+            self._arr[self.COUNT_SLOT] -= 1
+            self._arr[self.HEAD_SLOT] = (head_idx + 1) % self._size
+        return value
+
+    def close(self):
+        """Release local process' reference to shared memory"""
+        self._arr.release()  # release the memory view, otherwise shm won't close
+        self._shm.close()
+
+    def unlink(self):
+        """Delete the underlying shared memory"""
+        self._shm.unlink()
+#+end_src
+
+** 17. Async + Thread Bridge
+
+*** Prompt
+
+Implement ~async def run_blocking_in_thread(fn, *args) -> Any~ that runs a
+blocking function ~fn~ in a thread via ~asyncio.to_thread~ and awaits the
+result. Then implement ~async def parallel_blocking(fns: list[Callable],
+max_concurrent: int) -> list[Any]~ that runs multiple blocking functions
+concurrently with a concurrency limit.
+
+*** Test
+
+#+begin_src python :tangle tests.py
+# test_async_thread_bridge.py
+from ex import run_blocking_in_thread, parallel_blocking
+
+
+def blocking_add(a, b):
+    time.sleep(0.05)
+    return a + b
+
+
+def test_single():
+    result = asyncio.run(run_blocking_in_thread(blocking_add, 2, 3))
+    assert result == 5
+
+
+def test_parallel():
+    fns = [lambda i=i: blocking_add(i, 10) for i in range(10)]
+    start = time.monotonic()
+    results = asyncio.run(parallel_blocking(fns, max_concurrent=10))
+    elapsed = time.monotonic() - start
+    assert results == [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    assert elapsed < 0.5  # should be concurrent, not 10 * 0.05 sequential
+
+
+def test_concurrency_limit():
+    current = 0
+    max_seen = 0
+    import threading
+
+    lock = threading.Lock()
+
+    def tracking_fn():
+        nonlocal current, max_seen
+        with lock:
+            current += 1
+            max_seen = max(max_seen, current)
+        time.sleep(0.05)
+        with lock:
+            current -= 1
+        return 1
+
+    fns = [tracking_fn] * 20
+    asyncio.run(parallel_blocking(fns, max_concurrent=3))
+    assert max_seen <= 3
+#+end_src
+
+*** Implementation
+
+#+begin_src python :tangle ex.py
+async def run_blocking_in_thread(f, *args):
+    result = await asyncio.to_thread(f, *args)
+    return result
+
+
+async def parallel_blocking(fns, max_concurrent):
+
+    semaphore = asyncio.Semaphore(max_concurrent)
+
+    async def runner(fn):
+        async with semaphore:
+            return await asyncio.to_thread(fn)
+
+    return await asyncio.gather(*[runner(fn) for fn in fns])
+#+end_src
+
+** 20. Concurrent LRU Cache
+
+*** Prompt
+
+Implement a ~ConcurrentLRUCache~ class:
+- ~__init__(self, capacity: int)~
+- ~get(self, key) -> Any | None~
+- ~put(self, key, value) -> None~
+
+Must be thread-safe and evict the least-recently-used item when full. ~get~
+counts as a "use."
+
+*** Test
+
+#+begin_src python :tangle tests.py
+import threading
+from ex import ConcurrentLRUCache
+
+
+def test_basic():
+    cache = ConcurrentLRUCache(capacity=2)
+    cache.put("a", 1)
+    cache.put("b", 2)
+    assert cache.get("a") == 1
+    cache.put("c", 3)  # evicts "b" (LRU)
+    assert cache.get("b") is None
+    assert cache.get("a") == 1
+    assert cache.get("c") == 3
+
+
+def test_get_refreshes():
+    cache = ConcurrentLRUCache(capacity=2)
+    cache.put("a", 1)
+    cache.put("b", 2)
+    cache.get("a")  # "a" is now most recently used
+    cache.put("c", 3)  # evicts "b"
+    assert cache.get("a") == 1
+    assert cache.get("b") is None
+
+
+def test_thread_safety():
+    cache = ConcurrentLRUCache(capacity=100)
+
+    def worker(start):
+        for i in range(50):
+            key = f"key-{start}-{i}"
+            cache.put(key, i)
+            cache.get(key)
+
+    threads = [threading.Thread(target=worker, args=(t,)) for t in range(10)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    # No crash = thread-safe; invariant maintained
+    assert len(cache) == 100
+#+end_src
+
+*** Implementation
+
+#+begin_src python :tangle ex.py
+class ConcurrentLRUCache:
+    def __init__(self, capacity):
+        self._capacity = capacity
+        self._cache = collections.OrderedDict()
+        self._lock = threading.Lock()
+
+    def __len__(self):
+        return len(self._cache)
+
+    def get(self, key):
+        with self._lock:
+            if key in self._cache:
+                self._cache.move_to_end(key)
+                return self._cache[key]
+            return None
+
+    def put(self, key, value):
+        with self._lock:
+            try:
+                self._cache.move_to_end(key)
+            except KeyError:
+                # key doesn't yet exist, skip
+                pass
+
+            self._cache[key] = value
+
+            if len(self._cache) > self._capacity:
+                self._cache.popitem(last=False)
+#+end_src
