@@ -1170,7 +1170,8 @@ class ConcurrentLRUCache:
         self._lock = threading.Lock()
 
     def __len__(self):
-        return len(self._cache)
+        with self._lock:
+            return len(self._cache)
 
     def get(self, key):
         with self._lock:
