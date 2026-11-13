@@ -1,0 +1,123 @@
+#+TITLE: Word Break
+#+DATE: <2026-11-13 Fri 14:07>
+#+FILETAGS: :leetcode:dsa:dfs:dynamic_programming:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Word Break
+
+** Description
+
+https://leetcode.com/problems/word-break/description/
+
+** Approach 1
+
+*** Top Down DFS
+
+- The key idea: we can successfully segment a string if we can
+  successfully segment it from first index to end of the string with
+  dictionary words (with dfs), trying all possible paths down the dfs tree
+- To avoid repeated checks, once we determine it's possible to
+  segment from a given index, we memoize it.
+
+** Solution 1
+
+#+begin_src python
+from typing import List
+
+
+class Solution:
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        self.memo = {len(s): True}
+        self.s = s
+        self.dictionary = wordDict
+        return self.canSegment(index=0)
+
+    def canSegment(self, index):
+        if index in self.memo:
+            return self.memo[index]
+
+        for w in self.dictionary:
+            if (index + len(w) <= len(self.s) and
+                self.s[index:index + len(w)] == w):
+                if self.canSegment(index + len(w)):
+                    self.memo[index] = True
+                    return True
+        self.memo[index] = False
+        return False
+
+
+s = "neetcode"; wordDict = ["neet","code"]
+
+# Output: true
+assert Solution().wordBreak(s, wordDict)
+
+s = "catsincars"; wordDict = ["cats","cat","sin","in","car"]
+
+# Output: false
+assert not Solution().wordBreak(s, wordDict)        
+#+end_src
+
+#+RESULTS:
+
+** Analysis 1
+
+Given n as length of string s, d as length of dictionary and w as length of longest word
+
+*** Time complexity
+
+0(n * d * w) - Worst case, for each string location, we check that
+each word matches by comparing w characters.
+
+*** Space complexity
+
+O(n) for the cache and recursion stack
+
+** Approach 2
+
+*** Bottom up Dynamic programming
+
+- Work backwards from end of string to determine if possible to segment
+  the suffix
+- Build up to the beginning of the string and return result for first index
+
+** Solution 2
+
+#+begin_src python
+class Solution:
+    def wordBreak(self, s: str, wordDict: List[str]) -> bool:
+        can_segment = [False] * (len(s) + 1)
+        can_segment[len(s)] = True
+        for i in range(len(s) - 1, -1, -1):
+            # match -> end for each word
+            for w in wordDict:
+                 if i + len(w) <= len(s) and s[i:i+len(w)] == w:
+                     if can_segment[i + len(w)]:
+                         can_segment[i] = True
+                         break
+        # traversed to beginning
+        return can_segment[0]
+    
+s = "neetcode"; wordDict = ["neet","code"]
+
+# Output: true
+assert Solution().wordBreak(s, wordDict)
+
+s = "catsincars"; wordDict = ["cats","cat","sin","in","car"]
+
+# Output: false
+assert not Solution().wordBreak(s, wordDict)        
+#+end_src
+
+#+RESULTS:
+
+** Analysis 2
+
+*** Time complexity
+
+O(n * d * w) - similar to first solution
+
+*** Space complexity
+
+O(n) - solutions array for each string position
+
+** Further Discussion
