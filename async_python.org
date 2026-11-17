@@ -1,0 +1,548 @@
+#+FILETAGS: :python:concurrency:async:
+#+TITLE: Asyncio Exercises — Worked Solutions
+#+STARTUP: overview
+
+* Exercise 1: Error Handling in =gather=
+
+** Prompt
+Write a function =run_tasks(tasks: list) -> list= that takes a list of
+coroutines, runs them concurrently with
+=asyncio.gather(return_exceptions=True)=, and returns a list of
+results. If a coroutine raised an exception, the corresponding entry
+in the result list should be the exception instance itself (not
+raised).
+
+** Test
+#+begin_src python :tangle tests.py
+async def ok():
+    return 42
+
+async def boom():
+    raise ValueError("boom")
+
+async def slow_ok():
+    await asyncio.sleep(0.05)
+    return "done"
+
+@pytest.mark.asyncio
+async def test_gather_error_handling():
+    from ex import run_tasks
+
+    results = await run_tasks([ok(), boom(), slow_ok()])
+
+    assert results[0] == 42
+    assert isinstance(results[1], ValueError)
+    assert results[2] == "done"
+#+end_src
+
+** Solution
+#+begin_src python :tangle ex.py
+async def run_tasks(tasks):
+    return await asyncio.gather(*tasks, return_exceptions=True)
+#+end_src
+
+* Exercise 2: Timeouts
+
+** Prompt
+Write a function =run_with_timeout(coro, timeout: float) -> object=
+that awaits the given coroutine with a timeout. If the coroutine does
+not finish within =timeout= seconds, raise =asyncio.TimeoutError=.
+Otherwise, return the coroutine's result.
+
+** Test
+#+begin_src python :tangle tests.py
+async def fast():
+    await asyncio.sleep(0.01)
+    return "fast"
+
+async def slow():
+    await asyncio.sleep(10)
+    return "slow"
+
+@pytest.mark.asyncio
+async def test_timeout_success():
+    from ex import run_with_timeout
+
+    result = await run_with_timeout(fast(), timeout=1.0)
+    assert result == "fast"
+
+@pytest.mark.asyncio
+async def test_timeout_expires():
+    from ex import run_with_timeout
+
+    with pytest.raises(asyncio.TimeoutError):
+        await run_with_timeout(slow(), timeout=0.05)
+#+end_src
+
+** Solution
+#+begin_src python :tangle ex.py
+async def run_with_timeout(coro, timeout):
+    return await asyncio.wait_for(coro, timeout)
+#+end_src
+
+* Exercise 3: Producer–Consumer
+
+** Prompt
+Write two coroutine factories:
+- =producer(queue: asyncio.Queue, items: list)= — puts each item into
+  the queue, then sets an =asyncio.Event= to signal completion.
+- =consumer(queue: asyncio.Queue, done: asyncio.Event) -> list= —
+  reads items from the queue until the =done= event is set *and* the
+  queue is empty. Returns the list of consumed items.
+
+Also write =run_pipeline(items: list) -> list= that wires them
+together and returns the consumed items.
+
+** Test
+#+begin_src python :tangle tests.py
+@pytest.mark.asyncio
+async def test_producer_consumer():
+    from ex import run_pipeline
+
+    items = [1, 2, 3, 4, 5]
+    result = await run_pipeline(items)
+    assert sorted(result) == items
+#+end_src
+
+** Solution
+#+begin_src python :tangle ex.py
+async def producer(queue, items):
+    for i in items:
+        await queue.put(i)
+    await queue.put(None)
+
+
+async def consumer(queue):
+    results = []
+    while item := await queue.get():
+        results.append(item)
+    return results
+
+
+async def run_pipeline(items):
+    queue = asyncio.Queue()
+
+    _, results = await asyncio.gather(producer(queue, items), consumer(queue))
+    return results
+#+end_src
+
+* Exercise 4: Concurrency Limiting
+
+** Prompt
+Write a function =run_with_limit(coros: list, limit: int) -> list= that
+runs all given coroutines concurrently but ensures no more than =limit=
+are running at the same time. Return results in the same order as the
+input.
+
+** Test
+#+begin_src python :tangle tests.py
+active = 0
+max_active = 0
+
+async def tracked(delay=0.05):
+    global active, max_active
+    active += 1
+    max_active = max(max_active, active)
+    await asyncio.sleep(delay)
+    active -= 1
+    return delay
+
+@pytest.mark.asyncio
+async def test_concurrency_limit():
+    global active, max_active
+    active = 0
+    max_active = 0
+
+    from ex import run_with_limit
+
+    coros = [tracked() for _ in range(10)]
+    results = await run_with_limit(coros, limit=3)
+
+    assert len(results) == 10
+    assert max_active <= 3
+#+end_src
+
+** Solution
+#+begin_src python :tangle ex.py
+async def run_with_limit(coros, limit):
+    semaphore = asyncio.Semaphore(limit)
+
+    async def runner(coro):
+        async with semaphore:
+            return await coro
+
+    return await asyncio.gather(*[runner(c) for c in coros])
+#+end_src
+
+* Exercise 5: Coordination Primitives
+
+** Prompt
+Write a function =run_coordinated() -> tuple= that starts two
+coroutines:
+- =setter(event: asyncio.Event)= — sleeps 0.05s, then sets the event.
+- =waiter(event: asyncio.Event) -> str= — waits for the event, then
+  returns ="signaled"=.
+
+Return the result of =waiter= and the time it took (should be ≥ 0.05s).
+
+** Test
+#+begin_src python :tangle tests.py
+@pytest.mark.asyncio
+async def test_coordination():
+    from ex import run_coordinated
+
+    result, elapsed = await run_coordinated()
+    assert result == "signaled"
+    assert elapsed >= 0.04  # allow small margin
+#+end_src
+
+** Solution
+#+begin_src python :tangle ex.py
+async def run_coordinated():
+
+    async def setter(event):
+        await asyncio.sleep(0.05)
+        event.set()
+
+    async def waiter(event):
+        await event.wait()
+        return "signaled"
+
+    event = asyncio.Event()
+
+    start = time.monotonic()
+    _, result = await asyncio.gather(setter(event), waiter(event))
+    end = time.monotonic()
+    return result, end - start
+#+end_src
+
+* Exercise 6: Async Context Manager
+
+** Prompt
+Implement a class =AsyncResource= that acts as an async context
+manager:
+- =__aenter__= — simulates opening a resource (sets =self.open = True=)
+  and returns =self=.
+- =__aexit__= — simulates closing (sets =self.open = False=).
+
+Write a function =use_resource() -> bool= that uses
+=async with AsyncResource() as res= and returns =res.open= inside the
+block.
+
+** Test
+#+begin_src python :tangle tests.py
+@pytest.mark.asyncio
+async def test_async_context_manager():
+    from ex import use_resource, AsyncResource
+
+    inside = await use_resource()
+    assert inside is True
+
+    # Verify resource is closed after use
+    res = AsyncResource()
+    async with res:
+        assert res.open is True
+    assert res.open is False
+#+end_src
+
+** Solution
+#+begin_src python :tangle ex.py
+class AsyncResource:
+    def __init__(self):
+        self.open = False
+
+    async def __aenter__(self):
+        self.open = True
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        self.open = False
+
+
+async def use_resource():
+    async with AsyncResource() as resource:
+        result = resource.open
+
+    return result
+#+end_src
+
+* Exercise 7: Async Iterator
+
+** Prompt
+Implement a class =AsyncCounter= that is an async iterable yielding
+integers from =0= to =n-1=, with a small delay (=asyncio.sleep(0.01)=)
+between yields. Implement =__aiter__= and =__anext__= manually (do
+*not* use =async def= generators).
+
+** Test
+#+begin_src python :tangle tests.py
+@pytest.mark.asyncio
+async def test_async_iterator():
+    from ex import AsyncCounter
+
+    results = []
+    async for val in AsyncCounter(5):
+        results.append(val)
+
+    assert results == [0, 1, 2, 3, 4]
+#+end_src
+
+** Solution
+#+begin_src python :tangle ex.py
+class AsyncCounter:
+    def __init__(self, upto):
+        self._upto = upto
+
+    def __aiter__(self):
+        self._current = 0
+        return self
+
+    async def __anext__(self):
+        if self._current == self._upto:
+            raise StopAsyncIteration
+        await asyncio.sleep(0.01)
+        result = self._current
+        self._current += 1
+        return result
+#+end_src
+
+* Exercise 8: Cancellation & Cleanup
+
+** Prompt
+Write a function =run_cancellable() -> tuple= that:
+1. Starts a task that sleeps for 10 seconds and sets a flag
+   =cleaned_up = False= initially.
+2. Cancels the task after 0.05 seconds.
+3. The task's =finally= block sets =cleaned_up = True=.
+4. Returns =(was_cancelled: bool, cleaned_up: bool)=.
+
+** Test
+#+begin_src python :tangle tests.py
+@pytest.mark.asyncio
+async def test_cancellation_cleanup():
+    from ex import run_cancellable
+
+    was_cancelled, cleaned_up = await run_cancellable()
+    assert was_cancelled is True
+    assert cleaned_up is True
+#+end_src
+
+** Solution
+#+begin_src python :tangle ex.py
+async def run_cancellable():
+    cleaned_up = False
+
+    async def cancellable():
+        try:
+            await asyncio.sleep(10)
+        except asyncio.CancelledError as exc:
+            pass
+        finally:
+            nonlocal cleaned_up
+            cleaned_up = True
+
+    task = asyncio.create_task(cancellable())
+    await asyncio.sleep(0.05)
+    was_cancelled = task.cancel()
+    await task
+    return was_cancelled, cleaned_up
+#+end_src
+
+* Exercise 9: =as_completed= Streaming
+
+** Prompt
+Write a function =collect_in_completion_order(coros: list) -> list= that
+runs all coroutines concurrently and returns their results in the order
+they *complete* (not submission order).
+
+** Test
+#+begin_src python :tangle tests.py
+async def make(delay, value):
+    await asyncio.sleep(delay)
+    return value
+
+@pytest.mark.asyncio
+async def test_as_completed_order():
+    from ex import collect_in_completion_order
+
+    coros = [make(0.10, "slow"), make(0.01, "fast"), make(0.05, "medium")]
+    results = await collect_in_completion_order(coros)
+
+    assert results == ["fast", "medium", "slow"]
+#+end_src
+
+** Solution
+#+begin_src python :tangle ex.py
+async def collect_in_completion_order(coros):
+    return [await coro for coro in asyncio.as_completed(coros)]
+#+end_src
+
+* Exercise 10: Thread + Async Bridge
+
+** Prompt
+Write a function =run_blocking_in_thread() -> str= that calls a
+blocking function =time.sleep(0.1); return "from thread"= using
+=asyncio.to_thread()= (or =loop.run_in_executor=) without blocking the
+event loop. Verify the event loop remains responsive by also running a
+concurrent coroutine that completes during the blocking call.
+
+** Test
+#+begin_src python :tangle tests.py
+@pytest.mark.asyncio
+async def test_thread_bridge():
+    from ex import run_blocking_in_thread
+
+    result, loop_responsive = await run_blocking_in_thread()
+    assert result == "from thread"
+    assert loop_responsive is True
+#+end_src
+
+** Solution
+#+begin_src python :tangle ex.py
+async def run_blocking_in_thread():
+
+    def blocking():
+        time.sleep(0.1)
+        return "from thread"
+
+    async def nonblocking():
+        await asyncio.sleep(0.01)
+        return True
+
+    completed, pending = await asyncio.wait(
+        [
+            asyncio.create_task(asyncio.to_thread(blocking)),
+            asyncio.create_task(nonblocking()),
+        ],
+        return_when=asyncio.FIRST_COMPLETED,
+    )
+
+    # nonblocking completed first
+    coro1, *_ = completed
+    result = await coro1
+    loop_responsive = result is True
+
+    coro2, *_ = pending
+    result = await coro2
+
+    return result, loop_responsive
+#+end_src
+
+* Exercise 11: Rate Limiter
+
+** Prompt
+Implement a class =AsyncRateLimiter= with:
+- =__init__(self, max_calls: int, period: float)= — allows at most
+  =max_calls= per =period= seconds.
+- =async def acquire(self)= — blocks until a slot is available.
+
+Write =run_rate_limited(n: int) -> float= that runs =n= tasks each
+calling =acquire()= and returns the total elapsed time.
+
+** Test
+#+begin_src python :tangle tests.py
+@pytest.mark.asyncio
+async def test_rate_limiter():
+    from ex import run_rate_limited
+
+    # 5 calls, max 2 per 0.1s → minimum ~0.2s
+    elapsed = await run_rate_limited(5)
+    assert elapsed >= 0.15  # allow margin
+#+end_src
+
+** Solution
+#+begin_src python :tangle ex.py
+class AsyncRateLimiter:
+    def __init__(self, max_calls, period):
+        self._max_calls = max_calls
+        self._period = period
+        self.q = collections.deque([], self._max_calls)
+        self._lock = asyncio.Lock()
+
+    async def acquire(self):
+        while True:
+            async with self._lock:
+                throttled = (
+                    len(self.q) == self._max_calls
+                    and (time_left := (self.q[-1] + self._period) - time.monotonic())
+                    > 0
+                )
+                if not throttled:
+                    self.q.appendleft(time.monotonic())
+                    return
+            await asyncio.sleep(time_left)
+
+
+async def run_rate_limited(n):
+    rate_limiter = AsyncRateLimiter(2, 0.1)
+    start = time.monotonic()
+    await asyncio.gather(*[rate_limiter.acquire() for _ in range(n)])
+    return time.monotonic() - start
+#+end_src
+
+* Exercise 12: Retry Decorator for Coroutines
+
+** Prompt
+Implement a decorator =retry(max_attempts: int, delay: float,
+exceptions: tuple = (Exception,))= that can be applied to =async=
+functions. On failure, it retries up to =max_attempts= times with a
+fixed =delay= between attempts. If all attempts fail, re-raise the last
+exception. The decorator must be cancellation-safe (a
+=CancelledError= should not be retried).
+
+** Test
+#+begin_src python :tangle tests.py
+@pytest.mark.asyncio
+async def test_retry_success_after_failures():
+    from ex import retry
+
+    calls = 0
+
+    @retry(max_attempts=3, delay=0.01)
+    async def flaky():
+        nonlocal calls
+        calls += 1
+        if calls < 3:
+            raise ValueError("not yet")
+        return "ok"
+
+    result = await flaky()
+    assert result == "ok"
+    assert calls == 3
+
+@pytest.mark.asyncio
+async def test_retry_exhausted():
+    from ex import retry
+
+    @retry(max_attempts=2, delay=0.01)
+    async def always_fails():
+        raise ValueError("nope")
+
+    with pytest.raises(ValueError):
+        await always_fails()
+#+end_src
+
+** Solution
+#+begin_src python :tangle ex.py
+def retry(max_attempts, delay, exceptions=(Exception,)):
+    def decorator(func):
+        @functools.wraps(func)
+        async def wrapper(*args, **kwargs):
+            attempts = 0
+            while attempts < max_attempts:
+                try:
+                    return await func(*args, **kwargs)
+                except exceptions:
+                    attempts += 1
+                    await asyncio.sleep(delay)
+            return await func(*args, **kwargs)
+        return wrapper
+    return decorator
+#+end_src
+
+** Known issues
+- =return await func(...)= after the loop exhausts calls =func= one
+  extra time (=max_attempts + 1= calls total on failure).
+- Unnecessary =await asyncio.sleep(delay)= after the final attempt.
+- A cleaner approach: capture the last exception in the loop and
+  =raise= it after the loop exits.

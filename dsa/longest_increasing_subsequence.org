@@ -1,0 +1,173 @@
+#+TITLE: Longest Increasing Subsequence
+#+DATE: <2026-11-14 Sat 06:50>
+#+FILETAGS: :leetcode:dsa:dynamic_programming:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Longest Increasing Subsequence
+
+** Description
+
+https://neetcode.io/problems/longest-increasing-subsequence/question
+
+** Top Down Dynamic Programming with memoization
+
+*** Approach
+
+- Starting from the left of nums, calculate length of each possible
+  increasing subsequence
+- Cache the found at each index to prevent repeated computation
+
+*** Solution
+
+#+begin_src python
+from typing import List
+
+class Solution:
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        self.nums = nums
+        self.memo = [-1] * len(nums)
+        return max(self.lis(i) for i in range(len(nums)))
+
+    def lis(self, index):
+        if self.memo[index] != -1:
+            return self.memo[index]
+
+        longest = 1
+        for j in range(index + 1, len(self.nums)):
+            if self.nums[index] < self.nums[j]:
+                longest = max(longest, 1 + self.lis(j))
+
+        self.memo[index] = longest
+        return longest
+
+nums = [9,1,4,2,3,3,7]
+
+# Output: 4
+assert Solution().lengthOfLIS(nums) == 4
+
+nums = [0,3,1,3,2,3]
+
+# Output: 4
+assert Solution().lengthOfLIS(nums) == 4
+#+end_src
+
+#+RESULTS:
+
+*** Analysis
+
+*** Time Complexity
+
+O(n^{2}) - for each index in nums, we traverse the rest of the array to the end
+
+*** Space Complexity
+
+O(n) - length of the memo and the recursion stack
+
+
+_Me_:
+
+Is this correct?
+
+_AI_:
+
+Yes — the solution is correct.
+
+
+*Complexities are right:* O(n²) time (each =lis(i)= scans up to n,
+each computed once), O(n) space for =memo= plus the same for the
+recursion stack.
+
+
+** Bottom Up  Dynamic Programming
+
+*** Approach
+
+- starting from end of the array, fill up LIS found for each index
+  - determined by the longest possible subsq with the remainder
+- return the longest such subsequence found.    
+
+*** Solution
+
+#+begin_src python
+class Solution:
+    def lengthOfLIS(self, nums: List[int]) -> int:
+        lis = [1] * len(nums)
+        for i in range(len(nums) - 1, -1, -1):
+            for j in range(i+1, len(nums)):
+                if nums[i] < nums[j]:
+                    lis[i] = max(lis[i], 1 + lis[j])
+        return max(lis)
+        
+nums = [9,1,4,2,3,3,7]
+
+# Output: 4
+assert Solution().lengthOfLIS(nums) == 4
+
+nums = [0,3,1,3,2,3]
+
+# Output: 4
+assert Solution().lengthOfLIS(nums) == 4
+
+#+end_src
+
+#+RESULTS:
+
+*** Analysis
+
+**** Time Complexity
+
+O(n^{2}) - for each item in nums, we compute a value with the remainder in the list
+
+**** Space Complexity
+
+O(n) - array used to track LIS of each index
+
+** Further Discussion
+
+_Me_:
+
+What are some real world applications?
+
+_AI_:
+
+Real-world uses of LIS come up wherever you need to find the largest
+ordered trend within noisy, out-of-order data:
+
+1. /Version control / diff tools/ — finding the longest common
+   subsequence (a close cousin of LIS) to compute minimal diffs
+   between two files.
+
+2. /Bioinformatics/ — aligning DNA/protein sequences to find the
+   longest chain of matching or monotonically improving mutations.
+
+3. /Patience card games / card game AI/ — LIS literally models the
+   optimal "patience sorting" play, which is also where the O(n log n)
+   algorithm gets its name.
+
+4. /Financial analysis/ — detecting the longest streak of rising stock
+   prices or indicators within a historical series.
+
+5. /Log analysis / anomaly detection/ — extracting the longest
+   monotonically increasing trend (e.g., growing latency, rising error
+   counts) out of noisy timestamps.
+
+6. /Scheduling / job sequencing/ — finding the maximum chain of jobs
+   that can be completed in order (increasing start and end times),
+   maximizing throughput.
+
+7. /Refactoring & code evolution/ — tracking the longest chain of
+   compatible API versions or migrations that can be applied in order.
+
+8. /Gaming / leaderboards/ — computing the longest run of strictly
+   improving scores to identify player progress.
+
+9. /Machine learning/ — non-parametric isotonic regression (pool
+   adjacent violators) uses the same patience-sorting structure to fit
+   a monotone sequence.
+
+10. /Text & font rendering/ — in typesetting, LIS helps lay out
+    elements in increasing size/priority while minimizing shuffling.
+
+The pattern is always the same: you have an /ordered sequence with no
+inherent continuity/, and you want to find the /largest subset that
+preserves a meaningful trend/.
