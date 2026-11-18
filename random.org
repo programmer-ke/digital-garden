@@ -116,3 +116,95 @@ Explanation [[https://www.kaggle.com/competitions/icr-identify-age-related-condi
   other
 - Durability :: once a transaction is committed, it remains commited
   even in the case of system failure.
+
+* joins                                                           :sql:joins:
+- inner :: intersection of rows in both sides
+- left join :: all rows in left table with matching rows in the right
+  one (null values where no match)
+- right join :: converse of left
+- full outer join :: all rows from both (null where no match in either side)
+- cross join :: each row in left is matched with rows in right (cartesian product)
+- self join :: query a table against itself e.g. find duplicate values
+
+** Joins vs window functions
+
+- Joins combine rows horizontally
+- window functions perform action over rows without changing their number
+  
+
+* Pandas merge, join, concat                                    :pandas:join:
+
+- concat :: concatenate dataframes and series along an axis (default,
+  index) while joining on the other
+- merge :: Performs join operation on dataframes (inner, outer, left,
+  right, cross join). Defaults on inner join by column(s)
+- join :: is essentially a wrapper around merge that by default left
+  joins the caller's index on the other's index.
+
+
+* Memory leaks vs memory fragmentation    :memory_leaks:memory_fragmentation:
+
+- Memory leaks :: memory is assigned but not freed. Available memory for use
+  reduces with time.
+  - detected by noticing RSS growing over time
+  - Use of valgrind (statically or dynamically)
+
+- Memory fragmentation :: assigned memory is freed correctly but in a
+  scattered non-contiguous pattern. Subsequent allocation of large
+  memory blocks fails.
+  - detected by noticing page allocation failure messages on dmesg
+
+* Resident set size (memory)                                     :rss:memory:
+
+- portion of a process's memory held in physical RAM, excluding pages
+  swapped to disk.
+
+
+* Reference cycles               :python:reference_cycles:garbage_collection:
+
+This happens when object reference each other in a cyclic manner so that
+the reference count will never reach zero even when there are no
+other references
+
+#+begin_src python
+class Node:
+    def __init__(self):
+        self.parent = None
+
+a, b = Node(), Node()
+a.parent = b
+b.parent = a  # cycle!
+#+end_src
+
+The python garbage collector runs periodically and reclaims from
+detected memory cycles.
+
+Can be detected by tracemalloc and objgraph.
+
+* Dangling pointers                                       :dangling_pointers:
+
+Dangling pointers are pointers that hold addresses to deallocated
+memory. This leads to undefined behaviour when accessed.
+
+** Common ownership models to prevent dangling pointers
+
+*** 1. Exclusive ownership
+
+- only one owner at a time
+- ownership can be moved
+- freeing happens at the end of owner's lifetime
+
+*** 2. Shared ownership with refcounting
+
+- Multiple owners
+- object freed when last reference dropped
+
+** Flaky CI (randomly failing tests)                 :continuous_integration:
+
+*** Causes
+
+- shared global state between tests
+- network/external dependencies instability
+- race conditions
+- hard timeoutsi
+  
