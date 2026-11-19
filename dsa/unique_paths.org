@@ -16,7 +16,7 @@ https://neetcode.io/problems/count-paths/question
 - Recursively calculate unique paths from each position in board
 - Unique paths from the target itself is 1
 - a position out of bounds gives no path
-- unique path for any other position is sum of paths from left and
+- unique path for any other position is sum of paths from right and
   bottom cells
 
 *** Solution

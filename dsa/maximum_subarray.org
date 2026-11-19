@@ -1,0 +1,173 @@
+#+TITLE: Maximum Subarray
+#+DATE: <2026-11-19 Thu 15:56>
+#+FILETAGS: :leetcode:dsa:greedy:dynamic_programming:arrays:
+#+PROPERTY: header-args :results output :session *shared* :exports both :eval no-export
+
+* Maximum Subarray
+
+** Description
+
+https://neetcode.io/problems/maximum-subarray/question
+
+** Dynamic programming
+
+*** Approach
+
+- at each position after the first in the numbers array we make
+  a choice to maximize the subarray sum:
+  - increment the previous subarray sum
+  - start a new subarray sum
+- Store the sums in another array and find the maximum
+
+*** Solution
+
+#+begin_src python
+from typing import List
+
+class Solution:
+    def maxSubArray(self, nums: List[int]) -> int:
+        fnum = nums[0]
+        sums = [fnum] * len(nums)
+
+        for i in range(1, len(nums)):
+            sums[i] = max(nums[i], nums[i] + sums[i-1])
+
+        return max(sums)
+            
+
+nums = [2,-3,4,-2,2,1,-1,4]
+
+#Output: 8
+assert Solution().maxSubArray(nums) == 8
+
+nums = [-1]
+
+# Output: -1
+assert Solution().maxSubArray(nums) == -1
+#+end_src
+
+#+RESULTS:
+: [2, -1, 4, 2, 4, 5, 4, 8]
+: [-1]
+
+*** Analysis
+
+**** Time complexity
+
+O(n) - traverse array once through
+
+**** Space complexity
+
+O(n) - space used to store the subarray sums
+
+
+** Kadane's algorithm (sliding window)
+
+*** Approach
+
+- The goal is to maximize sum, so we maintain a sum of the current
+  window.
+  - any time we advance, if the sum of the previous window is negative,
+    we start a new window sum (-ve numbers always decrease the sum)
+  - add the new value to current window sum and compare with the maximum
+    seen so far
+  - At the end, return the maximum sum seen
+
+*** Solution
+
+#+begin_src python
+class Solution:
+    def maxSubArray(self, nums: List[int]) -> int:
+        cur_sum = max_sum = nums[0]
+        for i in range(1, len(nums)):
+            if cur_sum < 0:
+                cur_sum = 0
+            cur_sum += nums[i]
+            max_sum = max(max_sum, cur_sum)
+        return max_sum
+
+nums = [2,-3,4,-2,2,1,-1,4]
+
+#Output: 8
+assert Solution().maxSubArray(nums) == 8
+
+nums = [-1]
+
+# Output: -1
+assert Solution().maxSubArray(nums) == -1
+
+#+end_src
+
+#+RESULTS:
+
+*** Analysis
+
+**** Time Analysis
+
+O(n) - traverse the nums array once through
+
+**** Space complexity
+
+O(1) - constant space used to track subarray state
+
+
+_Me_:
+
+Is this correct?
+
+_AI_:
+
+Yes — both solutions are correct, including the edge cases (single
+element, all-negative arrays).
+
+*Minor notes (not bugs):*
+
+1. /Terminology/: "Kadane's algorithm (sliding window)" is slightly
+   off — there's no left pointer moving, so it's really Kadane's
+   greedy/DP approach rather than a sliding window. Some people do
+   call it a one-sided window, but "greedy" fits your own filetags
+   better.
+2. The DP solution is also O(1) space-able (=prev= scalar instead of
+   =sums= array), since you only read =sums[i-1]= and =max= can be
+   tracked inline. Worth mentioning since it collapses both approaches
+   into the same algorithm — Kadane's /is/ the space-optimized version
+   of your DP formulation.
+3. Your =#+RESULTS:= for the first block shows printed lists, but the
+   code shown has no =print= — likely a leftover from an earlier
+   session buffer. Harmless, just stale output.
+
+So: correct code, with a small labeling nitpick in the second section's heading.
+
+** Further Discussion
+
+_Me_:
+
+What are real world applications of this?
+
+_AI_:
+
+*Real-world applications of Maximum Subarray (Kadane's):*
+
+1. /Stock trading/ — the classic framing: given daily price /changes/
+   (=gain/loss per day=), find the buy/sell window with maximum profit.
+2. /Time-series anomaly detection/ — finding the contiguous period of
+   greatest deviation (positive or negative) from a baseline, e.g. in
+   monitoring CPU usage, network traffic, or sensor readings.
+3. /Genomics/ — locating regions of DNA/protein sequences with the
+   highest aggregate score (e.g. GC content, alignment scores,
+   identifying hotspots of mutation).
+4. /Image processing/ — 1D max subarray generalizes to 2D (maximum sum
+   rectangle) for finding brightest/densest regions in an image or
+   matrix of values.
+5. /Business analytics/ — best contiguous stretch of days/quarters by
+   revenue change, customer churn delta, or sentiment score; also
+   "best sales streak".
+6. /Game AI and scoring_ — finding the highest-scoring contiguous combo
+   or sequence in score-event streams.
+7. /Text/sentiment analysis/ — the span of a document with the highest
+   cumulative sentiment score (the "most positive passage").
+
+/Common thread:/ anything where you have a /sequence of signed
+deltas/ (profits, deviations, scores) and want the contiguous stretch
+with maximum total. Whenever data can be 2D or higher, it generalizes
+(e.g. max-sum rectangle via column-compression + Kadane's on rows).
